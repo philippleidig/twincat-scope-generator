@@ -1,0 +1,105 @@
+/* Example Patterns */
+.example-patterns {
+    padding: 1rem;
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--gray-200);
+}
+
+.example-patterns h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.example-hint {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.examples-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.example-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--gray-50);
+    border-radius: 0.375rem;
+}
+
+.example-template {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.example-item code {
+    font-size: 0.75rem;
+    color: var(--gray-700);
+    background: transparent;
+    word-break: break-all;
+    flex: 1;
+}
+
+.copy-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    opacity: 0;
+}
+
+.example-item:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background: var(--gray-200);
+    color: var(--gray-600);
+}
+
+.copy-button.copied {
+    opacity: 1;
+    color: var(--success);
+}
+
+.example-desc {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+
+.syntax-help {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.syntax-help code {
+    background: var(--gray-100);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.syntax-example {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--gray-500);
+}

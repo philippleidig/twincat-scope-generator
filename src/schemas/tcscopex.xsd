@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+  
+  <!-- Root Element -->
+  <xs:element name="ScopeProject" type="ScopeProjectType"/>
+  
+  <!-- ScopeProject Type -->
+  <xs:complexType name="ScopeProjectType">
+    <xs:sequence>
+      <xs:element name="ActiveWorkfolderPath" type="xs:string"/>
+      <xs:element name="AutoDeleteCapacity" type="xs:int"/>
+      <xs:element name="AutoDeleteMode" type="xs:string"/>
+      <xs:element name="AutoDeleteOlderThan" type="xs:int"/>
+      <xs:element name="AutoRestartRecord" type="xs:boolean"/>
+      <xs:element name="AutoSaveExportConfigurationString" type="xs:string"/>
+      <xs:element name="AutoSaveFileNameMask" type="xs:string"/>
+      <xs:element name="AutoSaveMode" type="xs:string"/>
+      <xs:element name="AutoSavePath" type="xs:string"/>
+      <xs:element name="Comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="DisplayColor" type="xs:string"/>
+      <xs:element name="Guid" type="xs:string"/>
+      <xs:element name="HeadlessServer" type="xs:string" minOccurs="0"/>
+      <xs:element name="HeadlessServerConnectionId" type="xs:string"/>
+      <xs:element name="ImageAutoDeleteCapacity" type="xs:int"/>
+      <xs:element name="ImageAutoDeleteOlderThan" type="xs:int"/>
+      <xs:element name="ImagesDeleteMode" type="xs:string"/>
+      <xs:element name="KeepPreviousExports" type="xs:boolean"/>
+      <xs:element name="KeepPreviousImageExports" type="xs:boolean"/>
+      <xs:element name="Layout" type="xs:string"/>
+      <xs:element name="MainServer" type="xs:string"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="RecordTime" type="xs:long"/>
+      <xs:element name="ServerVersions" type="xs:string" minOccurs="0"/>
+      <xs:element name="SortPriority" type="xs:int"/>
+      <xs:element name="StopMode" type="xs:string"/>
+      <xs:element name="SubMember" type="SubMemberType"/>
+    </xs:sequence>
+    <xs:attribute name="AssemblyName" type="xs:string" use="required"/>
+  </xs:complexType>
+  
+  <!-- SubMember Type (container) -->
+  <xs:complexType name="SubMemberType">
+    <xs:sequence>
+      <xs:element name="DataPool" type="DataPoolType" minOccurs="0"/>
+      <xs:element name="NameRelationInfo" type="NameRelationInfoType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- DataPool Type -->
+  <xs:complexType name="DataPoolType">
+    <xs:sequence>
+      <xs:element name="Comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="DisplayColor" type="xs:string"/>
+      <xs:element name="Guid" type="xs:string"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="SortPriority" type="xs:int"/>
+      <xs:element name="SubMember" type="DataPoolSubMemberType"/>
+    </xs:sequence>
+    <xs:attribute name="AssemblyName" type="xs:string" use="required"/>
+  </xs:complexType>
+  
+  <!-- DataPool SubMember (contains AdsAcquisitions) -->
+  <xs:complexType name="DataPoolSubMemberType">
+    <xs:sequence>
+      <xs:element name="AdsAcquisition" type="AdsAcquisitionType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- AdsAcquisition Type -->
+  <xs:complexType name="AdsAcquisitionType">
+    <xs:sequence>
+      <xs:element name="AmsNetId" type="xs:string"/>
+      <xs:element name="Area" type="xs:string"/>
+      <xs:element name="ArrayLength" type="xs:int"/>
+      <xs:element name="BaseSampleTime" type="xs:long"/>
+      <xs:element name="ChannelStyleInformation" type="xs:string" minOccurs="0"/>
+      <xs:element name="Comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="CompressionMode" type="xs:string"/>
+      <xs:element name="ContextMask" type="xs:int"/>
+      <xs:element name="DataAccess" type="DataAccessType"/>
+      <xs:element name="DataType" type="DataTypeEnum"/>
+      <xs:element name="DisplayColor" type="xs:string"/>
+      <xs:element name="Enabled" type="xs:boolean"/>
+      <xs:element name="FileHandle" type="xs:int"/>
+      <xs:element name="ForceOversampling" type="xs:boolean"/>
+      <xs:element name="Guid" type="xs:string"/>
+      <xs:element name="IndexGroup" type="xs:long"/>
+      <xs:element name="IndexOffset" type="xs:long"/>
+      <xs:element name="IsEvent" type="xs:boolean"/>
+      <xs:element name="IsHistorical" type="xs:boolean"/>
+      <xs:element name="IsTimeline" type="xs:boolean"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="Oversample" type="xs:int"/>
+      <xs:element name="RawUnit" type="RawUnitType"/>
+      <xs:element name="SaveOption" type="xs:string"/>
+      <xs:element name="ServerHandle" type="xs:int"/>
+      <xs:element name="SortPriority" type="xs:int"/>
+      <xs:element name="SubAdsAcquisition" type="xs:string" minOccurs="0"/>
+      <xs:element name="SubMember" type="SubMemberType" minOccurs="0"/>
+      <xs:element name="SymbolBased" type="xs:boolean"/>
+      <xs:element name="SymbolName" type="xs:string"/>
+      <xs:element name="TargetPort" type="xs:int"/>
+      <xs:element name="TimeOffset" type="xs:int"/>
+      <xs:element name="Title" type="xs:string"/>
+      <xs:element name="UseLocalServer" type="xs:boolean"/>
+      <xs:element name="UseTaskSampleTime" type="xs:boolean"/>
+      <xs:element name="UTF8Encoding" type="xs:boolean"/>
+      <xs:element name="VariableSize" type="xs:int"/>
+    </xs:sequence>
+    <xs:attribute name="AssemblyName" type="xs:string" use="required"/>
+  </xs:complexType>
+  
+  <!-- DataType Enumeration -->
+  <xs:simpleType name="DataTypeEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="BIT"/>
+      <xs:enumeration value="INT8"/>
+      <xs:enumeration value="INT16"/>
+      <xs:enumeration value="INT32"/>
+      <xs:enumeration value="INT64"/>
+      <xs:enumeration value="UINT8"/>
+      <xs:enumeration value="UINT16"/>
+      <xs:enumeration value="UINT32"/>
+      <xs:enumeration value="UINT64"/>
+      <xs:enumeration value="REAL32"/>
+      <xs:enumeration value="REAL64"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- DataAccess Type -->
+  <xs:complexType name="DataAccessType">
+    <xs:sequence>
+      <xs:element name="DataAccessMode" type="DataAccessModeType"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- DataAccessMode Type -->
+  <xs:complexType name="DataAccessModeType">
+    <xs:sequence>
+      <xs:element name="Source" type="xs:string"/>
+      <xs:element name="Protocoll" type="xs:string"/>
+      <xs:element name="Format" type="xs:string"/>
+      <xs:element name="TimeContext" type="xs:string"/>
+      <xs:element name="TimeTangeInfo" type="TimeRangeInfoType"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- TimeRangeInfo Type -->
+  <xs:complexType name="TimeRangeInfoType">
+    <xs:sequence>
+      <xs:element name="StartTimeStamp" type="xs:long"/>
+      <xs:element name="EndTimeStamp" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- RawUnit Type -->
+  <xs:complexType name="RawUnitType">
+    <xs:sequence>
+      <xs:element name="Transformation" type="TransformationType"/>
+      <xs:element name="Unit" type="UnitType"/>
+      <xs:element name="UnitOffsetResult" type="xs:decimal"/>
+      <xs:element name="UnitScaleResult" type="xs:decimal"/>
+      <xs:element name="UserUnit" type="UserUnitType"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- Transformation Type -->
+  <xs:complexType name="TransformationType">
+    <xs:sequence>
+      <xs:element name="BaseUnitValue" type="xs:decimal"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="ScaleFactor" type="xs:decimal"/>
+      <xs:element name="SourceUnitPrefix" type="xs:string"/>
+      <xs:element name="SourceUnitString" type="xs:string" minOccurs="0"/>
+      <xs:element name="Symbol" type="xs:string"/>
+      <xs:element name="TargetUnitString" type="xs:string" minOccurs="0"/>
+      <xs:element name="TargetUnitValue" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- Unit Type -->
+  <xs:complexType name="UnitType">
+    <xs:sequence>
+      <xs:element name="BaseUnitString" type="xs:string" minOccurs="0"/>
+      <xs:element name="BaseUnitValue" type="xs:decimal"/>
+      <xs:element name="NameExtension" type="xs:string" minOccurs="0"/>
+      <xs:element name="Offset" type="xs:decimal"/>
+      <xs:element name="Prefix" type="xs:string"/>
+      <xs:element name="ReturnText" type="xs:string"/>
+      <xs:element name="ScaleFactor" type="xs:decimal"/>
+      <xs:element name="Symbol" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- UserUnit Type -->
+  <xs:complexType name="UserUnitType">
+    <xs:sequence>
+      <xs:element name="BaseName" type="xs:string"/>
+      <xs:element name="BaseUnitString" type="xs:string" minOccurs="0"/>
+      <xs:element name="BaseUnitValue" type="xs:decimal"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="NameExtension" type="xs:string" minOccurs="0"/>
+      <xs:element name="Offset" type="xs:decimal"/>
+      <xs:element name="Prefix" type="xs:string"/>
+      <xs:element name="ScaleFactor" type="xs:decimal"/>
+      <xs:element name="Symbol" type="xs:string" minOccurs="0"/>
+      <xs:element name="UserPrefix" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- NameRelationInfo Type -->
+  <xs:complexType name="NameRelationInfoType">
+    <xs:sequence>
+      <xs:element name="Comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="DetailLevel" type="DetailLevelType"/>
+      <xs:element name="DisplayColor" type="xs:string"/>
+      <xs:element name="Guid" type="xs:string"/>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="SortPriority" type="xs:int"/>
+      <xs:element name="Title" type="xs:string"/>
+      <xs:element name="UsedNameType" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="AssemblyName" type="xs:string" use="required"/>
+  </xs:complexType>
+  
+  <!-- DetailLevel Type -->
+  <xs:complexType name="DetailLevelType">
+    <xs:sequence>
+      <xs:element name="Int32" type="xs:int" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+</xs:schema>
