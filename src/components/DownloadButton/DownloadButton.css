@@ -1,0 +1,76 @@
+.download-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+    border-radius: 0.75rem;
+    border: 1px solid var(--gray-200);
+}
+
+.download-summary {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.summary-item .summary-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.summary-item .summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.download-button {
+    min-width: 200px;
+    font-size: 1rem;
+}
+
+.download-button .spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.download-warning {
+    font-size: 0.875rem;
+    color: var(--yellow-600);
+    margin: 0;
+}
+
+.download-hint {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin: 0;
+}
+
+.download-error {
+    font-size: 0.875rem;
+    color: var(--red-500);
+    margin: 0;
+}

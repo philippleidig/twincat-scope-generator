@@ -1,0 +1,1 @@
+export { ScopeFileManager } from './ScopeFileManager'
