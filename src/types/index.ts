@@ -114,26 +114,41 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
     defaultTargetPort: 851,
 }
 
-// Example patterns for quick start
-export const EXAMPLE_PATTERNS: { template: string; description: string }[] = [
+// Sample pattern for reference
+export interface Sample {
+    id: string
+    template: string
+    description: string
+}
+
+// Default sample patterns (used for initial state and reset)
+export const DEFAULT_SAMPLES: Sample[] = [
     {
+        id: 'default-1',
         template: 'MAIN.mover[{i:1:5}].position',
         description: 'Simple mover position (5 movers)',
     },
     {
+        id: 'default-2',
         template: 'MAIN.mover[{i:1:3}].stMoverRef.NcToPlc.SetVelo',
         description: 'Mover velocity setpoint',
     },
     {
+        id: 'default-3',
         template: 'Mover Axis {i:1:10}.SoftDrive {i:1:10}.SdScopeVariable.ActPos',
         description: 'NC axis actual position',
     },
     {
+        id: 'default-4',
         template: 'GVL.station[{s:1:4}].sensor[{n:1:8}].value',
-        description: 'Multi-level: 4 stations × 8 sensors',
+        description: 'Multi-level: 4 stations x 8 sensors',
     },
     {
+        id: 'default-5',
         template: 'MAIN.mover[{i:1:3}].stMoverRef.NcToPlc[{j:1:3}]',
         description: 'Nested counters example',
     },
 ]
+
+// Legacy export for backwards compatibility
+export const EXAMPLE_PATTERNS = DEFAULT_SAMPLES
