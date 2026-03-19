@@ -54,11 +54,18 @@ export interface Pattern {
     targetPort: number
 }
 
-// A tcscopex file containing multiple patterns
+// Axis group containing one or more patterns (displayed together in a YT chart)
+export interface AxisGroup {
+    id: string
+    name: string
+    patterns: Pattern[]
+}
+
+// A tcscopex file containing axis groups with patterns
 export interface ScopeFile {
     id: string
     name: string // User-defined file name (without extension)
-    patterns: Pattern[]
+    axisGroups: AxisGroup[]
 }
 
 // Generated AdsAcquisition

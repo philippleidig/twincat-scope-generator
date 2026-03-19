@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import type {
+    AxisGroup,
     GlobalSettings,
     Pattern,
     ScopeFile,
@@ -23,16 +24,22 @@ interface ConfigStore {
     removeScopeFile: (id: string) => void
     duplicateScopeFile: (id: string) => void
 
-    // Pattern Actions (within a scope file)
-    addPattern: (fileId: string) => void
-    removePattern: (fileId: string, patternId: string) => void
-    duplicatePattern: (fileId: string, patternId: string) => void
+    // Axis Group Actions (within a scope file)
+    addAxisGroup: (fileId: string) => void
+    removeAxisGroup: (fileId: string, axisGroupId: string) => void
+    updateAxisGroup: (fileId: string, axisGroupId: string, updates: Partial<AxisGroup>) => void
+    duplicateAxisGroup: (fileId: string, axisGroupId: string) => void
+
+    // Pattern Actions (within an axis group)
+    addPattern: (fileId: string, axisGroupId: string) => void
+    removePattern: (fileId: string, axisGroupId: string, patternId: string) => void
+    duplicatePattern: (fileId: string, axisGroupId: string, patternId: string) => void
 
     // Symbol Actions
-    addSymbol: (fileId: string, patternId: string) => void
-    updateSymbol: (fileId: string, patternId: string, symbolId: string, updates: Partial<SymbolTemplate>) => void
-    removeSymbol: (fileId: string, patternId: string, symbolId: string) => void
-    updatePatternPort: (fileId: string, patternId: string, targetPort: number) => void
+    addSymbol: (fileId: string, axisGroupId: string, patternId: string) => void
+    updateSymbol: (fileId: string, axisGroupId: string, patternId: string, symbolId: string, updates: Partial<SymbolTemplate>) => void
+    removeSymbol: (fileId: string, axisGroupId: string, patternId: string, symbolId: string) => void
+    updatePatternPort: (fileId: string, axisGroupId: string, patternId: string, targetPort: number) => void
 
     // Utility Actions
     resetAll: () => void
@@ -60,11 +67,49 @@ const createDefaultPattern = (targetPort: number = 851): Pattern => ({
     targetPort,
 })
 
-const createDefaultScopeFile = (name: string, targetPort: number = 851): ScopeFile => ({
+const createDefaultAxisGroup = (name: string, targetPort: number = 851): AxisGroup => ({
     id: uuidv4(),
     name,
     patterns: [createDefaultPattern(targetPort)],
 })
+
+const createDefaultScopeFile = (name: string, targetPort: number = 851): ScopeFile => ({
+    id: uuidv4(),
+    name,
+    axisGroups: [createDefaultAxisGroup('Axis Group 1', targetPort)],
+})
+
+const duplicatePatterns = (patterns: Pattern[]): Pattern[] =>
+    patterns.map((p) => ({
+        id: uuidv4(),
+        targetPort: p.targetPort,
+        symbols: p.symbols.map((s) => ({ ...s, id: uuidv4() })),
+    }))
+
+// Helper to map axis groups within a specific file
+const mapAxisGroups = (
+    scopeFiles: ScopeFile[],
+    fileId: string,
+    fn: (ag: AxisGroup) => AxisGroup
+): ScopeFile[] =>
+    scopeFiles.map((f) =>
+        f.id === fileId
+            ? { ...f, axisGroups: f.axisGroups.map(fn) }
+            : f
+    )
+
+// Helper to map patterns within a specific axis group
+const mapPatterns = (
+    scopeFiles: ScopeFile[],
+    fileId: string,
+    axisGroupId: string,
+    fn: (p: Pattern) => Pattern
+): ScopeFile[] =>
+    mapAxisGroups(scopeFiles, fileId, (ag) =>
+        ag.id === axisGroupId
+            ? { ...ag, patterns: ag.patterns.map(fn) }
+            : ag
+    )
 
 export const useConfigStore = create<ConfigStore>()((set) => ({
     // Initial State - start with one default file
@@ -109,13 +154,10 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
             const duplicatedFile: ScopeFile = {
                 id: uuidv4(),
                 name: `${file.name}_copy`,
-                patterns: file.patterns.map((p) => ({
+                axisGroups: file.axisGroups.map((ag) => ({
                     id: uuidv4(),
-                    targetPort: p.targetPort,
-                    symbols: p.symbols.map((s) => ({
-                        ...s,
-                        id: uuidv4(),
-                    })),
+                    name: ag.name,
+                    patterns: duplicatePatterns(ag.patterns),
                 })),
             }
             const newScopeFiles = [...state.scopeFiles]
@@ -123,116 +165,138 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
             return { scopeFiles: newScopeFiles }
         }),
 
-    // Pattern Actions
-    addPattern: (fileId) =>
+    // Axis Group Actions
+    addAxisGroup: (fileId) =>
         set((state) => ({
             scopeFiles: state.scopeFiles.map((f) =>
                 f.id === fileId
-                    ? { ...f, patterns: [...f.patterns, createDefaultPattern(state.globalSettings.defaultTargetPort)] }
+                    ? {
+                        ...f,
+                        axisGroups: [
+                            ...f.axisGroups,
+                            createDefaultAxisGroup(
+                                `Axis Group ${f.axisGroups.length + 1}`,
+                                state.globalSettings.defaultTargetPort
+                            ),
+                        ],
+                    }
                     : f
             ),
         })),
 
-    removePattern: (fileId, patternId) =>
+    removeAxisGroup: (fileId, axisGroupId) =>
         set((state) => ({
             scopeFiles: state.scopeFiles.map((f) =>
                 f.id === fileId
-                    ? { ...f, patterns: f.patterns.filter((p) => p.id !== patternId) }
+                    ? { ...f, axisGroups: f.axisGroups.filter((ag) => ag.id !== axisGroupId) }
                     : f
             ),
         })),
 
-    duplicatePattern: (fileId, patternId) =>
+    updateAxisGroup: (fileId, axisGroupId, updates) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) =>
+                ag.id === axisGroupId ? { ...ag, ...updates } : ag
+            ),
+        })),
+
+    duplicateAxisGroup: (fileId, axisGroupId) =>
         set((state) => ({
             scopeFiles: state.scopeFiles.map((f) => {
                 if (f.id !== fileId) return f
-                const patternIndex = f.patterns.findIndex((p) => p.id === patternId)
-                if (patternIndex === -1) return f
-                const pattern = f.patterns[patternIndex]
+                const agIndex = f.axisGroups.findIndex((ag) => ag.id === axisGroupId)
+                if (agIndex === -1) return f
+                const ag = f.axisGroups[agIndex]
+                const duplicated: AxisGroup = {
+                    id: uuidv4(),
+                    name: `${ag.name} (copy)`,
+                    patterns: duplicatePatterns(ag.patterns),
+                }
+                const newAxisGroups = [...f.axisGroups]
+                newAxisGroups.splice(agIndex + 1, 0, duplicated)
+                return { ...f, axisGroups: newAxisGroups }
+            }),
+        })),
+
+    // Pattern Actions
+    addPattern: (fileId, axisGroupId) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) =>
+                ag.id === axisGroupId
+                    ? { ...ag, patterns: [...ag.patterns, createDefaultPattern(state.globalSettings.defaultTargetPort)] }
+                    : ag
+            ),
+        })),
+
+    removePattern: (fileId, axisGroupId, patternId) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) =>
+                ag.id === axisGroupId
+                    ? { ...ag, patterns: ag.patterns.filter((p) => p.id !== patternId) }
+                    : ag
+            ),
+        })),
+
+    duplicatePattern: (fileId, axisGroupId, patternId) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) => {
+                if (ag.id !== axisGroupId) return ag
+                const patternIndex = ag.patterns.findIndex((p) => p.id === patternId)
+                if (patternIndex === -1) return ag
+                const pattern = ag.patterns[patternIndex]
                 const duplicatedPattern: Pattern = {
                     id: uuidv4(),
                     targetPort: pattern.targetPort,
-                    symbols: pattern.symbols.map((s) => ({
-                        ...s,
-                        id: uuidv4(),
-                    })),
+                    symbols: pattern.symbols.map((s) => ({ ...s, id: uuidv4() })),
                 }
-                const newPatterns = [...f.patterns]
+                const newPatterns = [...ag.patterns]
                 newPatterns.splice(patternIndex + 1, 0, duplicatedPattern)
-                return { ...f, patterns: newPatterns }
+                return { ...ag, patterns: newPatterns }
             }),
         })),
 
     // Symbol Actions
-    addSymbol: (fileId, patternId) =>
+    addSymbol: (fileId, axisGroupId, patternId) =>
         set((state) => ({
-            scopeFiles: state.scopeFiles.map((f) =>
-                f.id === fileId
-                    ? {
-                        ...f,
-                        patterns: f.patterns.map((p) =>
-                            p.id === patternId
-                                ? { ...p, symbols: [...p.symbols, createDefaultSymbol()] }
-                                : p
-                        ),
-                    }
-                    : f
+            scopeFiles: mapPatterns(state.scopeFiles, fileId, axisGroupId, (p) =>
+                p.id === patternId
+                    ? { ...p, symbols: [...p.symbols, createDefaultSymbol()] }
+                    : p
             ),
         })),
 
-    updateSymbol: (fileId, patternId, symbolId, updates) =>
+    updateSymbol: (fileId, axisGroupId, patternId, symbolId, updates) =>
         set((state) => ({
-            scopeFiles: state.scopeFiles.map((f) =>
-                f.id === fileId
+            scopeFiles: mapPatterns(state.scopeFiles, fileId, axisGroupId, (p) =>
+                p.id === patternId
                     ? {
-                        ...f,
-                        patterns: f.patterns.map((p) =>
-                            p.id === patternId
-                                ? {
-                                    ...p,
-                                    symbols: p.symbols.map((s) => {
-                                        if (s.id !== symbolId) return s
-                                        const newSymbol = { ...s, ...updates }
-                                        if (updates.dataType && !updates.variableSize) {
-                                            newSymbol.variableSize = getVariableSizeForDataType(updates.dataType)
-                                        }
-                                        return newSymbol
-                                    }),
-                                }
-                                : p
-                        ),
+                        ...p,
+                        symbols: p.symbols.map((s) => {
+                            if (s.id !== symbolId) return s
+                            const newSymbol = { ...s, ...updates }
+                            if (updates.dataType && !updates.variableSize) {
+                                newSymbol.variableSize = getVariableSizeForDataType(updates.dataType)
+                            }
+                            return newSymbol
+                        }),
                     }
-                    : f
+                    : p
             ),
         })),
 
-    removeSymbol: (fileId, patternId, symbolId) =>
+    removeSymbol: (fileId, axisGroupId, patternId, symbolId) =>
         set((state) => ({
-            scopeFiles: state.scopeFiles.map((f) =>
-                f.id === fileId
-                    ? {
-                        ...f,
-                        patterns: f.patterns.map((p) =>
-                            p.id === patternId
-                                ? { ...p, symbols: p.symbols.filter((s) => s.id !== symbolId) }
-                                : p
-                        ),
-                    }
-                    : f
+            scopeFiles: mapPatterns(state.scopeFiles, fileId, axisGroupId, (p) =>
+                p.id === patternId
+                    ? { ...p, symbols: p.symbols.filter((s) => s.id !== symbolId) }
+                    : p
             ),
         })),
 
-    updatePatternPort: (fileId, patternId, targetPort) =>
+    updatePatternPort: (fileId, axisGroupId, patternId, targetPort) =>
         set((state) => ({
-            scopeFiles: state.scopeFiles.map((f) =>
-                f.id === fileId
-                    ? {
-                        ...f,
-                        patterns: f.patterns.map((p) =>
-                            p.id === patternId ? { ...p, targetPort } : p
-                        ),
-                    }
-                    : f
+            scopeFiles: mapPatterns(state.scopeFiles, fileId, axisGroupId, (p) =>
+                p.id === patternId ? { ...p, targetPort } : p
             ),
         })),
 

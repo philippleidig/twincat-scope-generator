@@ -18,6 +18,16 @@ describe('DownloadButton Component', () => {
         vi.clearAllMocks()
     })
 
+    // Helper to get IDs for the default structure
+    const getIds = () => {
+        const state = useConfigStore.getState()
+        const fileId = state.scopeFiles[0].id
+        const agId = state.scopeFiles[0].axisGroups[0].id
+        const patternId = state.scopeFiles[0].axisGroups[0].patterns[0].id
+        const symbolId = state.scopeFiles[0].axisGroups[0].patterns[0].symbols[0].id
+        return { fileId, agId, patternId, symbolId }
+    }
+
     describe('initial state', () => {
         it('should render download button', () => {
             render(<DownloadButton />)
@@ -41,12 +51,8 @@ describe('DownloadButton Component', () => {
 
     describe('with valid patterns', () => {
         beforeEach(() => {
-            // Set up a valid pattern
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: 'MAIN.value[{n:1:3}]',
             })
         })
@@ -97,7 +103,6 @@ describe('DownloadButton Component', () => {
         it('should show generating state during download', async () => {
             const user = userEvent.setup()
 
-            // Delay the mock to test loading state
             vi.mocked(createZipArchive).mockImplementation(
                 () => new Promise(resolve => setTimeout(() => resolve(new Blob()), 100))
             )
@@ -107,10 +112,8 @@ describe('DownloadButton Component', () => {
             const button = screen.getByRole('button', { name: /download zip/i })
             await user.click(button)
 
-            // Should show generating state
             expect(screen.getByText(/generating/i)).toBeInTheDocument()
 
-            // Wait for completion
             await waitFor(() => {
                 expect(screen.getByRole('button', { name: /download zip/i })).toBeInTheDocument()
             })
@@ -119,7 +122,6 @@ describe('DownloadButton Component', () => {
         it('should disable button while generating', async () => {
             const user = userEvent.setup()
 
-            // Delay the mock
             vi.mocked(createZipArchive).mockImplementation(
                 () => new Promise(resolve => setTimeout(() => resolve(new Blob()), 100))
             )
@@ -129,7 +131,6 @@ describe('DownloadButton Component', () => {
             const button = screen.getByRole('button', { name: /download zip/i })
             await user.click(button)
 
-            // Button should be disabled during generation
             const generatingButton = screen.getByRole('button')
             expect(generatingButton).toBeDisabled()
 
@@ -147,11 +148,8 @@ describe('DownloadButton Component', () => {
         })
 
         it('should remain disabled with whitespace-only template', () => {
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: '   ',
             })
 
@@ -161,12 +159,9 @@ describe('DownloadButton Component', () => {
         })
 
         it('should remain disabled with invalid template', () => {
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
-                template: 'Item[{n:10:5}]', // Invalid: start > end
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
+                template: 'Item[{n:10:5}]',
             })
 
             render(<DownloadButton />)
@@ -175,21 +170,17 @@ describe('DownloadButton Component', () => {
         })
 
         it('should enable with at least one valid template among multiple', () => {
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
+            const { fileId, agId, patternId } = getIds()
 
-            // Add a second symbol
-            useConfigStore.getState().addSymbol(fileId, patternId)
+            useConfigStore.getState().addSymbol(fileId, agId, patternId)
 
-            const symbols = useConfigStore.getState().scopeFiles[0].patterns[0].symbols
+            const symbols = useConfigStore.getState().scopeFiles[0].axisGroups[0].patterns[0].symbols
 
-            // First symbol invalid
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbols[0].id, {
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbols[0].id, {
                 template: 'Item[{n:10:5}]',
             })
 
-            // Second symbol valid
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbols[1].id, {
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbols[1].id, {
                 template: 'Valid.Template',
             })
 
@@ -203,16 +194,11 @@ describe('DownloadButton Component', () => {
         it('should show error message on generation failure', async () => {
             const user = userEvent.setup()
 
-            // Set up valid pattern
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: 'MAIN.value',
             })
 
-            // Mock error
             vi.mocked(createZipArchive).mockRejectedValueOnce(new Error('Generation failed'))
 
             render(<DownloadButton />)
@@ -228,16 +214,11 @@ describe('DownloadButton Component', () => {
         it('should show generic error for non-Error exceptions', async () => {
             const user = userEvent.setup()
 
-            // Set up valid pattern
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: 'MAIN.value',
             })
 
-            // Mock non-Error rejection
             vi.mocked(createZipArchive).mockRejectedValueOnce('Some string error')
 
             render(<DownloadButton />)
@@ -253,16 +234,11 @@ describe('DownloadButton Component', () => {
         it('should clear error on successful retry', async () => {
             const user = userEvent.setup()
 
-            // Set up valid pattern
-            const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            const { fileId, agId, patternId, symbolId } = getIds()
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: 'MAIN.value',
             })
 
-            // First call fails
             vi.mocked(createZipArchive).mockRejectedValueOnce(new Error('First failure'))
 
             render(<DownloadButton />)
@@ -274,10 +250,8 @@ describe('DownloadButton Component', () => {
                 expect(screen.getByText('First failure')).toBeInTheDocument()
             })
 
-            // Reset mock for success
             vi.mocked(createZipArchive).mockResolvedValueOnce(new Blob(['success']))
 
-            // Click again
             await user.click(button)
 
             await waitFor(() => {
@@ -288,15 +262,14 @@ describe('DownloadButton Component', () => {
 
     describe('multiple files', () => {
         it('should enable download when any file has valid pattern', () => {
-            // Add second file
             useConfigStore.getState().addScopeFile()
 
-            // Set valid template in second file
             const secondFileId = useConfigStore.getState().scopeFiles[1].id
-            const patternId = useConfigStore.getState().scopeFiles[1].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[1].patterns[0].symbols[0].id
+            const agId = useConfigStore.getState().scopeFiles[1].axisGroups[0].id
+            const patternId = useConfigStore.getState().scopeFiles[1].axisGroups[0].patterns[0].id
+            const symbolId = useConfigStore.getState().scopeFiles[1].axisGroups[0].patterns[0].symbols[0].id
 
-            useConfigStore.getState().updateSymbol(secondFileId, patternId, symbolId, {
+            useConfigStore.getState().updateSymbol(secondFileId, agId, patternId, symbolId, {
                 template: 'Valid.Template',
             })
 

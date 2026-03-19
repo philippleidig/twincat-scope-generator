@@ -18,6 +18,13 @@ describe('XML Generator', () => {
         defaultTargetPort: 852,
     }
 
+    // Helper to create a ScopeFile with axisGroups
+    const createScopeFile = (id: string, name: string, patterns: Pattern[]): ScopeFile => ({
+        id,
+        name,
+        axisGroups: [{ id: `ag-${id}`, name: 'Axis Group 1', patterns }],
+    })
+
     describe('getVariableSizeForDataType', () => {
         it('should return correct size for REAL64', () => {
             expect(getVariableSizeForDataType('REAL64')).toBe(8)
@@ -151,12 +158,13 @@ describe('XML Generator', () => {
     })
 
     describe('generateTcscopexXml', () => {
-        it('should generate valid XML structure', () => {
+        it('should generate valid XML structure with YTChart', () => {
             const xml = generateTcscopexXml(mockGlobalSettings, [])
 
             expect(xml).toContain('<?xml version="1.0" encoding="utf-8"?>')
             expect(xml).toContain('<ScopeProject AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
             expect(xml).toContain('<DataPool AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(xml).toContain('<YTChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
             expect(xml).toContain('</ScopeProject>')
         })
 
@@ -168,7 +176,7 @@ describe('XML Generator', () => {
             expect(xml).toContain('<RecordTime>6000000000</RecordTime>')
         })
 
-        it('should include AdsAcquisition elements', () => {
+        it('should include AdsAcquisition and Channel elements', () => {
             const acquisitions = [
                 {
                     guid: 'test-guid',
@@ -182,13 +190,20 @@ describe('XML Generator', () => {
                     enabled: true,
                 },
             ]
+            const axisGroupAcqs = [{
+                axisGroup: { id: 'ag1', name: 'Axis Group 1', patterns: [] },
+                acquisitions,
+            }]
 
-            const xml = generateTcscopexXml(mockGlobalSettings, acquisitions)
+            const xml = generateTcscopexXml(mockGlobalSettings, axisGroupAcqs)
 
             expect(xml).toContain('<AdsAcquisition AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
             expect(xml).toContain('<SymbolName>Test.Symbol</SymbolName>')
             expect(xml).toContain('<TargetPort>852</TargetPort>')
             expect(xml).toContain('<DataType>REAL64</DataType>')
+            expect(xml).toContain('<AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(xml).toContain('<Channel AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(xml).toContain('<AcquisitionGUID>test-guid</AcquisitionGUID>')
         })
 
         it('should escape special XML characters', () => {
@@ -200,6 +215,13 @@ describe('XML Generator', () => {
             const xml = generateTcscopexXml(settings, [])
 
             expect(xml).toContain('Test &lt;Project&gt; &amp; &quot;Name&quot;')
+        })
+
+        it('should include SynchronisationMode and Version', () => {
+            const xml = generateTcscopexXml(mockGlobalSettings, [])
+
+            expect(xml).toContain('<SynchronisationMode>Default</SynchronisationMode>')
+            expect(xml).toContain('<Version>1.0.0.6</Version>')
         })
     })
 
@@ -229,28 +251,12 @@ describe('XML Generator', () => {
     describe('generateAllFiles', () => {
         it('should generate files from scope files', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'Scope_1',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }],
-                        },
-                    ],
-                },
-                {
-                    id: '2',
-                    name: 'Scope_2',
-                    patterns: [
-                        {
-                            id: 'p2',
-                            targetPort: 852,
-                            symbols: [{ id: 's2', template: 'C.D', dataType: 'REAL64', variableSize: 8 }],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'Scope_1', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
+                createScopeFile('2', 'Scope_2', [
+                    { id: 'p2', targetPort: 852, symbols: [{ id: 's2', template: 'C.D', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -262,17 +268,9 @@ describe('XML Generator', () => {
 
         it('should generate tcmproj with all file references', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'Test',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'Test', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -283,19 +281,9 @@ describe('XML Generator', () => {
 
         it('should count acquisitions correctly per file', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'Scope_1',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [
-                                { id: 's1', template: 'A[{n:1:5}]', dataType: 'REAL64', variableSize: 8 },
-                            ],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'Scope_1', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: 'A[{n:1:5}]', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -305,19 +293,9 @@ describe('XML Generator', () => {
 
         it('should skip empty templates', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'Scope_1',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [
-                                { id: 's1', template: '', dataType: 'REAL64', variableSize: 8 },
-                            ],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'Scope_1', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: '', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -327,22 +305,10 @@ describe('XML Generator', () => {
 
         it('should handle multiple patterns with different target ports', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'MultiPort',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 851,
-                            symbols: [{ id: 's1', template: 'PLC1.Var', dataType: 'REAL64', variableSize: 8 }],
-                        },
-                        {
-                            id: 'p2',
-                            targetPort: 852,
-                            symbols: [{ id: 's2', template: 'PLC2.Var', dataType: 'INT32', variableSize: 4 }],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'MultiPort', [
+                    { id: 'p1', targetPort: 851, symbols: [{ id: 's1', template: 'PLC1.Var', dataType: 'REAL64', variableSize: 8 }] },
+                    { id: 'p2', targetPort: 852, symbols: [{ id: 's2', template: 'PLC2.Var', dataType: 'INT32', variableSize: 4 }] },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -355,21 +321,15 @@ describe('XML Generator', () => {
 
         it('should handle multiple symbols in one pattern', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'MultiSymbol',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [
-                                { id: 's1', template: 'A.Position', dataType: 'REAL64', variableSize: 8 },
-                                { id: 's2', template: 'A.Velocity', dataType: 'REAL64', variableSize: 8 },
-                                { id: 's3', template: 'A.Torque', dataType: 'REAL32', variableSize: 4 },
-                            ],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'MultiSymbol', [
+                    {
+                        id: 'p1', targetPort: 852, symbols: [
+                            { id: 's1', template: 'A.Position', dataType: 'REAL64', variableSize: 8 },
+                            { id: 's2', template: 'A.Velocity', dataType: 'REAL64', variableSize: 8 },
+                            { id: 's3', template: 'A.Torque', dataType: 'REAL32', variableSize: 4 },
+                        ],
+                    },
+                ]),
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -380,13 +340,9 @@ describe('XML Generator', () => {
             expect(result.tcscopexFiles[0].content).toContain('<SymbolName>A.Torque</SymbolName>')
         })
 
-        it('should skip files with empty patterns list', () => {
+        it('should skip files with empty axis groups list', () => {
             const scopeFiles: ScopeFile[] = [
-                {
-                    id: '1',
-                    name: 'EmptyPatterns',
-                    patterns: [],
-                },
+                { id: '1', name: 'EmptyAxisGroups', axisGroups: [] },
             ]
 
             const result = generateAllFiles(mockGlobalSettings, scopeFiles)
@@ -396,20 +352,46 @@ describe('XML Generator', () => {
 
         it('should generate correct tcmproj filename from project name with spaces', () => {
             const result = generateAllFiles(mockGlobalSettings, [
-                {
-                    id: '1',
-                    name: 'Test',
-                    patterns: [
-                        {
-                            id: 'p1',
-                            targetPort: 852,
-                            symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }],
-                        },
-                    ],
-                },
+                createScopeFile('1', 'Test', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
             ])
 
             expect(result.tcmprojFileName).toBe('Test_Project.tcmproj')
+        })
+
+        it('should generate YTChart with AxisGroup and Channels', () => {
+            const scopeFiles: ScopeFile[] = [
+                createScopeFile('1', 'Scope_1', [
+                    { id: 'p1', targetPort: 852, symbols: [{ id: 's1', template: 'A.B', dataType: 'REAL64', variableSize: 8 }] },
+                ]),
+            ]
+
+            const result = generateAllFiles(mockGlobalSettings, scopeFiles)
+            const content = result.tcscopexFiles[0].content
+
+            expect(content).toContain('<YTChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(content).toContain('<AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(content).toContain('<Channel AssemblyName="TwinCAT.Measurement.Scope.API.Model">')
+            expect(content).toContain('<Name>Axis Group 1</Name>')
+        })
+
+        it('should handle multiple axis groups', () => {
+            const scopeFiles: ScopeFile[] = [{
+                id: '1',
+                name: 'MultiAG',
+                axisGroups: [
+                    { id: 'ag1', name: 'Positions', patterns: [{ id: 'p1', targetPort: 851, symbols: [{ id: 's1', template: 'A.Pos', dataType: 'REAL64', variableSize: 8 }] }] },
+                    { id: 'ag2', name: 'Velocities', patterns: [{ id: 'p2', targetPort: 851, symbols: [{ id: 's2', template: 'A.Vel', dataType: 'REAL64', variableSize: 8 }] }] },
+                ],
+            }]
+
+            const result = generateAllFiles(mockGlobalSettings, scopeFiles)
+            const content = result.tcscopexFiles[0].content
+
+            expect(content).toContain('<Name>Positions</Name>')
+            expect(content).toContain('<Name>Velocities</Name>')
+            expect(result.tcscopexFiles[0].acquisitionCount).toBe(2)
         })
     })
 
@@ -422,7 +404,11 @@ describe('XML Generator', () => {
             }
 
             const acquisitions = generateAcquisitionsFromPattern(pattern, mockGlobalSettings)
-            const xml = generateTcscopexXml(mockGlobalSettings, acquisitions)
+            const axisGroupAcqs = [{
+                axisGroup: { id: 'ag1', name: 'AG', patterns: [] },
+                acquisitions,
+            }]
+            const xml = generateTcscopexXml(mockGlobalSettings, axisGroupAcqs)
 
             expect(xml).toContain('MAIN.data&amp;value')
             expect(xml).not.toContain('MAIN.data&value')

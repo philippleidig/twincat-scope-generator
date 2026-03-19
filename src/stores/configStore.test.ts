@@ -6,6 +6,11 @@ describe('configStore', () => {
         useConfigStore.getState().resetAll()
     })
 
+    // Helper to get the first axis group's patterns
+    const getFirstAxisGroup = () => useConfigStore.getState().scopeFiles[0].axisGroups[0]
+    const getFirstPattern = () => getFirstAxisGroup().patterns[0]
+    const getFirstSymbol = () => getFirstPattern().symbols[0]
+
     describe('initial state', () => {
         it('should have default global settings', () => {
             const { globalSettings } = useConfigStore.getState()
@@ -18,18 +23,19 @@ describe('configStore', () => {
             expect(globalSettings.defaultTargetPort).toBe(851)
         })
 
-        it('should have one default scope file', () => {
+        it('should have one default scope file with one axis group', () => {
             const { scopeFiles } = useConfigStore.getState()
 
             expect(scopeFiles).toHaveLength(1)
             expect(scopeFiles[0].name).toBe('Scope_1')
-            expect(scopeFiles[0].patterns).toHaveLength(1)
-            expect(scopeFiles[0].patterns[0].symbols).toHaveLength(1)
+            expect(scopeFiles[0].axisGroups).toHaveLength(1)
+            expect(scopeFiles[0].axisGroups[0].name).toBe('Axis Group 1')
+            expect(scopeFiles[0].axisGroups[0].patterns).toHaveLength(1)
+            expect(scopeFiles[0].axisGroups[0].patterns[0].symbols).toHaveLength(1)
         })
 
         it('should have default symbol with REAL64 data type', () => {
-            const { scopeFiles } = useConfigStore.getState()
-            const symbol = scopeFiles[0].patterns[0].symbols[0]
+            const symbol = getFirstSymbol()
 
             expect(symbol.template).toBe('')
             expect(symbol.dataType).toBe('REAL64')
@@ -79,7 +85,7 @@ describe('configStore', () => {
             useConfigStore.getState().addScopeFile()
 
             const { scopeFiles } = useConfigStore.getState()
-            expect(scopeFiles[1].patterns[0].targetPort).toBe(852)
+            expect(scopeFiles[1].axisGroups[0].patterns[0].targetPort).toBe(852)
         })
 
         it('should update scope file properties', () => {
@@ -102,7 +108,6 @@ describe('configStore', () => {
             const { scopeFiles } = useConfigStore.getState()
             const fileId = scopeFiles[0].id
 
-            // Set some values first
             useConfigStore.getState().updateScopeFile(fileId, { name: 'Original' })
 
             useConfigStore.getState().duplicateScopeFile(fileId)
@@ -110,7 +115,9 @@ describe('configStore', () => {
             const newScopeFiles = useConfigStore.getState().scopeFiles
             expect(newScopeFiles).toHaveLength(2)
             expect(newScopeFiles[1].name).toBe('Original_copy')
-            expect(newScopeFiles[1].id).not.toBe(fileId) // New ID
+            expect(newScopeFiles[1].id).not.toBe(fileId)
+            expect(newScopeFiles[1].axisGroups).toHaveLength(1)
+            expect(newScopeFiles[1].axisGroups[0].name).toBe('Axis Group 1')
         })
 
         it('should insert duplicated file after original', () => {
@@ -131,42 +138,95 @@ describe('configStore', () => {
         })
     })
 
-    describe('pattern actions', () => {
-        it('should add pattern to file', () => {
+    describe('axis group actions', () => {
+        it('should add axis group to file', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            useConfigStore.getState().addPattern(fileId)
+            useConfigStore.getState().addAxisGroup(fileId)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(2)
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(2)
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups[1].name).toBe('Axis Group 2')
+        })
+
+        it('should add axis group with default target port', () => {
+            useConfigStore.getState().updateGlobalSettings({ defaultTargetPort: 853 })
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            useConfigStore.getState().addAxisGroup(fileId)
+
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups[1].patterns[0].targetPort).toBe(853)
+        })
+
+        it('should remove axis group', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            useConfigStore.getState().addAxisGroup(fileId)
+
+            const agId = useConfigStore.getState().scopeFiles[0].axisGroups[0].id
+            useConfigStore.getState().removeAxisGroup(fileId, agId)
+
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(1)
+        })
+
+        it('should update axis group name', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const agId = getFirstAxisGroup().id
+
+            useConfigStore.getState().updateAxisGroup(fileId, agId, { name: 'Positions' })
+
+            expect(getFirstAxisGroup().name).toBe('Positions')
+        })
+
+        it('should duplicate axis group', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const agId = getFirstAxisGroup().id
+
+            useConfigStore.getState().updateAxisGroup(fileId, agId, { name: 'Original AG' })
+            useConfigStore.getState().duplicateAxisGroup(fileId, agId)
+
+            const axisGroups = useConfigStore.getState().scopeFiles[0].axisGroups
+            expect(axisGroups).toHaveLength(2)
+            expect(axisGroups[1].name).toBe('Original AG (copy)')
+            expect(axisGroups[1].id).not.toBe(agId)
+        })
+    })
+
+    describe('pattern actions', () => {
+        it('should add pattern to axis group', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const agId = getFirstAxisGroup().id
+            useConfigStore.getState().addPattern(fileId, agId)
+
+            expect(getFirstAxisGroup().patterns).toHaveLength(2)
         })
 
         it('should add pattern with default target port', () => {
             useConfigStore.getState().updateGlobalSettings({ defaultTargetPort: 853 })
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            useConfigStore.getState().addPattern(fileId)
+            const agId = getFirstAxisGroup().id
+            useConfigStore.getState().addPattern(fileId, agId)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[1].targetPort).toBe(853)
+            expect(getFirstAxisGroup().patterns[1].targetPort).toBe(853)
         })
 
-        it('should remove pattern from file', () => {
+        it('should remove pattern from axis group', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            useConfigStore.getState().addPattern(fileId)
+            const agId = getFirstAxisGroup().id
+            useConfigStore.getState().addPattern(fileId, agId)
 
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            useConfigStore.getState().removePattern(fileId, patternId)
+            const patternId = getFirstAxisGroup().patterns[0].id
+            useConfigStore.getState().removePattern(fileId, agId, patternId)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns).toHaveLength(1)
         })
 
         it('should duplicate pattern', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
 
-            // Set a custom port
-            useConfigStore.getState().updatePatternPort(fileId, patternId, 999)
+            useConfigStore.getState().updatePatternPort(fileId, agId, patternId, 999)
 
-            useConfigStore.getState().duplicatePattern(fileId, patternId)
+            useConfigStore.getState().duplicatePattern(fileId, agId, patternId)
 
-            const patterns = useConfigStore.getState().scopeFiles[0].patterns
+            const patterns = getFirstAxisGroup().patterns
             expect(patterns).toHaveLength(2)
             expect(patterns[1].targetPort).toBe(999)
             expect(patterns[1].id).not.toBe(patternId)
@@ -174,90 +234,97 @@ describe('configStore', () => {
 
         it('should update pattern port', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
 
-            useConfigStore.getState().updatePatternPort(fileId, patternId, 852)
+            useConfigStore.getState().updatePatternPort(fileId, agId, patternId, 852)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].targetPort).toBe(852)
+            expect(getFirstPattern().targetPort).toBe(852)
         })
     })
 
     describe('symbol actions', () => {
         it('should add symbol to pattern', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
 
-            useConfigStore.getState().addSymbol(fileId, patternId)
+            useConfigStore.getState().addSymbol(fileId, agId, patternId)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols).toHaveLength(2)
+            expect(getFirstPattern().symbols).toHaveLength(2)
         })
 
         it('should update symbol template', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
+            const symbolId = getFirstSymbol().id
 
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 template: 'MAIN.value[{n:1:5}]'
             })
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].template).toBe('MAIN.value[{n:1:5}]')
+            expect(getFirstSymbol().template).toBe('MAIN.value[{n:1:5}]')
         })
 
         it('should update symbol data type and auto-calculate variable size', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
+            const symbolId = getFirstSymbol().id
 
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 dataType: 'INT32'
             })
 
-            const symbol = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0]
+            const symbol = getFirstSymbol()
             expect(symbol.dataType).toBe('INT32')
             expect(symbol.variableSize).toBe(4)
         })
 
         it('should not auto-calculate variable size if explicitly provided', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
+            const symbolId = getFirstSymbol().id
 
-            useConfigStore.getState().updateSymbol(fileId, patternId, symbolId, {
+            useConfigStore.getState().updateSymbol(fileId, agId, patternId, symbolId, {
                 dataType: 'INT32',
-                variableSize: 99 // Custom size
+                variableSize: 99
             })
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].variableSize).toBe(99)
+            expect(getFirstSymbol().variableSize).toBe(99)
         })
 
         it('should remove symbol from pattern', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            useConfigStore.getState().addSymbol(fileId, patternId)
+            const agId = getFirstAxisGroup().id
+            const patternId = getFirstPattern().id
+            useConfigStore.getState().addSymbol(fileId, agId, patternId)
 
-            const symbolId = useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].id
-            useConfigStore.getState().removeSymbol(fileId, patternId, symbolId)
+            const symbolId = getFirstPattern().symbols[0].id
+            useConfigStore.getState().removeSymbol(fileId, agId, patternId, symbolId)
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols).toHaveLength(1)
+            expect(getFirstPattern().symbols).toHaveLength(1)
         })
     })
 
     describe('resetAll', () => {
         it('should reset all state to defaults', () => {
-            // Make various changes
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const agId = getFirstAxisGroup().id
             useConfigStore.getState().updateGlobalSettings({ projectName: 'Changed' })
             useConfigStore.getState().addScopeFile()
-            useConfigStore.getState().addPattern(useConfigStore.getState().scopeFiles[0].id)
+            useConfigStore.getState().addPattern(fileId, agId)
 
-            // Reset
             useConfigStore.getState().resetAll()
 
             const state = useConfigStore.getState()
             expect(state.globalSettings.projectName).toBe('Scope Project')
             expect(state.scopeFiles).toHaveLength(1)
             expect(state.scopeFiles[0].name).toBe('Scope_1')
-            expect(state.scopeFiles[0].patterns).toHaveLength(1)
+            expect(state.scopeFiles[0].axisGroups).toHaveLength(1)
+            expect(state.scopeFiles[0].axisGroups[0].patterns).toHaveLength(1)
         })
     })
 
@@ -265,7 +332,6 @@ describe('configStore', () => {
         it('should handle updating non-existent file', () => {
             useConfigStore.getState().updateScopeFile('non-existent', { name: 'Test' })
 
-            // Should not throw, state unchanged
             expect(useConfigStore.getState().scopeFiles[0].name).toBe('Scope_1')
         })
 
@@ -275,34 +341,38 @@ describe('configStore', () => {
             expect(useConfigStore.getState().scopeFiles).toHaveLength(1)
         })
 
-        it('should handle adding pattern to non-existent file', () => {
-            useConfigStore.getState().addPattern('non-existent')
+        it('should handle adding pattern to non-existent axis group', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            useConfigStore.getState().addPattern(fileId, 'non-existent')
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns).toHaveLength(1)
         })
 
-        it('should handle duplicate pattern in non-existent file', () => {
-            useConfigStore.getState().duplicatePattern('non-existent', 'pattern-id')
+        it('should handle duplicate pattern in non-existent axis group', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            useConfigStore.getState().duplicatePattern(fileId, 'non-existent', 'pattern-id')
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns).toHaveLength(1)
         })
 
         it('should handle duplicate non-existent pattern', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            useConfigStore.getState().duplicatePattern(fileId, 'non-existent')
+            const agId = getFirstAxisGroup().id
+            useConfigStore.getState().duplicatePattern(fileId, agId, 'non-existent')
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns).toHaveLength(1)
         })
 
         it('should preserve other patterns when adding symbol', () => {
             const fileId = useConfigStore.getState().scopeFiles[0].id
-            useConfigStore.getState().addPattern(fileId)
+            const agId = getFirstAxisGroup().id
+            useConfigStore.getState().addPattern(fileId, agId)
 
-            const patternId = useConfigStore.getState().scopeFiles[0].patterns[0].id
-            useConfigStore.getState().addSymbol(fileId, patternId)
+            const patternId = getFirstAxisGroup().patterns[0].id
+            useConfigStore.getState().addSymbol(fileId, agId, patternId)
 
             // Second pattern should be unchanged
-            expect(useConfigStore.getState().scopeFiles[0].patterns[1].symbols).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns[1].symbols).toHaveLength(1)
         })
     })
 })

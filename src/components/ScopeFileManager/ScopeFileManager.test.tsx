@@ -9,6 +9,10 @@ describe('ScopeFileManager Component', () => {
         useConfigStore.getState().resetAll()
     })
 
+    // Helpers
+    const getFirstAxisGroup = () => useConfigStore.getState().scopeFiles[0].axisGroups[0]
+    const getFirstPattern = () => getFirstAxisGroup().patterns[0]
+
     describe('initial rendering', () => {
         it('should render with one default file', () => {
             render(<ScopeFileManager />)
@@ -23,9 +27,10 @@ describe('ScopeFileManager Component', () => {
             expect(screen.getByRole('heading', { name: /scope files/i })).toBeInTheDocument()
         })
 
-        it('should show Pattern 1 label', () => {
+        it('should show Axis Group 1 and Pattern 1 label', () => {
             render(<ScopeFileManager />)
 
+            expect(screen.getByDisplayValue('Axis Group 1')).toBeInTheDocument()
             expect(screen.getByText('Pattern 1')).toBeInTheDocument()
         })
     })
@@ -54,11 +59,9 @@ describe('ScopeFileManager Component', () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Add a second file first
             await user.click(screen.getByRole('button', { name: /add file/i }))
             expect(useConfigStore.getState().scopeFiles).toHaveLength(2)
 
-            // Find and click the remove button for the first file
             const removeButtons = screen.getAllByTitle('Remove File')
             await user.click(removeButtons[0])
 
@@ -76,16 +79,63 @@ describe('ScopeFileManager Component', () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Set a template first
             const input = screen.getByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(input, { target: { value: 'Test.Value' } })
 
-            // Click duplicate
             await user.click(screen.getByTitle('Duplicate File'))
 
             expect(useConfigStore.getState().scopeFiles).toHaveLength(2)
             expect(useConfigStore.getState().scopeFiles[1].name).toBe('Scope_1_copy')
-            expect(useConfigStore.getState().scopeFiles[1].patterns[0].symbols[0].template).toBe('Test.Value')
+            expect(useConfigStore.getState().scopeFiles[1].axisGroups[0].patterns[0].symbols[0].template).toBe('Test.Value')
+        })
+    })
+
+    describe('axis group operations', () => {
+        it('should add an axis group', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            await user.click(screen.getByRole('button', { name: /add axis group/i }))
+
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(2)
+            expect(screen.getByDisplayValue('Axis Group 2')).toBeInTheDocument()
+        })
+
+        it('should update axis group name', () => {
+            render(<ScopeFileManager />)
+
+            const input = screen.getByDisplayValue('Axis Group 1')
+            fireEvent.change(input, { target: { value: 'Positions' } })
+
+            expect(getFirstAxisGroup().name).toBe('Positions')
+        })
+
+        it('should duplicate an axis group', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            await user.click(screen.getByTitle('Duplicate Axis Group'))
+
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(2)
+        })
+
+        it('should remove an axis group when multiple exist', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            await user.click(screen.getByRole('button', { name: /add axis group/i }))
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(2)
+
+            const removeButtons = screen.getAllByTitle('Remove Axis Group')
+            await user.click(removeButtons[0])
+
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups).toHaveLength(1)
+        })
+
+        it('should not show remove button for single axis group', () => {
+            render(<ScopeFileManager />)
+
+            expect(screen.queryByTitle('Remove Axis Group')).not.toBeInTheDocument()
         })
     })
 
@@ -96,9 +146,7 @@ describe('ScopeFileManager Component', () => {
             const input = screen.getByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(input, { target: { value: 'Test.Symbol[{i:1:5}]' } })
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].template).toBe(
-                'Test.Symbol[{i:1:5}]'
-            )
+            expect(getFirstPattern().symbols[0].template).toBe('Test.Symbol[{i:1:5}]')
         })
 
         it('should add symbol to pattern', async () => {
@@ -107,22 +155,20 @@ describe('ScopeFileManager Component', () => {
 
             await user.click(screen.getByRole('button', { name: /add symbol/i }))
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols).toHaveLength(2)
+            expect(getFirstPattern().symbols).toHaveLength(2)
         })
 
         it('should remove symbol when multiple symbols exist', async () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Add a second symbol
             await user.click(screen.getByRole('button', { name: /add symbol/i }))
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols).toHaveLength(2)
+            expect(getFirstPattern().symbols).toHaveLength(2)
 
-            // Remove a symbol
             const removeButtons = screen.getAllByTitle('Remove Symbol')
             await user.click(removeButtons[0])
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols).toHaveLength(1)
+            expect(getFirstPattern().symbols).toHaveLength(1)
         })
 
         it('should update data type', () => {
@@ -131,19 +177,19 @@ describe('ScopeFileManager Component', () => {
             const select = screen.getByDisplayValue('REAL64 (LREAL)')
             fireEvent.change(select, { target: { value: 'INT32' } })
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].dataType).toBe('INT32')
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].variableSize).toBe(4)
+            expect(getFirstPattern().symbols[0].dataType).toBe('INT32')
+            expect(getFirstPattern().symbols[0].variableSize).toBe(4)
         })
     })
 
     describe('pattern operations', () => {
-        it('should add pattern to file', async () => {
+        it('should add pattern to axis group', async () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
             await user.click(screen.getByRole('button', { name: /add pattern/i }))
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(2)
+            expect(getFirstAxisGroup().patterns).toHaveLength(2)
             expect(screen.getByText('Pattern 2')).toBeInTheDocument()
         })
 
@@ -151,40 +197,35 @@ describe('ScopeFileManager Component', () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Add a second pattern first
             await user.click(screen.getByRole('button', { name: /add pattern/i }))
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(2)
+            expect(getFirstAxisGroup().patterns).toHaveLength(2)
 
-            // Remove a pattern
             const removeButtons = screen.getAllByTitle('Remove Pattern')
             await user.click(removeButtons[0])
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(1)
+            expect(getFirstAxisGroup().patterns).toHaveLength(1)
         })
 
         it('should duplicate pattern', async () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Set a template in the pattern
             const input = screen.getByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(input, { target: { value: 'Original.Value' } })
 
-            // Click duplicate pattern
             await user.click(screen.getByTitle('Duplicate Pattern'))
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns).toHaveLength(2)
-            expect(useConfigStore.getState().scopeFiles[0].patterns[1].symbols[0].template).toBe('Original.Value')
+            expect(getFirstAxisGroup().patterns).toHaveLength(2)
+            expect(getFirstAxisGroup().patterns[1].symbols[0].template).toBe('Original.Value')
         })
 
         it('should change port using preset dropdown', () => {
             render(<ScopeFileManager />)
 
-            // Find the port selector (should default to 851)
             const select = screen.getByDisplayValue('851 - PLC 1')
             fireEvent.change(select, { target: { value: '852' } })
 
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].targetPort).toBe(852)
+            expect(getFirstPattern().targetPort).toBe(852)
         })
     })
 
@@ -195,7 +236,6 @@ describe('ScopeFileManager Component', () => {
             const input = screen.getByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(input, { target: { value: 'Item[{n:1:10}]' } })
 
-            // May have multiple elements showing acquisition counts
             const elements = screen.getAllByText(/10 acquisition/)
             expect(elements.length).toBeGreaterThan(0)
         })
@@ -221,7 +261,6 @@ describe('ScopeFileManager Component', () => {
         it('should not show acquisition count for empty template', () => {
             render(<ScopeFileManager />)
 
-            // Default template is empty, so no acquisition count should be shown
             expect(screen.queryByText(/acquisition/)).not.toBeInTheDocument()
         })
 
@@ -240,20 +279,16 @@ describe('ScopeFileManager Component', () => {
             const user = userEvent.setup()
             render(<ScopeFileManager />)
 
-            // Set template in first file
             const input1 = screen.getByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(input1, { target: { value: 'File1.Value' } })
 
-            // Add second file
             await user.click(screen.getByRole('button', { name: /add file/i }))
 
-            // Set template in second file
             const inputs = screen.getAllByPlaceholderText(/MAIN\.mover/)
             fireEvent.change(inputs[1], { target: { value: 'File2.Value' } })
 
-            // Verify both templates are stored correctly
-            expect(useConfigStore.getState().scopeFiles[0].patterns[0].symbols[0].template).toBe('File1.Value')
-            expect(useConfigStore.getState().scopeFiles[1].patterns[0].symbols[0].template).toBe('File2.Value')
+            expect(useConfigStore.getState().scopeFiles[0].axisGroups[0].patterns[0].symbols[0].template).toBe('File1.Value')
+            expect(useConfigStore.getState().scopeFiles[1].axisGroups[0].patterns[0].symbols[0].template).toBe('File2.Value')
         })
     })
 })

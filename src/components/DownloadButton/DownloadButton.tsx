@@ -15,12 +15,14 @@ export function DownloadButton() {
 
     // Validate all patterns
     const hasValidPatterns = scopeFiles.some((file) =>
-        file.patterns.some((pattern) =>
-            pattern.symbols.some((symbol) => {
-                if (!symbol.template.trim()) return false
-                const validation = validateTemplate(symbol.template)
-                return validation.valid
-            })
+        file.axisGroups.some((ag) =>
+            ag.patterns.some((pattern) =>
+                pattern.symbols.some((symbol) => {
+                    if (!symbol.template.trim()) return false
+                    const validation = validateTemplate(symbol.template)
+                    return validation.valid
+                })
+            )
         )
     )
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card, Input, Button, Select, TrashIcon, CopyIcon, FileIcon } from '@/components/ui'
 import { useConfigStore } from '@/stores/configStore'
-import type { ScopeFile, Pattern, DataType } from '@/types'
+import type { ScopeFile, AxisGroup, Pattern, DataType } from '@/types'
 import { validateTemplate, calculateExpansionCount } from '@/lib/patterns'
 import './ScopeFileManager.css'
 
@@ -41,12 +41,13 @@ const PORT_PRESETS = [
 
 interface PatternEditorProps {
     fileId: string
+    axisGroupId: string
     pattern: Pattern
     patternIndex: number
     canRemove: boolean
 }
 
-function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEditorProps) {
+function PatternEditor({ fileId, axisGroupId, pattern, patternIndex, canRemove }: PatternEditorProps) {
     const { addSymbol, updateSymbol, removeSymbol, removePattern, updatePatternPort, duplicatePattern } = useConfigStore()
     const [showCustomPort, setShowCustomPort] = useState(false)
     const [customPortValue, setCustomPortValue] = useState('')
@@ -65,14 +66,14 @@ function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEdit
             setCustomPortValue(currentPortValue)
         } else {
             setShowCustomPort(false)
-            updatePatternPort(fileId, pattern.id, parseInt(value, 10))
+            updatePatternPort(fileId, axisGroupId, pattern.id, parseInt(value, 10))
         }
     }
 
     const handleCustomPortSubmit = () => {
         const port = parseInt(customPortValue, 10)
         if (!isNaN(port) && port > 0) {
-            updatePatternPort(fileId, pattern.id, port)
+            updatePatternPort(fileId, axisGroupId, pattern.id, port)
             setShowCustomPort(false)
         }
     }
@@ -109,7 +110,7 @@ function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEdit
                     <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => duplicatePattern(fileId, pattern.id)}
+                        onClick={() => duplicatePattern(fileId, axisGroupId, pattern.id)}
                         title="Duplicate Pattern"
                         className="btn-icon"
                     >
@@ -119,7 +120,7 @@ function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEdit
                         <Button
                             size="sm"
                             variant="danger"
-                            onClick={() => removePattern(fileId, pattern.id)}
+                            onClick={() => removePattern(fileId, axisGroupId, pattern.id)}
                             title="Remove Pattern"
                             className="btn-icon"
                         >
@@ -141,21 +142,21 @@ function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEdit
                                 <div className="symbol-input-row">
                                     <Input
                                         value={symbol.template}
-                                        onChange={(e) => updateSymbol(fileId, pattern.id, symbol.id, { template: e.target.value })}
+                                        onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { template: e.target.value })}
                                         placeholder="e.g., MAIN.mover[{i:1:5}].position"
                                         error={symbol.template && !validation.valid ? validation.errors[0] : undefined}
                                         className="symbol-input"
                                     />
                                     <Select
                                         value={symbol.dataType}
-                                        onChange={(e) => updateSymbol(fileId, pattern.id, symbol.id, { dataType: e.target.value as DataType })}
+                                        onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { dataType: e.target.value as DataType })}
                                         options={DATA_TYPE_OPTIONS}
                                     />
                                     {pattern.symbols.length > 1 && (
                                         <Button
                                             size="sm"
                                             variant="danger"
-                                            onClick={() => removeSymbol(fileId, pattern.id, symbol.id)}
+                                            onClick={() => removeSymbol(fileId, axisGroupId, pattern.id, symbol.id)}
                                             title="Remove Symbol"
                                             className="btn-icon"
                                         >
@@ -175,13 +176,85 @@ function PatternEditor({ fileId, pattern, patternIndex, canRemove }: PatternEdit
             </div>
 
             <div className="pattern-actions">
-                <Button size="sm" variant="secondary" onClick={() => addSymbol(fileId, pattern.id)}>
+                <Button size="sm" variant="secondary" onClick={() => addSymbol(fileId, axisGroupId, pattern.id)}>
                     + Add Symbol
                 </Button>
                 {totalExpansions > 0 && (
                     <span className="pattern-total">Total: {totalExpansions}</span>
                 )}
             </div>
+        </div>
+    )
+}
+
+interface AxisGroupEditorProps {
+    fileId: string
+    axisGroup: AxisGroup
+    canRemove: boolean
+}
+
+function AxisGroupEditor({ fileId, axisGroup, canRemove }: AxisGroupEditorProps) {
+    const { updateAxisGroup, removeAxisGroup, duplicateAxisGroup, addPattern } = useConfigStore()
+
+    const totalAcquisitions = axisGroup.patterns.reduce((sum, pattern) => {
+        return sum + pattern.symbols.reduce((symSum, symbol) => {
+            if (!symbol.template.trim()) return symSum
+            return symSum + calculateExpansionCount(symbol.template)
+        }, 0)
+    }, 0)
+
+    return (
+        <div className="axis-group-editor">
+            <div className="axis-group-header">
+                <Input
+                    value={axisGroup.name}
+                    onChange={(e) => updateAxisGroup(fileId, axisGroup.id, { name: e.target.value })}
+                    placeholder="Axis Group Name"
+                    className="axis-group-name-input"
+                />
+                {totalAcquisitions > 0 && (
+                    <span className="axis-group-total">{totalAcquisitions} acq.</span>
+                )}
+                <div className="axis-group-actions">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => duplicateAxisGroup(fileId, axisGroup.id)}
+                        title="Duplicate Axis Group"
+                        className="btn-icon"
+                    >
+                        <CopyIcon size={14} />
+                    </Button>
+                    {canRemove && (
+                        <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => removeAxisGroup(fileId, axisGroup.id)}
+                            title="Remove Axis Group"
+                            className="btn-icon"
+                        >
+                            <TrashIcon size={14} />
+                        </Button>
+                    )}
+                </div>
+            </div>
+
+            <div className="patterns-container">
+                {axisGroup.patterns.map((pattern, index) => (
+                    <PatternEditor
+                        key={pattern.id}
+                        fileId={fileId}
+                        axisGroupId={axisGroup.id}
+                        pattern={pattern}
+                        patternIndex={index}
+                        canRemove={axisGroup.patterns.length > 1}
+                    />
+                ))}
+            </div>
+
+            <Button size="sm" variant="secondary" onClick={() => addPattern(fileId, axisGroup.id)} className="add-pattern-btn">
+                + Add Pattern
+            </Button>
         </div>
     )
 }
@@ -193,12 +266,14 @@ interface ScopeFileCardProps {
 }
 
 function ScopeFileCard({ scopeFile, canRemove, onDuplicate }: ScopeFileCardProps) {
-    const { updateScopeFile, removeScopeFile, addPattern } = useConfigStore()
+    const { updateScopeFile, removeScopeFile, addAxisGroup } = useConfigStore()
 
-    const totalAcquisitions = scopeFile.patterns.reduce((sum, pattern) => {
-        return sum + pattern.symbols.reduce((symSum, symbol) => {
-            if (!symbol.template.trim()) return symSum
-            return symSum + calculateExpansionCount(symbol.template)
+    const totalAcquisitions = scopeFile.axisGroups.reduce((sum, ag) => {
+        return sum + ag.patterns.reduce((patSum, pattern) => {
+            return patSum + pattern.symbols.reduce((symSum, symbol) => {
+                if (!symbol.template.trim()) return symSum
+                return symSum + calculateExpansionCount(symbol.template)
+            }, 0)
         }, 0)
     }, 0)
 
@@ -245,20 +320,19 @@ function ScopeFileCard({ scopeFile, canRemove, onDuplicate }: ScopeFileCardProps
                 )}
             </div>
 
-            <div className="patterns-container">
-                {scopeFile.patterns.map((pattern, index) => (
-                    <PatternEditor
-                        key={pattern.id}
+            <div className="axis-groups-container">
+                {scopeFile.axisGroups.map((axisGroup) => (
+                    <AxisGroupEditor
+                        key={axisGroup.id}
                         fileId={scopeFile.id}
-                        pattern={pattern}
-                        patternIndex={index}
-                        canRemove={scopeFile.patterns.length > 1}
+                        axisGroup={axisGroup}
+                        canRemove={scopeFile.axisGroups.length > 1}
                     />
                 ))}
             </div>
 
-            <Button size="sm" variant="secondary" onClick={() => addPattern(scopeFile.id)} className="add-pattern-btn">
-                + Add Pattern
+            <Button size="sm" variant="secondary" onClick={() => addAxisGroup(scopeFile.id)} className="add-axis-group-btn">
+                + Add Axis Group
             </Button>
         </Card>
     )
