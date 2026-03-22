@@ -244,6 +244,13 @@
     padding-left: 1rem;
     background: var(--gray-25, #fcfcfd);
     border-radius: 0 0.5rem 0.5rem 0;
+    transition: outline 0.15s ease, background 0.15s ease;
+}
+
+.axis-group-editor.drag-over {
+    outline: 2px dashed var(--primary-400, #60a5fa);
+    outline-offset: -2px;
+    background: var(--primary-50, #eff6ff);
 }
 
 .axis-group-header {

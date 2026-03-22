@@ -41,6 +41,9 @@ interface ConfigStore {
     removeSymbol: (fileId: string, axisGroupId: string, patternId: string, symbolId: string) => void
     updatePatternPort: (fileId: string, axisGroupId: string, patternId: string, targetPort: number) => void
 
+    // Pattern from Drag & Drop
+    addPatternWithSymbol: (fileId: string, axisGroupId: string, template: string, dataType: import('@/types').DataType, targetPort: number) => void
+
     // Utility Actions
     resetAll: () => void
 }
@@ -297,6 +300,28 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
         set((state) => ({
             scopeFiles: mapPatterns(state.scopeFiles, fileId, axisGroupId, (p) =>
                 p.id === patternId ? { ...p, targetPort } : p
+            ),
+        })),
+
+    // Pattern from Drag & Drop
+    addPatternWithSymbol: (fileId, axisGroupId, template, dataType, targetPort) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) =>
+                ag.id === axisGroupId
+                    ? {
+                        ...ag,
+                        patterns: [...ag.patterns, {
+                            id: uuidv4(),
+                            targetPort,
+                            symbols: [{
+                                id: uuidv4(),
+                                template,
+                                dataType,
+                                variableSize: getVariableSizeForDataType(dataType),
+                            }],
+                        }],
+                    }
+                    : ag
             ),
         })),
 

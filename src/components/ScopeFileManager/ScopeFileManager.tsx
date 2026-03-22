@@ -1,9 +1,66 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, Input, Button, Select, TrashIcon, CopyIcon, FileIcon } from '@/components/ui'
 import { useConfigStore } from '@/stores/configStore'
 import type { ScopeFile, AxisGroup, Pattern, DataType } from '@/types'
 import { validateTemplate, calculateExpansionCount } from '@/lib/patterns'
 import './ScopeFileManager.css'
+
+// Map Beckhoff TwinCAT base types to app DataType
+const BECKHOFF_TYPE_MAP: Record<string, DataType> = {
+    BOOL: 'BIT',
+    BIT: 'BIT',
+    SINT: 'INT8',
+    INT: 'INT16',
+    DINT: 'INT32',
+    LINT: 'INT64',
+    USINT: 'UINT8',
+    UINT: 'UINT16',
+    UDINT: 'UINT32',
+    ULINT: 'UINT64',
+    REAL: 'REAL32',
+    LREAL: 'REAL64',
+}
+
+function parseBeckhoffDrop(xmlText: string): { symbolName: string; dataType: DataType; targetPort: number } | null {
+    try {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(xmlText, 'text/xml')
+
+        // Extract target port
+        const portEl = doc.querySelector('TargetInfo AmsAddress Port')
+        const targetPort = portEl ? parseInt(portEl.textContent || '851', 10) : 851
+
+        // Build type resolution map from DataTypes section
+        const typeMap: Record<string, string> = {}
+        doc.querySelectorAll('DataTypes DataType').forEach((dt) => {
+            const name = dt.querySelector('Name')?.textContent || ''
+            const baseType = dt.querySelector('BaseType')?.textContent || ''
+            if (name && baseType) {
+                typeMap[name.toUpperCase()] = baseType.toUpperCase()
+            }
+        })
+
+        // Extract symbol
+        const symbolEl = doc.querySelector('Symbols Symbol')
+        if (!symbolEl) return null
+
+        const symbolName = symbolEl.querySelector('Name')?.textContent || ''
+        let baseTypeName = (symbolEl.querySelector('BaseType')?.textContent || '').toUpperCase()
+
+        // Resolve type aliases (e.g. OTCID -> UDINT)
+        let maxDepth = 10
+        while (typeMap[baseTypeName] && maxDepth-- > 0) {
+            baseTypeName = typeMap[baseTypeName]
+        }
+
+        const dataType = BECKHOFF_TYPE_MAP[baseTypeName]
+        if (!symbolName || !dataType) return null
+
+        return { symbolName, dataType, targetPort }
+    } catch {
+        return null
+    }
+}
 
 const DATA_TYPE_OPTIONS: { value: DataType; label: string }[] = [
     { value: 'REAL64', label: 'REAL64 (LREAL)' },
@@ -194,7 +251,8 @@ interface AxisGroupEditorProps {
 }
 
 function AxisGroupEditor({ fileId, axisGroup, canRemove }: AxisGroupEditorProps) {
-    const { updateAxisGroup, removeAxisGroup, duplicateAxisGroup, addPattern } = useConfigStore()
+    const { updateAxisGroup, removeAxisGroup, duplicateAxisGroup, addPattern, addPatternWithSymbol } = useConfigStore()
+    const [isDragOver, setIsDragOver] = useState(false)
 
     const totalAcquisitions = axisGroup.patterns.reduce((sum, pattern) => {
         return sum + pattern.symbols.reduce((symSum, symbol) => {
@@ -203,8 +261,39 @@ function AxisGroupEditor({ fileId, axisGroup, canRemove }: AxisGroupEditorProps)
         }, 0)
     }, 0)
 
+    const handleDragOver = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(true)
+    }, [])
+
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(false)
+    }, [])
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragOver(false)
+
+        const xmlText = e.dataTransfer.getData('text/plain')
+        if (!xmlText || !xmlText.includes('TargetBrowserExportInfo')) return
+
+        const parsed = parseBeckhoffDrop(xmlText)
+        if (!parsed) return
+
+        addPatternWithSymbol(fileId, axisGroup.id, parsed.symbolName, parsed.dataType, parsed.targetPort)
+    }, [fileId, axisGroup.id, addPatternWithSymbol])
+
     return (
-        <div className="axis-group-editor">
+        <div
+            className={`axis-group-editor${isDragOver ? ' drag-over' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <div className="axis-group-header">
                 <Input
                     value={axisGroup.name}
