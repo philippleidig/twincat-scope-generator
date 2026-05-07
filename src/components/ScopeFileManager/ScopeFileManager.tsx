@@ -3,6 +3,8 @@ import { Card, Input, Button, Select, TrashIcon, CopyIcon, FileIcon } from '@/co
 import { useConfigStore } from '@/stores/configStore'
 import type { ScopeFile, AxisGroup, Pattern, DataType } from '@/types'
 import { validateTemplate, calculateExpansionCount } from '@/lib/patterns'
+import { ImportModal, ImportFileButton } from '@/components/ImportModal'
+import type { ParseResult } from '@/lib/twincat'
 import './ScopeFileManager.css'
 
 // Map Beckhoff TwinCAT base types to app DataType
@@ -429,13 +431,33 @@ function ScopeFileCard({ scopeFile, canRemove, onDuplicate }: ScopeFileCardProps
 
 export function ScopeFileManager() {
     const { scopeFiles, addScopeFile, duplicateScopeFile } = useConfigStore()
+    const [importResult, setImportResult] = useState<ParseResult | null>(null)
+    const [importError, setImportError] = useState<string | null>(null)
 
     return (
         <div className="scope-file-manager">
             <div className="manager-header">
                 <h2>Scope Files</h2>
-                <Button onClick={addScopeFile}>+ Add File</Button>
+                <div className="manager-header-actions">
+                    <ImportFileButton
+                        onLoaded={(r) => { setImportError(null); setImportResult(r) }}
+                        onError={(msg) => { setImportError(msg); setImportResult(null) }}
+                    />
+                    <Button onClick={addScopeFile}>+ Add File</Button>
+                </div>
             </div>
+
+            {importError && (
+                <div className="import-error-banner" role="alert">
+                    {importError}
+                    <button
+                        type="button"
+                        className="import-error-dismiss"
+                        onClick={() => setImportError(null)}
+                        aria-label="Dismiss"
+                    >×</button>
+                </div>
+            )}
 
             <div className="files-list">
                 {scopeFiles.map((scopeFile) => (
@@ -447,6 +469,12 @@ export function ScopeFileManager() {
                     />
                 ))}
             </div>
+
+            <ImportModal
+                isOpen={importResult !== null}
+                parseResult={importResult}
+                onClose={() => setImportResult(null)}
+            />
         </div>
     )
 }

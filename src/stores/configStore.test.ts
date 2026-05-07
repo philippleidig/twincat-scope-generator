@@ -375,4 +375,40 @@ describe('configStore', () => {
             expect(getFirstAxisGroup().patterns[1].symbols).toHaveLength(1)
         })
     })
+
+    describe('addSymbolsToAxisGroup (bulk import)', () => {
+        it('appends one pattern per imported symbol with correct data types and ports', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const agId = getFirstAxisGroup().id
+            const initialPatternCount = getFirstAxisGroup().patterns.length
+
+            useConfigStore.getState().addSymbolsToAxisGroup(fileId, agId, [
+                { template: 'CMyModule.bEnable', dataType: 'BIT', targetPort: 851 },
+                { template: 'CMyModule.fActPos', dataType: 'REAL64', targetPort: 351 },
+                { template: 'CMyModule.nMaxSpeed', dataType: 'UINT32', targetPort: 851 },
+            ])
+
+            const patterns = getFirstAxisGroup().patterns
+            expect(patterns).toHaveLength(initialPatternCount + 3)
+
+            const added = patterns.slice(initialPatternCount)
+            expect(added.map(p => p.symbols[0].template)).toEqual([
+                'CMyModule.bEnable',
+                'CMyModule.fActPos',
+                'CMyModule.nMaxSpeed',
+            ])
+            expect(added.map(p => p.symbols[0].dataType)).toEqual(['BIT', 'REAL64', 'UINT32'])
+            expect(added.map(p => p.symbols[0].variableSize)).toEqual([1, 8, 4])
+            expect(added.map(p => p.targetPort)).toEqual([851, 351, 851])
+        })
+
+        it('does nothing for an unknown axis group id', () => {
+            const fileId = useConfigStore.getState().scopeFiles[0].id
+            const before = getFirstAxisGroup().patterns.length
+            useConfigStore.getState().addSymbolsToAxisGroup(fileId, 'no-such-id', [
+                { template: 'X', dataType: 'BIT', targetPort: 851 },
+            ])
+            expect(getFirstAxisGroup().patterns).toHaveLength(before)
+        })
+    })
 })

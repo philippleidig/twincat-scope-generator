@@ -44,6 +44,13 @@ interface ConfigStore {
     // Pattern from Drag & Drop
     addPatternWithSymbol: (fileId: string, axisGroupId: string, template: string, dataType: import('@/types').DataType, targetPort: number) => void
 
+    // Bulk add (e.g. from XTI/TMC import)
+    addSymbolsToAxisGroup: (
+        fileId: string,
+        axisGroupId: string,
+        symbols: Array<{ template: string; dataType: import('@/types').DataType; targetPort: number }>,
+    ) => void
+
     // Utility Actions
     resetAll: () => void
 }
@@ -320,6 +327,31 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
                                 variableSize: getVariableSizeForDataType(dataType),
                             }],
                         }],
+                    }
+                    : ag
+            ),
+        })),
+
+    // Bulk add: append one Pattern per imported symbol.
+    addSymbolsToAxisGroup: (fileId, axisGroupId, symbols) =>
+        set((state) => ({
+            scopeFiles: mapAxisGroups(state.scopeFiles, fileId, (ag) =>
+                ag.id === axisGroupId
+                    ? {
+                        ...ag,
+                        patterns: [
+                            ...ag.patterns,
+                            ...symbols.map((s) => ({
+                                id: uuidv4(),
+                                targetPort: s.targetPort,
+                                symbols: [{
+                                    id: uuidv4(),
+                                    template: s.template,
+                                    dataType: s.dataType,
+                                    variableSize: getVariableSizeForDataType(s.dataType),
+                                }],
+                            })),
+                        ],
                     }
                     : ag
             ),
