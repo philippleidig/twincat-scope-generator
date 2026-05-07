@@ -4,7 +4,7 @@ import { ExamplePatterns } from '@/components/ExamplePatterns'
 import { DownloadButton } from '@/components/DownloadButton'
 import { SettingsIcon, GithubIcon, FeedbackIcon } from '@/components/ui'
 
-const APP_VERSION = 'V1.5'
+const APP_VERSION = 'V1.6'
 
 const ISSUES_URL = 'https://github.com/philippleidig/twincat-scope-generator/issues/new/choose'
 import './App.css'

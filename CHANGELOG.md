@@ -1,5 +1,12 @@
 # Changelog
 
+## V1.6 (2026-05-07)
+
+### Improvements
+
+- **ADS port from XTI**: when importing an `.xti` file, the suggested ADS port for each symbol is now read directly from the file's `AmsPort` attribute (looked up on `<TcSmItem>` itself, then on `<Project>`, `<Task>`, `<Box>`, `<Module>`, or anywhere in the subtree). Child TreeItems inherit the parent's port unless they specify their own. NC-axis XTIs without an explicit `AmsPort` now default to 501 (NC SAF) instead of 851.
+- **README**: documents the new XTI/TMC import workflow and the existing drag-and-drop import from the TwinCAT Target Browser.
+
 ## V1.5 (2026-05-07)
 
 ### New Features

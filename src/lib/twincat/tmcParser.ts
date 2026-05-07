@@ -293,6 +293,8 @@ interface MakeSymbolArgs {
     groupName: string
     groupKind: SymbolGroupKind
     pathComponents: string[]
+    /** Override the suggested ADS port. Defaults to DEFAULT_SUGGESTED_PORT (851). */
+    suggestedPort?: number
 }
 
 export function makeSymbol(args: MakeSymbolArgs): ParsedSymbol {
@@ -310,6 +312,6 @@ export function makeSymbol(args: MakeSymbolArgs): ParsedSymbol {
         groupName: args.groupName,
         groupKind: args.groupKind,
         fullPath: args.pathComponents.filter(Boolean).join('.'),
-        suggestedPort: DEFAULT_SUGGESTED_PORT,
+        suggestedPort: args.suggestedPort ?? DEFAULT_SUGGESTED_PORT,
     }
 }

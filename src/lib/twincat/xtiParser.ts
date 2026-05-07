@@ -1,5 +1,6 @@
 import type { ParseResult, ParsedSymbol, ParsedSymbolGroup, ParsedTcomObject, SymbolGroupKind } from './types'
 import {
+    DEFAULT_SUGGESTED_PORT,
     buildAliasMap,
     child,
     children,
@@ -10,6 +11,9 @@ import {
     txt,
 } from './shared'
 import { makeSymbol } from './tmcParser'
+
+/** NC SAF task default port — used for NC-axis XTI when no AmsPort is set. */
+const DEFAULT_NC_PORT = 501
 
 /**
  * Parses a TwinCAT eXported Tree Item file (.xti).
@@ -25,21 +29,14 @@ import { makeSymbol } from './tmcParser'
  *
  *   <TcSmItem TcSmVersion="1.0" ClassName="CNcAxisDef" SubType="1">
  *     <DataTypes>...</DataTypes>
- *     <Axis Id="3" CreateSymbols="true" AxisType="1">
- *       <Encoder Name="Enc">
- *         <Vars VarGrpType="1"><Name>Inputs</Name><Var>...</Var></Vars>
- *         <Vars VarGrpType="2"><Name>Outputs</Name><Var>...</Var></Vars>
- *       </Encoder>
- *       <Drive Name="Drive">...</Drive>
- *       <Controller Name="Ctrl">...</Controller>
- *       <Vars VarGrpType="1"><Name>Inputs</Name><Var>...</Var></Vars>
- *       <Vars VarGrpType="2"><Name>Outputs</Name><Var>...</Var></Vars>
- *     </Axis>
+ *     <Axis Id="3" CreateSymbols="true" AxisType="1">...</Axis>
  *   </TcSmItem>
  *
- * We dispatch on ClassName and on the structural elements actually present.
- * Unknown ClassNames fall back to a structural scan that handles the common
- * "embedded TcCOM module" and "NC axis with Vars" shapes.
+ * ADS port: TwinCAT carries the port as an `AmsPort` attribute on
+ * <Project>, <Task>, <Box>, <Module>, or <TreeItem> elements (verified
+ * against Beckhoff/ADS NotificationTest.tsproj). When present, that port
+ * is propagated as the suggested port on each parsed symbol so the user
+ * doesn't have to reconfigure it manually after import.
  */
 export function parseXti(fileName: string, content: string): ParseResult {
     const doc = parseXmlOrThrow(content)
@@ -56,29 +53,30 @@ export function parseXti(fileName: string, content: string): ParseResult {
 
     // Display name: stem of the file (without .xti) is what the user sees
     // when they pick the file. The actual instance name typically isn't
-    // stored in the XTI itself (it's the file's own name on disk).
+    // stored in the XTI itself.
     const instanceName = fileNameStem(fileName) || className || 'Instance'
 
     // 1) NC axis form (ClassName CNcAxisDef or presence of <Axis>)
     const axisEl = root.getElementsByTagName('Axis')[0]
     if (axisEl && axisEl.parentElement === root) {
-        objects.push(parseNcAxis(axisEl, aliasMap, instanceName))
+        const ncPort = resolvePortInSubtree(root) ?? DEFAULT_NC_PORT
+        objects.push(parseNcAxis(axisEl, aliasMap, instanceName, ncPort))
     }
 
-    // 2) TcCOM-instance form: a <TreeItem> wrapping a Module, or a
-    //    direct <Module> child, or parameter/data overrides at root.
+    // 2) TcCOM-instance form: a <TreeItem> wrapping a Module, etc.
     if (objects.length === 0) {
+        const rootPort = resolvePortInSubtree(root) ?? DEFAULT_SUGGESTED_PORT
         const treeItemTops = topLevelTreeItems(doc)
         for (const ti of treeItemTops) {
-            const obj = parseTreeItem(ti, aliasMap, '', instanceName)
+            const obj = parseTreeItem(ti, aliasMap, '', instanceName, rootPort)
             if (obj) objects.push(obj)
         }
     }
 
     if (objects.length === 0) {
-        // 3) Last-ditch: scan for any embedded <Module>, <Parameters>, or
-        //    <DataAreas> blocks anywhere in the document.
-        const fallback = parseFlatStructure(root, aliasMap, instanceName)
+        // 3) Last-ditch: scan for any embedded Module/Parameters/DataAreas.
+        const port = resolvePortInSubtree(root) ?? DEFAULT_SUGGESTED_PORT
+        const fallback = parseFlatStructure(root, aliasMap, instanceName, port)
         if (fallback) objects.push(fallback)
     }
 
@@ -92,7 +90,7 @@ export function parseXti(fileName: string, content: string): ParseResult {
     return { fileName, fileType: 'XTI', objects, warnings }
 }
 
-/** Strip the `.xti` (or any single trailing extension) from a filename. */
+/** Strip the `.xti` extension (or any single trailing extension) from a filename. */
 function fileNameStem(fileName: string): string {
     const base = fileName.split(/[/\\]/).pop() || fileName
     const dot = base.lastIndexOf('.')
@@ -112,15 +110,58 @@ function topLevelTreeItems(doc: Document): Element[] {
 }
 
 /**
+ * Read AmsPort attribute as a positive integer, or null if absent/invalid.
+ */
+function readAmsPort(el: Element): number | null {
+    const a = el.getAttribute('AmsPort')
+    if (!a) return null
+    const n = parseInt(a, 10)
+    return Number.isFinite(n) && n > 0 ? n : null
+}
+
+/**
+ * Walk an element subtree looking for an `AmsPort="..."` attribute.
+ * Order of preference: the element itself, its direct port-bearing children
+ * (<Project>, <Task>, <Box>, <Module>), then any descendant.
+ *
+ * Returns null when no AmsPort attribute is present anywhere.
+ */
+function resolvePortInSubtree(el: Element): number | null {
+    const own = readAmsPort(el)
+    if (own !== null) return own
+
+    const directCandidates = ['Project', 'Task', 'Box', 'Module']
+    for (const tag of directCandidates) {
+        const c = child(el, tag)
+        if (c) {
+            const p = readAmsPort(c)
+            if (p !== null) return p
+        }
+    }
+
+    // Any descendant
+    const all = el.getElementsByTagName('*')
+    for (let i = 0; i < all.length; i++) {
+        const p = readAmsPort(all[i])
+        if (p !== null) return p
+    }
+    return null
+}
+
+/**
  * Parse a TreeItem (one node in the TwinCAT solution explorer hierarchy).
  * Returns null if the TreeItem has nothing scopable (and no scopable
  * descendants).
+ *
+ * `parentPort` is the port inherited from the enclosing scope; this
+ * TreeItem's own AmsPort (if any) overrides it for itself and its children.
  */
 function parseTreeItem(
     treeEl: Element,
     aliasMap: Map<string, string>,
     parentPathPrefix: string,
     fallbackName: string,
+    parentPort: number,
 ): ParsedTcomObject | null {
     const treeName = txt(child(treeEl, 'Name')) || treeEl.getAttribute('Name') || fallbackName
     const moduleEl = locateEmbeddedModule(treeEl)
@@ -131,13 +172,19 @@ function parseTreeItem(
 
     const pathPrefix = parentPathPrefix ? `${parentPathPrefix}.${treeName}` : treeName
 
+    // This TreeItem's own port: own attribute > embedded Module/Project/Task
+    // attribute > inherited from parent.
+    const ownPort = readAmsPort(treeEl)
+        ?? (moduleEl ? resolvePortInSubtree(moduleEl) : null)
+        ?? parentPort
+
     if (moduleEl) {
-        groups.push(...parseEmbeddedParameters(moduleEl, aliasMap, objectId, treeName, pathPrefix))
-        groups.push(...parseEmbeddedDataAreas(moduleEl, aliasMap, objectId, treeName, pathPrefix))
+        groups.push(...parseEmbeddedParameters(moduleEl, aliasMap, objectId, treeName, pathPrefix, ownPort))
+        groups.push(...parseEmbeddedDataAreas(moduleEl, aliasMap, objectId, treeName, pathPrefix, ownPort))
     }
 
     for (const childTree of children(treeEl, 'TreeItem')) {
-        const c = parseTreeItem(childTree, aliasMap, pathPrefix, 'Child')
+        const c = parseTreeItem(childTree, aliasMap, pathPrefix, 'Child', ownPort)
         if (c) childObjects.push(c)
     }
 
@@ -171,11 +218,9 @@ function locateEmbeddedModule(treeEl: Element): Element | null {
     for (const w of wrappers) {
         const direct = child(treeEl, w)
         if (direct) {
-            // <Module> directly, or <Wrapper><Module>...</Module></Wrapper>
             if (w === 'Module') return direct
             const inner = child(direct, 'Module')
             if (inner) return inner
-            // Some wrappers (TcCOMObject) carry parameters/data inline.
             if (child(direct, 'Parameters') || child(direct, 'DataAreas')) return direct
         }
     }
@@ -189,6 +234,7 @@ function parseEmbeddedParameters(
     ownerObjectId: string,
     ownerObjectName: string,
     pathPrefix: string,
+    suggestedPort: number,
 ): ParsedSymbolGroup[] {
     const paramsEl = child(moduleEl, 'Parameters')
     if (!paramsEl) return []
@@ -217,6 +263,7 @@ function parseEmbeddedParameters(
                     name: subName, rawType, aliasMap, createSymbol, comment,
                     ownerObjectId, ownerObjectName, groupId, groupName, groupKind,
                     pathComponents: [pathPrefix, paramName, subName],
+                    suggestedPort,
                 }))
             }
         } else {
@@ -225,6 +272,7 @@ function parseEmbeddedParameters(
                 name: paramName, rawType, aliasMap, createSymbol, comment,
                 ownerObjectId, ownerObjectName, groupId, groupName, groupKind,
                 pathComponents: [pathPrefix, paramName],
+                suggestedPort,
             }))
         }
     }
@@ -240,6 +288,7 @@ function parseEmbeddedDataAreas(
     ownerObjectId: string,
     ownerObjectName: string,
     pathPrefix: string,
+    suggestedPort: number,
 ): ParsedSymbolGroup[] {
     const dataAreasEl = child(moduleEl, 'DataAreas')
     if (!dataAreasEl) return []
@@ -270,6 +319,7 @@ function parseEmbeddedDataAreas(
                         name: subName, rawType, aliasMap, createSymbol, comment,
                         ownerObjectId, ownerObjectName, groupId, groupName, groupKind,
                         pathComponents: [pathPrefix, name, subName],
+                        suggestedPort,
                     }))
                 }
             } else {
@@ -278,6 +328,7 @@ function parseEmbeddedDataAreas(
                     name, rawType, aliasMap, createSymbol, comment,
                     ownerObjectId, ownerObjectName, groupId, groupName, groupKind,
                     pathComponents: [pathPrefix, name],
+                    suggestedPort,
                 }))
             }
         }
@@ -296,25 +347,23 @@ function classifyAreaType(areaType: string): SymbolGroupKind {
 }
 
 /**
- * Parse a CNcAxisDef-style XTI (<Axis> at root with Encoder/Drive/Controller
- * sub-objects). Variables come from <Vars VarGrpType="1|2"> with <Var>
- * children. VarGrpType=1 -> Inputs, VarGrpType=2 -> Outputs.
+ * Parse a CNcAxisDef-style XTI (<Axis> at root with Encoder/Drive/Controller).
  */
 function parseNcAxis(
     axisEl: Element,
     aliasMap: Map<string, string>,
     instanceName: string,
+    suggestedPort: number,
 ): ParsedTcomObject {
     const objectId = nextId('obj')
     const groups: ParsedSymbolGroup[] = []
 
-    // Collect <Vars> at the Axis level and inside Encoder/Drive/Controller subgroups.
-    collectVarsInto(axisEl, aliasMap, objectId, instanceName, [instanceName], groups)
+    collectVarsInto(axisEl, aliasMap, objectId, instanceName, [instanceName], groups, suggestedPort)
     for (const subTag of ['Encoder', 'Drive', 'Controller']) {
         const sub = child(axisEl, subTag)
         if (!sub) continue
         const subName = sub.getAttribute('Name') || subTag
-        collectVarsInto(sub, aliasMap, objectId, instanceName, [instanceName, subName], groups)
+        collectVarsInto(sub, aliasMap, objectId, instanceName, [instanceName, subName], groups, suggestedPort)
     }
 
     return {
@@ -334,6 +383,7 @@ function collectVarsInto(
     ownerObjectName: string,
     pathComponents: string[],
     groups: ParsedSymbolGroup[],
+    suggestedPort: number,
 ): void {
     for (const varsEl of children(parent, 'Vars')) {
         const grpType = varsEl.getAttribute('VarGrpType') || ''
@@ -353,6 +403,7 @@ function collectVarsInto(
                 name, rawType, aliasMap, createSymbol,
                 ownerObjectId, ownerObjectName, groupId, groupName, groupKind,
                 pathComponents: [...pathComponents, name],
+                suggestedPort,
             }))
         }
 
@@ -372,24 +423,23 @@ function parseFlatStructure(
     root: Element,
     aliasMap: Map<string, string>,
     instanceName: string,
+    suggestedPort: number,
 ): ParsedTcomObject | null {
     const objectId = nextId('obj')
     const groups: ParsedSymbolGroup[] = []
 
-    // Find any <Parameters> / <DataAreas> blocks with content.
     const paramsBlocks = root.getElementsByTagName('Parameters')
     if (paramsBlocks.length > 0) {
-        // Treat the first block as if attached to a synthetic Module.
         const synthetic = paramsBlocks[0].parentElement
         if (synthetic) {
-            groups.push(...parseEmbeddedParameters(synthetic, aliasMap, objectId, instanceName, instanceName))
+            groups.push(...parseEmbeddedParameters(synthetic, aliasMap, objectId, instanceName, instanceName, suggestedPort))
         }
     }
     const dataBlocks = root.getElementsByTagName('DataAreas')
     if (dataBlocks.length > 0) {
         const synthetic = dataBlocks[0].parentElement
         if (synthetic) {
-            groups.push(...parseEmbeddedDataAreas(synthetic, aliasMap, objectId, instanceName, instanceName))
+            groups.push(...parseEmbeddedDataAreas(synthetic, aliasMap, objectId, instanceName, instanceName, suggestedPort))
         }
     }
 
@@ -405,5 +455,5 @@ function parseFlatStructure(
     }
 }
 
-// Re-export internal helper for tests.
-export { classifyAreaType as __classifyAreaType }
+// Re-export internal helpers for tests.
+export { classifyAreaType as __classifyAreaType, resolvePortInSubtree as __resolvePortInSubtree, DEFAULT_NC_PORT as __DEFAULT_NC_PORT }

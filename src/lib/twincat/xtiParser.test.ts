@@ -171,6 +171,146 @@ describe('parseXti — TcCOM instance (CTcCOMObject)', () => {
     })
 })
 
+describe('parseXti — AmsPort propagation', () => {
+    it('uses port 501 (NC SAF) for an NC axis XTI without explicit AmsPort', () => {
+        const r = parseXti('Axis 3.xti', XTI_NC_AXIS_SAMPLE)
+        const all = Array.from(iterAllSymbols(r.objects))
+        for (const s of all) expect(s.suggestedPort).toBe(501)
+    })
+
+    it('reads AmsPort from <TcSmItem AmsPort="..."> at root', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CNcAxisDef" AmsPort="501">
+  <Axis Id="1">
+    <Vars VarGrpType="1"><Name>Inputs</Name>
+      <Var><Name>x</Name><BaseType>UDINT</BaseType></Var>
+    </Vars>
+  </Axis>
+</TcSmItem>`
+        const r = parseXti('Custom.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        expect(all[0].suggestedPort).toBe(501)
+    })
+
+    it('reads AmsPort from <Project AmsPort="851"> in a PLC-style XTI', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CTcCOMObject">
+  <TreeItem>
+    <Name>PlcInstance</Name>
+    <Project AmsPort="851"/>
+    <Module>
+      <DataAreas>
+        <DataArea>
+          <AreaNo AreaType="InputDst">0</AreaNo>
+          <Name>Inputs</Name>
+          <Symbol><Name>v</Name><BaseType>UDINT</BaseType></Symbol>
+        </DataArea>
+      </DataAreas>
+    </Module>
+  </TreeItem>
+</TcSmItem>`
+        const r = parseXti('Plc.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        expect(all[0].suggestedPort).toBe(851)
+    })
+
+    it('reads AmsPort from <Task AmsPort="350"> for TcCOM module', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CTcCOMObject">
+  <TreeItem>
+    <Name>MyTcComInstance</Name>
+    <Task AmsPort="350"/>
+    <Module>
+      <Parameters>
+        <Parameter><Name>kp</Name><BaseType>LREAL</BaseType></Parameter>
+      </Parameters>
+    </Module>
+  </TreeItem>
+</TcSmItem>`
+        const r = parseXti('M.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        expect(all[0].suggestedPort).toBe(350)
+    })
+
+    it('child TreeItem inherits parent port when it has none of its own', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CTcCOMObject">
+  <TreeItem>
+    <Name>Parent</Name>
+    <Task AmsPort="352"/>
+    <Module>
+      <DataAreas>
+        <DataArea>
+          <AreaNo AreaType="InputDst">0</AreaNo>
+          <Name>Inputs</Name>
+          <Symbol><Name>p</Name><BaseType>UDINT</BaseType></Symbol>
+        </DataArea>
+      </DataAreas>
+    </Module>
+    <TreeItem>
+      <Name>Child</Name>
+      <Module>
+        <DataAreas>
+          <DataArea>
+            <AreaNo AreaType="InputDst">0</AreaNo>
+            <Name>Inputs</Name>
+            <Symbol><Name>c</Name><BaseType>UDINT</BaseType></Symbol>
+          </DataArea>
+        </DataAreas>
+      </Module>
+    </TreeItem>
+  </TreeItem>
+</TcSmItem>`
+        const r = parseXti('X.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        const parent = all.find(s => s.name === 'p')!
+        const childSym = all.find(s => s.name === 'c')!
+        expect(parent.suggestedPort).toBe(352)
+        expect(childSym.suggestedPort).toBe(352)
+    })
+
+    it('child TreeItem AmsPort overrides the inherited one', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CTcCOMObject">
+  <TreeItem>
+    <Name>Parent</Name>
+    <Task AmsPort="350"/>
+    <TreeItem AmsPort="355">
+      <Name>Child</Name>
+      <Module>
+        <DataAreas>
+          <DataArea>
+            <AreaNo AreaType="InputDst">0</AreaNo>
+            <Name>Inputs</Name>
+            <Symbol><Name>c</Name><BaseType>UDINT</BaseType></Symbol>
+          </DataArea>
+        </DataAreas>
+      </Module>
+    </TreeItem>
+  </TreeItem>
+</TcSmItem>`
+        const r = parseXti('X.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        const childSym = all.find(s => s.name === 'c')!
+        expect(childSym.suggestedPort).toBe(355)
+    })
+
+    it('falls back to 851 when the XTI has no AmsPort and no NC <Axis>', () => {
+        const xml = `<?xml version="1.0"?>
+<TcSmItem ClassName="CTcCOMObject">
+  <TreeItem>
+    <Name>Foo</Name>
+    <Module>
+      <Parameters><Parameter><Name>x</Name><BaseType>UDINT</BaseType></Parameter></Parameters>
+    </Module>
+  </TreeItem>
+</TcSmItem>`
+        const r = parseXti('X.xti', xml)
+        const all = Array.from(iterAllSymbols(r.objects))
+        expect(all[0].suggestedPort).toBe(851)
+    })
+})
+
 describe('parseTwinCatFile dispatcher', () => {
     it('routes .tmc files to the TMC parser', () => {
         const r = parseTwinCatFile('x.tmc', '<?xml version="1.0"?><TcModuleClass/>')
