@@ -195,17 +195,27 @@
     letter-spacing: 0.03em;
 }
 
-.group-kind.kind-parameterinit {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.group-kind.kind-parameteronline {
+.group-kind.kind-parameter {
     background: #ddd6fe;
     color: #5b21b6;
 }
 
 .group-kind.kind-dataarea {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.group-kind.kind-inputarea {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.group-kind.kind-outputarea {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.group-kind.kind-instancevar {
     background: #d1fae5;
     color: #065f46;
 }
