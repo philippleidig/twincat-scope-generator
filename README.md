@@ -1,5 +1,7 @@
 # TwinCAT Scope Generator
 
+> **Disclaimer**: This is an independent, personal open-source tool. It is **not a Beckhoff product** and is **not affiliated with, sponsored by, or endorsed by Beckhoff Automation GmbH & Co. KG**. "TwinCAT", "TwinCAT Scope", and related names are trademarks of their respective owners and are used here only to describe the file formats this tool generates and consumes. Use at your own risk.
+
 A web-based tool for generating TwinCAT Scope configuration files (`.tcscopex`) using pattern-based symbol expressions. This tool simplifies the process of creating scope configurations for repetitive structures like axis arrays or multi-mover systems — and now also lets you pull symbols straight out of TwinCAT XTI/TMC files or directly drag them in from the TwinCAT Target Browser.
 
 ## Features

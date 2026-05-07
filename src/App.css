@@ -178,7 +178,7 @@ body {
 }
 
 .app-footer {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     text-align: center;
     color: var(--gray-500);
     font-size: 0.8rem;
@@ -186,11 +186,28 @@ body {
     background: white;
 }
 
+.app-footer p {
+    margin: 0.15rem 0;
+}
+
 .app-footer code {
     background: var(--gray-100);
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.75rem;
+}
+
+.app-disclaimer {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    max-width: 900px;
+    margin: 0.4rem auto 0 !important;
+    line-height: 1.4;
+}
+
+.app-disclaimer strong {
+    color: var(--gray-600);
+    font-weight: 600;
 }
 
 /* Responsive */

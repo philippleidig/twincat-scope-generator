@@ -4,7 +4,7 @@ import { ExamplePatterns } from '@/components/ExamplePatterns'
 import { DownloadButton } from '@/components/DownloadButton'
 import { SettingsIcon, GithubIcon, FeedbackIcon } from '@/components/ui'
 
-const APP_VERSION = 'V1.6'
+const APP_VERSION = 'V1.7'
 
 const ISSUES_URL = 'https://github.com/philippleidig/twincat-scope-generator/issues/new/choose'
 import './App.css'
@@ -68,6 +68,10 @@ function App() {
                 <p>
                     TwinCAT Scope Configuration Generator •
                     Uses <code>.tcscopex</code> and <code>.tcmproj</code> formats
+                </p>
+                <p className="app-disclaimer">
+                    This is an independent, personal open-source tool — <strong>not a Beckhoff product</strong> and not affiliated with or endorsed by Beckhoff Automation GmbH &amp; Co. KG.
+                    "TwinCAT" and related names are trademarks of their respective owners.
                 </p>
             </footer>
         </div>

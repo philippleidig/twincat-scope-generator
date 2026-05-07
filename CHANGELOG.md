@@ -1,5 +1,11 @@
 # Changelog
 
+## V1.7 (2026-05-07)
+
+### Documentation
+
+- **Disclaimer**: README and the in-app footer now state clearly that this is an independent, personal open-source tool and **not a Beckhoff product** — not affiliated with, sponsored by, or endorsed by Beckhoff Automation GmbH & Co. KG. Trademark notice for "TwinCAT" added.
+
 ## V1.6 (2026-05-07)
 
 ### Improvements
