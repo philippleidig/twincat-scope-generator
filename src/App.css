@@ -39,6 +39,25 @@
     /* Yellow */
     --yellow-500: #eab308;
     --yellow-600: #ca8a04;
+
+    /* Hierarchy levels — each tier of the Scope File > Axis Group > Pattern
+       tree gets its own hue so nesting is readable at a glance.
+       `-accent` is the saturated rail/icon colour, `-ink` is text on light,
+       `-soft` the header tint and `-line` the containment rail. */
+    --level-file-accent: #e50000;
+    --level-file-ink: #a30000;
+    --level-file-soft: #fef2f2;
+    --level-file-line: #fbcfcf;
+
+    --level-group-accent: #0d9488;
+    --level-group-ink: #0f766e;
+    --level-group-soft: #f0fdfa;
+    --level-group-line: #a7ded6;
+
+    --level-pattern-accent: #4f46e5;
+    --level-pattern-ink: #4338ca;
+    --level-pattern-soft: #eef2ff;
+    --level-pattern-line: #c7cdf7;
 }
 
 /* Reset & Base */

@@ -1,5 +1,16 @@
 import { useState, useCallback } from 'react'
-import { Card, Input, Button, Select, TrashIcon, CopyIcon, FileIcon } from '@/components/ui'
+import {
+    Input,
+    Button,
+    Select,
+    TrashIcon,
+    CopyIcon,
+    FileIcon,
+    AxisGroupIcon,
+    PatternIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
+} from '@/components/ui'
 import { useConfigStore } from '@/stores/configStore'
 import type { ScopeFile, AxisGroup, Pattern, DataType } from '@/types'
 import { validateTemplate, calculateExpansionCount } from '@/lib/patterns'
@@ -98,6 +109,79 @@ const PORT_PRESETS = [
     { value: 'custom', label: 'Custom...' },
 ]
 
+type Level = 'file' | 'group' | 'pattern'
+
+interface CollapseToggleProps {
+    expanded: boolean
+    onToggle: () => void
+    label: string
+}
+
+/** Chevron that expands/collapses one node of the Scope File tree. */
+function CollapseToggle({ expanded, onToggle, label }: CollapseToggleProps) {
+    return (
+        <button
+            type="button"
+            className="level-toggle"
+            onClick={onToggle}
+            aria-expanded={expanded}
+            title={`${expanded ? 'Collapse' : 'Expand'} ${label}`}
+            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label}`}
+        >
+            {expanded ? <ChevronDownIcon size={16} /> : <ChevronRightIcon size={16} />}
+        </button>
+    )
+}
+
+interface LevelHeaderProps {
+    level: Level
+    icon: React.ReactNode
+    /**
+     * Small uppercase kicker naming the tier, e.g. "Scope File". Omitted where
+     * the node's own title already names the tier (patterns), which keeps the
+     * most-repeated header on a single line.
+     */
+    kicker?: string
+    expanded: boolean
+    onToggle: () => void
+    toggleLabel: string
+    children: React.ReactNode
+    badge?: React.ReactNode
+    actions?: React.ReactNode
+}
+
+/**
+ * Shared header bar for every tier of the tree. Each tier gets its own hue,
+ * icon and kicker so Scope File / Axis Group / Pattern are distinguishable
+ * without relying on nesting depth alone.
+ */
+function LevelHeader({
+    level,
+    icon,
+    kicker,
+    expanded,
+    onToggle,
+    toggleLabel,
+    children,
+    badge,
+    actions,
+}: LevelHeaderProps) {
+    return (
+        <div className={`level-header level-header--${level}`}>
+            <CollapseToggle expanded={expanded} onToggle={onToggle} label={toggleLabel} />
+            <span className={`level-icon level-icon--${level}`} aria-hidden="true">
+                {icon}
+            </span>
+            <div className="level-titles">
+                {kicker && <span className={`level-kicker level-kicker--${level}`}>{kicker}</span>}
+                <div className="level-name-row">{children}</div>
+            </div>
+            {badge}
+            {actions && <div className="level-actions">{actions}</div>}
+        </div>
+    )
+}
+
 interface PatternEditorProps {
     fileId: string
     axisGroupId: string
@@ -110,6 +194,7 @@ function PatternEditor({ fileId, axisGroupId, pattern, patternIndex, canRemove }
     const { addSymbol, updateSymbol, removeSymbol, removePattern, updatePatternPort, duplicatePattern } = useConfigStore()
     const [showCustomPort, setShowCustomPort] = useState(false)
     const [customPortValue, setCustomPortValue] = useState('')
+    const [expanded, setExpanded] = useState(true)
 
     const totalExpansions = pattern.symbols.reduce((sum, symbol) => {
         if (!symbol.template.trim()) return sum
@@ -137,10 +222,47 @@ function PatternEditor({ fileId, axisGroupId, pattern, patternIndex, canRemove }
         }
     }
 
+    const patternLabel = `Pattern ${patternIndex + 1}`
+
     return (
-        <div className="pattern-editor">
-            <div className="pattern-header-row">
-                <span className="pattern-number">Pattern {patternIndex + 1}</span>
+        <section className={`level-node pattern-editor${expanded ? '' : ' is-collapsed'}`}>
+            <LevelHeader
+                level="pattern"
+                icon={<PatternIcon size={15} />}
+                expanded={expanded}
+                onToggle={() => setExpanded((v) => !v)}
+                toggleLabel={patternLabel}
+                badge={
+                    totalExpansions > 0 ? (
+                        <span className="level-count level-count--pattern">Total: {totalExpansions}</span>
+                    ) : undefined
+                }
+                actions={
+                    <>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => duplicatePattern(fileId, axisGroupId, pattern.id)}
+                            title="Duplicate Pattern"
+                            className="btn-icon"
+                        >
+                            <CopyIcon size={14} />
+                        </Button>
+                        {canRemove && (
+                            <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => removePattern(fileId, axisGroupId, pattern.id)}
+                                title="Remove Pattern"
+                                className="btn-icon"
+                            >
+                                <TrashIcon size={14} />
+                            </Button>
+                        )}
+                    </>
+                }
+            >
+                <span className="pattern-number">{patternLabel}</span>
                 <div className="port-selector">
                     {showCustomPort ? (
                         <div className="custom-port-input">
@@ -159,90 +281,71 @@ function PatternEditor({ fileId, axisGroupId, pattern, patternIndex, canRemove }
                             value={isPresetPort ? currentPortValue : 'custom'}
                             onChange={(e) => handlePortChange(e.target.value)}
                             options={PORT_PRESETS}
+                            aria-label="ADS port"
                         />
                     )}
                     {!showCustomPort && !isPresetPort && (
                         <span className="custom-port-display">Port: {currentPortValue}</span>
                     )}
                 </div>
-                <div className="pattern-actions-top">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => duplicatePattern(fileId, axisGroupId, pattern.id)}
-                        title="Duplicate Pattern"
-                        className="btn-icon"
-                    >
-                        <CopyIcon size={14} />
-                    </Button>
-                    {canRemove && (
-                        <Button
-                            size="sm"
-                            variant="danger"
-                            onClick={() => removePattern(fileId, axisGroupId, pattern.id)}
-                            title="Remove Pattern"
-                            className="btn-icon"
-                        >
-                            <TrashIcon size={14} />
-                        </Button>
-                    )}
-                </div>
-            </div>
+            </LevelHeader>
 
-            <div className="symbols-list">
-                {pattern.symbols.map((symbol, symbolIndex) => {
-                    const validation = symbol.template ? validateTemplate(symbol.template) : { valid: true, errors: [] }
-                    const expansionCount = symbol.template ? calculateExpansionCount(symbol.template) : 0
+            {expanded && (
+                <div className="level-body pattern-body">
+                    <div className="symbols-list">
+                        {pattern.symbols.map((symbol, symbolIndex) => {
+                            const validation = symbol.template ? validateTemplate(symbol.template) : { valid: true, errors: [] }
+                            const expansionCount = symbol.template ? calculateExpansionCount(symbol.template) : 0
 
-                    return (
-                        <div key={symbol.id} className="symbol-row">
-                            <div className="symbol-index">{symbolIndex + 1}</div>
-                            <div className="symbol-content">
-                                <div className="symbol-input-row">
-                                    <Input
-                                        value={symbol.template}
-                                        onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { template: e.target.value })}
-                                        placeholder="e.g., MAIN.mover[{i:1:5}].position"
-                                        error={symbol.template && !validation.valid ? validation.errors[0] : undefined}
-                                        className="symbol-input"
-                                    />
-                                    <Select
-                                        value={symbol.dataType}
-                                        onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { dataType: e.target.value as DataType })}
-                                        options={DATA_TYPE_OPTIONS}
-                                    />
-                                    {pattern.symbols.length > 1 && (
-                                        <Button
-                                            size="sm"
-                                            variant="danger"
-                                            onClick={() => removeSymbol(fileId, axisGroupId, pattern.id, symbol.id)}
-                                            title="Remove Symbol"
-                                            className="btn-icon"
-                                        >
-                                            <TrashIcon size={14} />
-                                        </Button>
-                                    )}
-                                </div>
-                                {symbol.template && validation.valid && expansionCount > 0 && (
-                                    <div className="expansion-count">
-                                        → {expansionCount} acquisition{expansionCount !== 1 ? 's' : ''}
+                            return (
+                                <div key={symbol.id} className="symbol-row">
+                                    <div className="symbol-index">{symbolIndex + 1}</div>
+                                    <div className="symbol-content">
+                                        <div className="symbol-input-row">
+                                            <Input
+                                                value={symbol.template}
+                                                onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { template: e.target.value })}
+                                                placeholder="e.g., MAIN.mover[{i:1:5}].position"
+                                                error={symbol.template && !validation.valid ? validation.errors[0] : undefined}
+                                                className="symbol-input"
+                                            />
+                                            <Select
+                                                value={symbol.dataType}
+                                                onChange={(e) => updateSymbol(fileId, axisGroupId, pattern.id, symbol.id, { dataType: e.target.value as DataType })}
+                                                options={DATA_TYPE_OPTIONS}
+                                                aria-label="Data type"
+                                            />
+                                            {pattern.symbols.length > 1 && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="danger"
+                                                    onClick={() => removeSymbol(fileId, axisGroupId, pattern.id, symbol.id)}
+                                                    title="Remove Symbol"
+                                                    className="btn-icon"
+                                                >
+                                                    <TrashIcon size={14} />
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {symbol.template && validation.valid && expansionCount > 0 && (
+                                            <div className="expansion-count">
+                                                → {expansionCount} acquisition{expansionCount !== 1 ? 's' : ''}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    )
-                })}
-            </div>
+                                </div>
+                            )
+                        })}
+                    </div>
 
-            <div className="pattern-actions">
-                <Button size="sm" variant="secondary" onClick={() => addSymbol(fileId, axisGroupId, pattern.id)}>
-                    + Add Symbol
-                </Button>
-                {totalExpansions > 0 && (
-                    <span className="pattern-total">Total: {totalExpansions}</span>
-                )}
-            </div>
-        </div>
+                    <div className="pattern-actions">
+                        <Button size="sm" variant="secondary" onClick={() => addSymbol(fileId, axisGroupId, pattern.id)}>
+                            + Add Symbol
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </section>
     )
 }
 
@@ -255,6 +358,7 @@ interface AxisGroupEditorProps {
 function AxisGroupEditor({ fileId, axisGroup, canRemove }: AxisGroupEditorProps) {
     const { updateAxisGroup, removeAxisGroup, duplicateAxisGroup, addPattern, addPatternWithSymbol } = useConfigStore()
     const [isDragOver, setIsDragOver] = useState(false)
+    const [expanded, setExpanded] = useState(true)
 
     const totalAcquisitions = axisGroup.patterns.reduce((sum, pattern) => {
         return sum + pattern.symbols.reduce((symSum, symbol) => {
@@ -289,64 +393,98 @@ function AxisGroupEditor({ fileId, axisGroup, canRemove }: AxisGroupEditorProps)
         addPatternWithSymbol(fileId, axisGroup.id, parsed.symbolName, parsed.dataType, parsed.targetPort)
     }, [fileId, axisGroup.id, addPatternWithSymbol])
 
+    const patternCount = axisGroup.patterns.length
+
     return (
-        <div
-            className={`axis-group-editor${isDragOver ? ' drag-over' : ''}`}
+        <section
+            className={`level-node axis-group-editor${isDragOver ? ' drag-over' : ''}${expanded ? '' : ' is-collapsed'}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <div className="axis-group-header">
+            <LevelHeader
+                level="group"
+                icon={<AxisGroupIcon size={16} />}
+                kicker="Axis Group"
+                expanded={expanded}
+                onToggle={() => setExpanded((v) => !v)}
+                toggleLabel={axisGroup.name || 'axis group'}
+                badge={
+                    <span className="level-meta">
+                        <span className="level-chip">
+                            {patternCount} pattern{patternCount !== 1 ? 's' : ''}
+                        </span>
+                        {totalAcquisitions > 0 && (
+                            <span className="level-count level-count--group">{totalAcquisitions} acq.</span>
+                        )}
+                    </span>
+                }
+                actions={
+                    <>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => duplicateAxisGroup(fileId, axisGroup.id)}
+                            title="Duplicate Axis Group"
+                            className="btn-icon"
+                        >
+                            <CopyIcon size={14} />
+                        </Button>
+                        {canRemove && (
+                            <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => removeAxisGroup(fileId, axisGroup.id)}
+                                title="Remove Axis Group"
+                                className="btn-icon"
+                            >
+                                <TrashIcon size={14} />
+                            </Button>
+                        )}
+                    </>
+                }
+            >
                 <Input
                     value={axisGroup.name}
                     onChange={(e) => updateAxisGroup(fileId, axisGroup.id, { name: e.target.value })}
                     placeholder="Axis Group Name"
                     className="axis-group-name-input"
+                    aria-label="Axis group name"
                 />
-                {totalAcquisitions > 0 && (
-                    <span className="axis-group-total">{totalAcquisitions} acq.</span>
-                )}
-                <div className="axis-group-actions">
+            </LevelHeader>
+
+            {expanded && (
+                <div className="level-body axis-group-body">
+                    <div className="level-children level-children--pattern">
+                        {axisGroup.patterns.map((pattern, index) => (
+                            <PatternEditor
+                                key={pattern.id}
+                                fileId={fileId}
+                                axisGroupId={axisGroup.id}
+                                pattern={pattern}
+                                patternIndex={index}
+                                canRemove={axisGroup.patterns.length > 1}
+                            />
+                        ))}
+                    </div>
+
                     <Button
                         size="sm"
-                        variant="ghost"
-                        onClick={() => duplicateAxisGroup(fileId, axisGroup.id)}
-                        title="Duplicate Axis Group"
-                        className="btn-icon"
+                        variant="secondary"
+                        onClick={() => addPattern(fileId, axisGroup.id)}
+                        className="add-pattern-btn level-add-btn"
                     >
-                        <CopyIcon size={14} />
+                        + Add Pattern
                     </Button>
-                    {canRemove && (
-                        <Button
-                            size="sm"
-                            variant="danger"
-                            onClick={() => removeAxisGroup(fileId, axisGroup.id)}
-                            title="Remove Axis Group"
-                            className="btn-icon"
-                        >
-                            <TrashIcon size={14} />
-                        </Button>
-                    )}
                 </div>
-            </div>
+            )}
 
-            <div className="patterns-container">
-                {axisGroup.patterns.map((pattern, index) => (
-                    <PatternEditor
-                        key={pattern.id}
-                        fileId={fileId}
-                        axisGroupId={axisGroup.id}
-                        pattern={pattern}
-                        patternIndex={index}
-                        canRemove={axisGroup.patterns.length > 1}
-                    />
-                ))}
-            </div>
-
-            <Button size="sm" variant="secondary" onClick={() => addPattern(fileId, axisGroup.id)} className="add-pattern-btn">
-                + Add Pattern
-            </Button>
-        </div>
+            {isDragOver && (
+                <div className="drop-hint" aria-hidden="true">
+                    Drop symbol into “{axisGroup.name || 'this axis group'}”
+                </div>
+            )}
+        </section>
     )
 }
 
@@ -358,6 +496,7 @@ interface ScopeFileCardProps {
 
 function ScopeFileCard({ scopeFile, canRemove, onDuplicate }: ScopeFileCardProps) {
     const { updateScopeFile, removeScopeFile, addAxisGroup } = useConfigStore()
+    const [expanded, setExpanded] = useState(true)
 
     const totalAcquisitions = scopeFile.axisGroups.reduce((sum, ag) => {
         return sum + ag.patterns.reduce((patSum, pattern) => {
@@ -368,64 +507,87 @@ function ScopeFileCard({ scopeFile, canRemove, onDuplicate }: ScopeFileCardProps
         }, 0)
     }, 0)
 
+    const groupCount = scopeFile.axisGroups.length
+
     return (
-        <Card
-            className="scope-file-card"
-            actions={
-                <div className="file-actions">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={onDuplicate}
-                        title="Duplicate File"
-                        className="btn-icon"
-                    >
-                        <CopyIcon size={14} />
-                    </Button>
-                    {canRemove && (
+        <section className={`level-node scope-file-card${expanded ? '' : ' is-collapsed'}`}>
+            <LevelHeader
+                level="file"
+                icon={<FileIcon size={18} />}
+                kicker="Scope File"
+                expanded={expanded}
+                onToggle={() => setExpanded((v) => !v)}
+                toggleLabel={scopeFile.name || 'scope file'}
+                badge={
+                    <span className="level-meta">
+                        <span className="level-chip">
+                            {groupCount} axis group{groupCount !== 1 ? 's' : ''}
+                        </span>
+                        {totalAcquisitions > 0 && (
+                            <span className="level-count level-count--file">{totalAcquisitions} acquisitions</span>
+                        )}
+                    </span>
+                }
+                actions={
+                    <>
                         <Button
                             size="sm"
-                            variant="danger"
-                            onClick={() => removeScopeFile(scopeFile.id)}
-                            title="Remove File"
+                            variant="ghost"
+                            onClick={onDuplicate}
+                            title="Duplicate File"
                             className="btn-icon"
                         >
-                            <TrashIcon size={14} />
+                            <CopyIcon size={14} />
                         </Button>
-                    )}
-                </div>
-            }
-        >
-            <div className="file-header">
+                        {canRemove && (
+                            <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => removeScopeFile(scopeFile.id)}
+                                title="Remove File"
+                                className="btn-icon"
+                            >
+                                <TrashIcon size={14} />
+                            </Button>
+                        )}
+                    </>
+                }
+            >
                 <div className="file-name-input">
-                    <FileIcon size={20} className="file-icon" />
                     <Input
                         value={scopeFile.name}
                         onChange={(e) => updateScopeFile(scopeFile.id, { name: e.target.value })}
                         placeholder="File name"
+                        aria-label="Scope file name"
                     />
                     <span className="file-ext">.tcscopex</span>
                 </div>
-                {totalAcquisitions > 0 && (
-                    <div className="file-total">{totalAcquisitions} acquisitions</div>
-                )}
-            </div>
+            </LevelHeader>
 
-            <div className="axis-groups-container">
-                {scopeFile.axisGroups.map((axisGroup) => (
-                    <AxisGroupEditor
-                        key={axisGroup.id}
-                        fileId={scopeFile.id}
-                        axisGroup={axisGroup}
-                        canRemove={scopeFile.axisGroups.length > 1}
-                    />
-                ))}
-            </div>
+            {expanded && (
+                <div className="level-body scope-file-body">
+                    <div className="level-children level-children--group">
+                        {scopeFile.axisGroups.map((axisGroup) => (
+                            <AxisGroupEditor
+                                key={axisGroup.id}
+                                fileId={scopeFile.id}
+                                axisGroup={axisGroup}
+                                canRemove={scopeFile.axisGroups.length > 1}
+                            />
+                        ))}
+                    </div>
 
-            <Button size="sm" variant="secondary" onClick={() => addAxisGroup(scopeFile.id)} className="add-axis-group-btn">
-                + Add Axis Group
-            </Button>
-        </Card>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => addAxisGroup(scopeFile.id)}
+                        className="add-axis-group-btn level-add-btn"
+                    >
+                        + Add Axis Group
+                    </Button>
+                </div>
+            )}
+        </section>
     )
 }
 
@@ -437,7 +599,22 @@ export function ScopeFileManager() {
     return (
         <div className="scope-file-manager">
             <div className="manager-header">
-                <h2>Scope Files</h2>
+                <div className="manager-heading">
+                    <h2>Scope Files</h2>
+                    <ul className="hierarchy-legend" aria-label="Structure">
+                        <li className="legend-item legend-item--file">
+                            <FileIcon size={13} aria-hidden="true" /> Scope File
+                        </li>
+                        <li className="legend-sep" aria-hidden="true">›</li>
+                        <li className="legend-item legend-item--group">
+                            <AxisGroupIcon size={13} aria-hidden="true" /> Axis Group
+                        </li>
+                        <li className="legend-sep" aria-hidden="true">›</li>
+                        <li className="legend-item legend-item--pattern">
+                            <PatternIcon size={13} aria-hidden="true" /> Pattern
+                        </li>
+                    </ul>
+                </div>
                 <div className="manager-header-actions">
                     <ImportFileButton
                         onLoaded={(r) => { setImportError(null); setImportResult(r) }}
