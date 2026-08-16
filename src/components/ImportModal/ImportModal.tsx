@@ -177,62 +177,45 @@ function ObjectTreeNode({ object, selectedIds, onToggle, onToggleMany, visibleBy
     )
 }
 
+/**
+ * Gate component: the dialog body is only mounted while the modal is open, so
+ * filters, selection and target pickers reset naturally on every open instead of
+ * being cleared by effects.
+ */
 export function ImportModal({ isOpen, parseResult, onClose }: ImportModalProps) {
+    if (!isOpen || !parseResult) return null
+    return <ImportModalDialog parseResult={parseResult} onClose={onClose} />
+}
+
+interface ImportModalDialogProps {
+    parseResult: ParseResult
+    onClose: () => void
+}
+
+function ImportModalDialog({ parseResult, onClose }: ImportModalDialogProps) {
     const { scopeFiles, addSymbolsToAxisGroup } = useConfigStore()
     const [viewMode, setViewMode] = useState<ViewMode>('tree')
     const [textFilter, setTextFilter] = useState('')
     const [createFilter, setCreateFilter] = useState<CreateSymbolFilter>('true')
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-    const [targetFileId, setTargetFileId] = useState<string>('')
-    const [targetAxisGroupId, setTargetAxisGroupId] = useState<string>('')
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+    const [pickedFileId, setPickedFileId] = useState<string>(() => scopeFiles[0]?.id ?? '')
+    const [pickedAxisGroupId, setPickedAxisGroupId] = useState<string>('')
     const [statusMessage, setStatusMessage] = useState<string | null>(null)
     const dialogRef = useRef<HTMLDivElement | null>(null)
 
-    // Reset filters / selection when the modal opens or a new file is parsed.
-    // Excludes scopeFiles so a successful bulk-add doesn't wipe state mid-flight.
-    useEffect(() => {
-        if (!isOpen) return
-        setSelectedIds(new Set())
-        setTextFilter('')
-        setCreateFilter('true')
-        setStatusMessage(null)
-    }, [isOpen, parseResult])
-
-    // Initialize target file/axis group on open. We read scopeFiles here but
-    // intentionally don't depend on it so the user's choice is preserved.
-    useEffect(() => {
-        if (!isOpen) return
-        const files = useConfigStore.getState().scopeFiles
-        if (files.length === 0) return
-        setTargetFileId(prev => files.some(f => f.id === prev) ? prev : files[0].id)
-        const file = files[0]
-        if (file.axisGroups.length > 0) setTargetAxisGroupId(file.axisGroups[0].id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen])
-
-    // When target file changes, reset axis group to its first.
-    useEffect(() => {
-        const file = scopeFiles.find(f => f.id === targetFileId)
-        if (!file) return
-        if (!file.axisGroups.some(ag => ag.id === targetAxisGroupId)) {
-            setTargetAxisGroupId(file.axisGroups[0]?.id ?? '')
-        }
-    }, [targetFileId, scopeFiles, targetAxisGroupId])
-
     // Close on Escape.
     useEffect(() => {
-        if (!isOpen) return
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose()
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
-    }, [isOpen, onClose])
+    }, [onClose])
 
-    const allSymbols = useMemo<ParsedSymbol[]>(() => {
-        if (!parseResult) return []
-        return Array.from(iterAllSymbols(parseResult.objects))
-    }, [parseResult])
+    const allSymbols = useMemo<ParsedSymbol[]>(
+        () => Array.from(iterAllSymbols(parseResult.objects)),
+        [parseResult],
+    )
 
     const filteredSymbols = useMemo(() => {
         const needle = textFilter.trim().toLowerCase()
@@ -268,6 +251,21 @@ export function ImportModal({ isOpen, parseResult, onClose }: ImportModalProps) 
 
     const totalSelectableCount = visibleSelectableIds.length
 
+    // Target file / axis group are derived rather than stored, so a picked id that
+    // disappears (file or group removed elsewhere) silently falls back to the first
+    // available entry instead of needing an effect to repair it.
+    const targetFile = scopeFiles.find(f => f.id === pickedFileId) ?? scopeFiles[0]
+    const targetFileId = targetFile?.id ?? ''
+    const axisGroups = targetFile?.axisGroups ?? []
+    const targetAxisGroup = axisGroups.find(ag => ag.id === pickedAxisGroupId) ?? axisGroups[0]
+    const targetAxisGroupId = targetAxisGroup?.id ?? ''
+
+    const fileOptions = scopeFiles.map(f => ({ value: f.id, label: f.name || '(unnamed)' }))
+    const axisGroupOptions = axisGroups.map(ag => ({
+        value: ag.id,
+        label: ag.name || '(unnamed)',
+    }))
+
     function toggleOne(id: string) {
         setSelectedIds(prev => {
             const next = new Set(prev)
@@ -296,7 +294,6 @@ export function ImportModal({ isOpen, parseResult, onClose }: ImportModalProps) 
     }
 
     function handleAddToScope() {
-        if (!parseResult) return
         if (!targetFileId || !targetAxisGroupId) {
             setStatusMessage('Please select a target Scope File and Axis Group.')
             return
@@ -319,15 +316,6 @@ export function ImportModal({ isOpen, parseResult, onClose }: ImportModalProps) 
         // Auto-close after a short delay so the user sees feedback.
         setTimeout(() => onClose(), 600)
     }
-
-    if (!isOpen || !parseResult) return null
-
-    const targetFile = scopeFiles.find(f => f.id === targetFileId)
-    const fileOptions = scopeFiles.map(f => ({ value: f.id, label: f.name || '(unnamed)' }))
-    const axisGroupOptions = (targetFile?.axisGroups ?? []).map(ag => ({
-        value: ag.id,
-        label: ag.name || '(unnamed)',
-    }))
 
     const totalParsed = allSymbols.length
     const visibleCount = filteredSymbols.length
@@ -465,14 +453,17 @@ export function ImportModal({ isOpen, parseResult, onClose }: ImportModalProps) 
                         <label className="footer-label">Add to:</label>
                         <Select
                             value={targetFileId}
-                            onChange={e => setTargetFileId(e.target.value)}
+                            onChange={e => {
+                                setPickedFileId(e.target.value)
+                                setPickedAxisGroupId('')
+                            }}
                             options={fileOptions}
                             disabled={fileOptions.length === 0}
                         />
                         <span className="footer-arrow">›</span>
                         <Select
                             value={targetAxisGroupId}
-                            onChange={e => setTargetAxisGroupId(e.target.value)}
+                            onChange={e => setPickedAxisGroupId(e.target.value)}
                             options={axisGroupOptions}
                             disabled={axisGroupOptions.length === 0}
                         />
