@@ -274,6 +274,71 @@ describe('ScopeFileManager Component', () => {
         })
     })
 
+    describe('hierarchy display', () => {
+        it('should label each level of the tree', () => {
+            const { container } = render(<ScopeFileManager />)
+
+            expect(container.querySelector('.level-kicker--file')).toHaveTextContent('Scope File')
+            expect(container.querySelector('.level-kicker--group')).toHaveTextContent('Axis Group')
+            expect(screen.getByText('Pattern 1')).toBeInTheDocument()
+        })
+
+        it('should show child counts per level', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            expect(screen.getByText('1 axis group')).toBeInTheDocument()
+            expect(screen.getByText('1 pattern')).toBeInTheDocument()
+
+            await user.click(screen.getByRole('button', { name: /add pattern/i }))
+
+            expect(screen.getByText('2 patterns')).toBeInTheDocument()
+        })
+    })
+
+    describe('collapsing', () => {
+        it('should collapse and expand an axis group', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            expect(screen.getByText('Pattern 1')).toBeInTheDocument()
+
+            await user.click(screen.getByRole('button', { name: 'Collapse Axis Group 1' }))
+            expect(screen.queryByText('Pattern 1')).not.toBeInTheDocument()
+
+            await user.click(screen.getByRole('button', { name: 'Expand Axis Group 1' }))
+            expect(screen.getByText('Pattern 1')).toBeInTheDocument()
+        })
+
+        it('should collapse a scope file without losing its state', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            const input = screen.getByPlaceholderText(/MAIN\.mover/)
+            fireEvent.change(input, { target: { value: 'Item[{n:1:5}]' } })
+
+            await user.click(screen.getByRole('button', { name: 'Collapse Scope_1' }))
+
+            expect(screen.queryByDisplayValue('Axis Group 1')).not.toBeInTheDocument()
+            // The summary stays visible while collapsed.
+            expect(screen.getByText('5 acquisitions')).toBeInTheDocument()
+
+            await user.click(screen.getByRole('button', { name: 'Expand Scope_1' }))
+
+            expect(screen.getByDisplayValue('Item[{n:1:5}]')).toBeInTheDocument()
+        })
+
+        it('should collapse a pattern', async () => {
+            const user = userEvent.setup()
+            render(<ScopeFileManager />)
+
+            await user.click(screen.getByRole('button', { name: 'Collapse Pattern 1' }))
+
+            expect(screen.queryByPlaceholderText(/MAIN\.mover/)).not.toBeInTheDocument()
+            expect(screen.getByText('Pattern 1')).toBeInTheDocument()
+        })
+    })
+
     describe('multiple files interaction', () => {
         it('should maintain separate state for each file', async () => {
             const user = userEvent.setup()

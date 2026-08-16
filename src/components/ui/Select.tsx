@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useId } from 'react'
 import './Select.css'
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
@@ -15,7 +15,8 @@ export function Select({
     id,
     ...props
 }: SelectProps) {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`
+    const generatedId = useId()
+    const selectId = id || generatedId
 
     return (
         <div className={`select-group ${className}`}>

@@ -1,5 +1,24 @@
 # Changelog
 
+## V1.8 (2026-08-16)
+
+### UI
+
+- **Visible hierarchy**: Scope File, Axis Group and Pattern were previously told apart only by a thin coloured stripe on the left. Each tier now has its own header bar with a coloured icon badge, a tier label, and a colour that runs down the node's full height — red for Scope File, teal for Axis Group, indigo for Pattern — so it is obvious which patterns belong to which axis group.
+- **Collapsible nodes**: every Scope File, Axis Group and Pattern can be folded away, which keeps large configurations navigable.
+- **Counts per tier**: headers show how many axis groups / patterns a node contains alongside the acquisition total.
+- **Header actions moved inline**: duplicate and delete for a Scope File used to sit in a detached strip above the file name; they are now in the file's own header next to everything else it applies to.
+- **Legend**: the Scope Files section header shows the `Scope File › Axis Group › Pattern` structure.
+- **Drag & drop feedback**: dropping a symbol from the TwinCAT Target Browser now names the axis group it will land in.
+
+### Dependencies
+
+- All dependencies updated to their current releases, including Vite 8, Vitest 4, ESLint 10, React 19.2.8, jsdom 30 and lucide-react 1.x. `npm audit` goes from 15 known vulnerabilities to 0.
+- TypeScript stays on 5.9 for now: `typescript-eslint` does not yet support TypeScript 7.
+- `@types/uuid` dropped — `uuid` ships its own type declarations.
+- Added `eslint.config.js`. The repository had no ESLint flat config, so `npm run lint` failed outright; linting now runs in CI as well.
+- CI moved to Node 22 (jsdom 30 and Vite 8 no longer support Node 20) and the GitHub Actions were bumped to current majors.
+
 ## V1.7 (2026-05-07)
 
 ### Documentation

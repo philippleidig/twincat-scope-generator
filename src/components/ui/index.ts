@@ -2,4 +2,24 @@ export { Button } from './Button'
 export { Input } from './Input'
 export { Select } from './Select'
 export { Card } from './Card'
-export { TrashIcon, CopyIcon, PlusIcon, ClipboardIcon, SettingsIcon, FileIcon, DownloadIcon, CheckIcon, EditIcon, UploadIcon, ResetIcon, CloseIcon, GithubIcon, FeedbackIcon } from './Icons'
+export {
+    TrashIcon,
+    CopyIcon,
+    PlusIcon,
+    ClipboardIcon,
+    SettingsIcon,
+    FileIcon,
+    DownloadIcon,
+    CheckIcon,
+    EditIcon,
+    UploadIcon,
+    ResetIcon,
+    CloseIcon,
+    GithubIcon,
+    FeedbackIcon,
+    AxisGroupIcon,
+    PatternIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
+    SymbolIcon,
+} from './Icons'
