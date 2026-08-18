@@ -219,6 +219,29 @@ describe('ScopeFileManager Component', () => {
             expect(getFirstAxisGroup().patterns[1].symbols[0].template).toBe('Original.Value')
         })
 
+        it('should offer 501 for NC2 and TcCOM ports from 350', () => {
+            render(<ScopeFileManager />)
+
+            const select = screen.getByLabelText('ADS port')
+            const options = Array.from(select.querySelectorAll('option')).map(o => o.textContent)
+
+            expect(options).toContain('501 - NC2')
+            expect(options).not.toContain('500 - NC2')
+            expect(options).toContain('350')
+            // The TcCOM range is contiguous from 350.
+            expect(options.filter(o => /^3\d\d$/.test(o ?? ''))).toEqual(
+                Array.from({ length: 11 }, (_, i) => String(350 + i)),
+            )
+        })
+
+        it('should select the NC2 port', () => {
+            render(<ScopeFileManager />)
+
+            fireEvent.change(screen.getByLabelText('ADS port'), { target: { value: '501' } })
+
+            expect(getFirstPattern().targetPort).toBe(501)
+        })
+
         it('should change port using preset dropdown', () => {
             render(<ScopeFileManager />)
 

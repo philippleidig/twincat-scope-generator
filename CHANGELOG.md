@@ -2,6 +2,11 @@
 
 ## V1.8 (2026-08-16)
 
+### ADS Ports
+
+- **NC2 is now 501** instead of 500, matching the NC SAF port the XTI parser already assumes for NC axes.
+- **TcCOM port presets start at 350** instead of 351.
+
 ### UI
 
 - **Visible hierarchy**: Scope File, Axis Group and Pattern were previously told apart only by a thin coloured stripe on the left. Each tier now has its own header bar with a coloured icon badge, a tier label, and a colour that runs down the node's full height — red for Scope File, teal for Axis Group, indigo for Pattern — so it is obvious which patterns belong to which axis group.
