@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
+import type { InputHTMLAttributes, ReactNode } from 'react'
 import { useId } from 'react'
 import { useNumberDraft } from './useNumberDraft'
 
@@ -56,29 +56,6 @@ export function TextField({ label, hideLabel, hint, error, mono, suffix, fieldCl
                 />
                 {suffix && <span className="input-suffix">{suffix}</span>}
             </div>
-        </FieldShell>
-    )
-}
-
-export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'> {
-    label: string
-    hideLabel?: boolean
-    hint?: ReactNode
-    options: Array<{ value: string; label: string }>
-    fieldClassName?: string
-}
-
-export function SelectField({ label, hideLabel, hint, options, fieldClassName, className = '', ...rest }: SelectFieldProps) {
-    const id = useId()
-    return (
-        <FieldShell label={label} hideLabel={hideLabel} hint={hint} id={id} className={fieldClassName}>
-            <select id={id} className={`input select ${className}`} {...rest}>
-                {options.map((o) => (
-                    <option key={o.value} value={o.value}>
-                        {o.label}
-                    </option>
-                ))}
-            </select>
         </FieldShell>
     )
 }

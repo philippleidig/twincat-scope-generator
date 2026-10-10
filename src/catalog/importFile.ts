@@ -20,3 +20,22 @@ export function importTwinCatFile(fileName: string, content: string): SymbolSour
             )
     }
 }
+
+/**
+ * Add freshly imported sources to the existing ones:
+ * - a re-imported file replaces what it contributed before;
+ * - a partial listing (PLC I/O from a `.tsproj`) is dropped when a complete source for the
+ *   same runtime (the PLC's `.tmc`: same kind and port) is present;
+ * - when the files name exactly one target Net ID (a `.tsproj`), sources without one get it —
+ *   in split projects the `.tsproj` holds the Net ID while `.xti`/`.tmc` files hold the symbols.
+ */
+export function mergeSources(existing: SymbolSource[], imported: SymbolSource[]): SymbolSource[] {
+    const files = new Set(imported.map((s) => s.fileName))
+    const all = [...existing.filter((s) => !files.has(s.fileName)), ...imported]
+    const complete = new Set(all.filter((s) => s.complete).map((s) => `${s.kind}:${s.port}`))
+    const netIds = new Set(all.map((s) => s.amsNetId).filter(Boolean))
+    const sharedNetId = netIds.size === 1 ? [...netIds][0] : undefined
+    return all
+        .filter((s) => s.complete || !complete.has(`${s.kind}:${s.port}`))
+        .map((s) => (sharedNetId && !s.amsNetId ? { ...s, amsNetId: sharedNetId } : s))
+}

@@ -1,31 +1,43 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Download, Plus, RotateCcw, Trash2, Upload } from 'lucide-react'
-import { expansionCount, validateTemplate } from '@/domain/pattern'
-import { findAxisGroup } from '@/domain/project'
+import { validateTemplate } from '@/domain/pattern'
+import { templateAcquisitions } from '@/domain/project'
 import { useSampleStore } from '@/state/sampleStore'
-import { useProjectStore } from '@/state/projectStore'
+import { selectActiveGroup, useProjectStore } from '@/state/projectStore'
 import { toast } from '@/state/toastStore'
 import { downloadText } from '@/export/bundle'
 import { Dialog } from '@/ui/components/Dialog'
 import { Button, IconButton } from '@/ui/components/Button'
 import { TextField } from '@/ui/components/Field'
+import { useFilePicker } from '@/ui/components/useFilePicker'
 
 /** Saved templates plus the counter syntax, one click away from the active axis group. */
 export function PatternLibraryDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { samples, addSample, removeSample, resetToDefaults, importSamples, exportSamples } = useSampleStore()
     const [template, setTemplate] = useState('')
     const [description, setDescription] = useState('')
-    const fileInput = useRef<HTMLInputElement>(null)
+    const picker = useFilePicker(
+        async (files) => {
+            try {
+                const n = importSamples(JSON.parse(await files[0].text()))
+                if (n > 0) toast.success(`Imported ${n} patterns`)
+                else toast.warning('The file contains no valid patterns.')
+            } catch {
+                toast.warning('Not a valid JSON file.')
+            }
+        },
+        { accept: '.json,application/json' },
+    )
     const validation = template.trim() ? validateTemplate(template) : null
 
     const insert = (symbol: string) => {
-        const { activeAxisGroupId, project, addChannels } = useProjectStore.getState()
-        const group = activeAxisGroupId ? findAxisGroup(project, activeAxisGroupId) : undefined
+        const state = useProjectStore.getState()
+        const group = selectActiveGroup(state)
         if (!group) {
             toast.warning('Select an axis group first.')
             return
         }
-        addChannels(group.id, [{ symbol }])
+        state.addChannels(group.id, [{ symbol }])
         toast.success(`Added to ${group.name}`)
     }
 
@@ -46,30 +58,13 @@ export function PatternLibraryDialog({ open, onClose }: { open: boolean; onClose
                     <Button variant="ghost" size="sm" icon={<RotateCcw size={14} />} onClick={resetToDefaults}>
                         Reset
                     </Button>
-                    <Button variant="ghost" size="sm" icon={<Upload size={14} />} onClick={() => fileInput.current?.click()}>
+                    <Button variant="ghost" size="sm" icon={<Upload size={14} />} onClick={picker.open}>
                         Import
                     </Button>
                     <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => downloadText(exportSamples(), 'scope-patterns.json')}>
                         Export
                     </Button>
-                    <input
-                        ref={fileInput}
-                        type="file"
-                        accept=".json,application/json"
-                        hidden
-                        onChange={async (e) => {
-                            const file = e.target.files?.[0]
-                            e.target.value = ''
-                            if (!file) return
-                            try {
-                                const n = importSamples(JSON.parse(await file.text()))
-                                if (n > 0) toast.success(`Imported ${n} patterns`)
-                                else toast.warning('The file contains no valid patterns.')
-                            } catch {
-                                toast.warning('Not a valid JSON file.')
-                            }
-                        }}
-                    />
+                    {picker.input}
                 </>
             }
         >
@@ -79,7 +74,7 @@ export function PatternLibraryDialog({ open, onClose }: { open: boolean; onClose
                         <div className="library__text">
                             <code>{s.template}</code>
                             <span>
-                                {s.description} · {expansionCount(s.template)} acquisitions
+                                {s.description} · {templateAcquisitions(s.template)} acquisitions
                             </span>
                         </div>
                         <Button size="sm" onClick={() => insert(s.template)}>

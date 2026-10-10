@@ -8,14 +8,9 @@
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { wildcardsToTemplate } from '@/domain/pattern'
-import type { AreaKind, MemberDef, ResolvedType, SymbolSource } from './model'
-import { resolveType } from './typeTable'
-import { arrayLabel, fullPath } from './tree'
-
-export interface IndexRange {
-    lower: number
-    upper: number
-}
+import type { ArrayDim, AreaKind, SymbolSource } from './model'
+import type { SymbolKind } from './walk'
+import { describe, rootNode, walk } from './walk'
 
 export interface SearchEntry {
     /** Unique within the index. */
@@ -25,136 +20,62 @@ export interface SearchEntry {
     path: string
     /** Last segment, for display and ranking. */
     name: string
-    kind: 'struct' | 'array' | 'scalar' | 'unsupported'
+    kind: SymbolKind
     typeName: string
     scopeType?: ScopeDataType
     area: AreaKind
     port: number
     comment?: string
     /** One range per `*` in `path`, in order. */
-    ranges: IndexRange[]
+    ranges: ArrayDim[]
     /** Lower-cased path, precomputed for matching. */
     haystack: string
 }
 
 export interface SearchIndex {
     entries: SearchEntry[]
-    /** True when the index stopped at MAX_ENTRIES or MAX_DEPTH and is incomplete. */
+    /** True when the index stopped at MAX_ENTRIES or the walk's depth limit and is incomplete. */
     truncated: boolean
 }
 
 export const MAX_ENTRIES = 250_000
-export const MAX_DEPTH = 16
-
-interface WalkStart {
-    path: string
-    name: string
-    resolved: ResolvedType
-    area: AreaKind
-    port: number
-    comment?: string
-    ranges?: IndexRange[]
-}
-
-/**
- * Visit a symbol and everything below it, emitting one entry per node.
- * Returns false once `limit` entries exist (the walk stops early).
- */
-function walk(source: SymbolSource, start: WalkStart, out: SearchEntry[], seen: Set<string>, limit: number): boolean {
-    let complete = true
-    const emit = (path: string, name: string, resolved: ResolvedType, ranges: IndexRange[], depth: number, comment?: string) => {
-        if (out.length >= limit || depth > MAX_DEPTH) {
-            complete = false
-            return
-        }
-        // The same path can be reachable twice (a struct root and its separately declared member).
-        const key = `${source.id}|${path}`
-        if (seen.has(key)) return
-        seen.add(key)
-        out.push({
-            key,
-            sourceId: source.id,
-            path,
-            name,
-            kind: resolved.kind,
-            typeName: resolved.kind === 'array' ? arrayLabel(resolved.dims, resolved.element) : resolved.typeName,
-            scopeType: resolved.kind === 'scalar' ? resolved.scopeType : undefined,
-            area: start.area,
-            port: start.port,
-            comment,
-            ranges,
-            haystack: path.toLowerCase(),
-        })
-        below(path, name, resolved, ranges, depth)
-    }
-    const member = (parent: string, m: MemberDef, ranges: IndexRange[], depth: number) =>
-        emit(`${parent}.${m.name}`, m.name, resolveType(source.types, m.type, m.ns, m.dims), ranges, depth + 1, m.comment)
-    const below = (path: string, name: string, resolved: ResolvedType, ranges: IndexRange[], depth: number) => {
-        if (resolved.kind === 'struct') {
-            for (const m of resolved.members) member(path, m, ranges, depth)
-        } else if (resolved.kind === 'array') {
-            const wildcard = `[${resolved.dims.map(() => '*').join(',')}]`
-            const element = resolveType(source.types, resolved.element, resolved.ns)
-            const inner = [...ranges, ...resolved.dims.map((d) => ({ lower: d.lower, upper: d.lower + d.length - 1 }))]
-            // A struct element adds nothing searchable beyond its members, so skip straight to them.
-            if (element.kind === 'struct') below(`${path}${wildcard}`, name, element, inner, depth + 1)
-            else emit(`${path}${wildcard}`, `${name}${wildcard}`, element, inner, depth + 1)
-        }
-    }
-    emit(start.path, start.name, start.resolved, start.ranges ?? [], 0, start.comment)
-    return complete
-}
-
-const lastSegment = (path: string) => path.slice(path.lastIndexOf('.') + 1)
 
 export function buildIndex(sources: SymbolSource[]): SearchIndex {
     const entries: SearchEntry[] = []
     const seen = new Set<string>()
-    let truncated = false
+    const stats = { depthLimited: false }
     for (const source of sources) {
         for (const root of source.roots) {
-            const path = fullPath(source, root.name)
-            const complete = walk(
-                source,
-                {
-                    path,
-                    name: lastSegment(path),
-                    resolved: resolveType(source.types, root.type, root.ns, root.dims),
-                    area: root.area,
-                    port: root.port ?? source.port,
-                    comment: root.comment,
-                },
-                entries,
-                seen,
-                MAX_ENTRIES,
-            )
-            truncated ||= !complete
+            for (const node of walk(source, rootNode(source, root), stats)) {
+                if (entries.length >= MAX_ENTRIES) return { entries, truncated: true }
+                // The same path can be reachable twice (a struct root and its separately declared member).
+                const key = `${source.id}|${node.path}`
+                if (seen.has(key)) continue
+                seen.add(key)
+                const { kind, typeName, scopeType } = describe(node.resolved)
+                entries.push({
+                    key,
+                    sourceId: source.id,
+                    path: node.path,
+                    name: node.name,
+                    kind,
+                    typeName,
+                    scopeType,
+                    area: node.area,
+                    port: node.port,
+                    comment: node.comment,
+                    ranges: node.ranges,
+                    haystack: node.path.toLowerCase(),
+                })
+            }
         }
     }
-    return { entries, truncated }
+    return { entries, truncated: stats.depthLimited }
 }
 
-export interface ChannelCandidate {
-    template: string
-    scopeType: ScopeDataType
-    port: number
-}
-
-/** Upper bound of channels a single "add" may create, so adding a huge FB stays deliberate. */
-export const MAX_CANDIDATES = 2_000
-
-/**
- * The recordable channels below a symbol (the symbol itself if it is a scalar):
- * every scalar leaf, with array indices turned into counters.
- */
-export function channelCandidates(source: SymbolSource, start: WalkStart): { candidates: ChannelCandidate[]; truncated: boolean } {
-    const entries: SearchEntry[] = []
-    const complete = walk(source, start, entries, new Set(), MAX_ENTRIES)
-    const scalars = entries.filter((e) => e.kind === 'scalar')
-    return {
-        candidates: scalars.slice(0, MAX_CANDIDATES).map((e) => ({ template: entryTemplate(e), scopeType: e.scopeType!, port: e.port })),
-        truncated: !complete || scalars.length > MAX_CANDIDATES,
-    }
+/** The channel template for a wildcard path: `*` become counters. */
+export function templateOf(entry: Pick<SearchEntry, 'path' | 'ranges'>): string {
+    return wildcardsToTemplate(entry.path, entry.ranges)
 }
 
 // ---------------------------------------------------------------------------
@@ -239,9 +160,4 @@ export function search(index: SearchIndex, query: SearchQuery, limit = 500): Sea
         matches.sort((a, b) => rank(a, firstWord) - rank(b, firstWord) || a.path.length - b.path.length)
     }
     return { entries: matches.slice(0, limit), total: matches.length }
-}
-
-/** The channel template for an entry: wildcards become counters. */
-export function entryTemplate(entry: Pick<SearchEntry, 'path' | 'ranges'>): string {
-    return wildcardsToTemplate(entry.path, entry.ranges)
 }

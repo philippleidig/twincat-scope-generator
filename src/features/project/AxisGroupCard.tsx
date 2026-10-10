@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { ChevronRight, Copy, Crosshair, Plus, Trash2 } from 'lucide-react'
+import { Copy, Crosshair, Plus, Trash2 } from 'lucide-react'
 import type { AxisGroup, Target } from '@/domain/project'
 import { acquisitionCount } from '@/domain/project'
 import { useProjectStore } from '@/state/projectStore'
-import { addChannels, addPicks, describeAddResult } from '@/state/actions'
-import { parseTargetBrowserDrop } from '@/catalog/targetBrowserDrop'
+import { describeAddResult, dropOnAxisGroup } from '@/state/actions'
+import { PICK_MIME } from '@/state/browserStore'
 import { toast } from '@/state/toastStore'
 import { Button, IconButton } from '@/ui/components/Button'
-import { PICK_MIME, draggedPicks } from '@/features/browser/picks'
+import { Disclosure } from '@/ui/components/Disclosure'
 import { ChannelRow } from './ChannelRow'
 
 interface AxisGroupCardProps {
@@ -30,24 +30,8 @@ export function AxisGroupCard({ group, targets, active, canRemove }: AxisGroupCa
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault()
         setDropping(false)
-        const picks = e.dataTransfer.types.includes(PICK_MIME) ? draggedPicks() : null
-        if (picks) {
-            const r = addPicks(group.id, picks)
-            toast[r.added > 0 ? 'success' : 'warning'](describeAddResult(r, group.name))
-            return
-        }
-        // Drag & drop straight from the TwinCAT Target Browser (XML as text).
-        const dropped = parseTargetBrowserDrop(e.dataTransfer.getData('text/plain'))
-        if (dropped.symbols.length > 0) {
-            const r = addChannels(group.id, dropped.symbols)
-            toast.success(describeAddResult({ ...r, truncated: false, empty: dropped.skipped.length }, group.name))
-        } else {
-            toast.warning(
-                dropped.skipped.length > 0
-                    ? `Cannot record ${dropped.skipped.join(', ')}: only numeric and BOOL symbols can be scoped.`
-                    : 'Nothing to add: drop symbols from the symbol browser or the TwinCAT Target Browser.',
-            )
-        }
+        const result = dropOnAxisGroup(group.id, e.dataTransfer)
+        toast[result.added > 0 ? 'success' : 'warning'](describeAddResult(result, group.name))
     }
 
     return (
@@ -67,18 +51,7 @@ export function AxisGroupCard({ group, targets, active, canRemove }: AxisGroupCa
             onDrop={onDrop}
         >
             <header className="axis-group__header" onClick={() => setActiveAxisGroup(group.id)}>
-                <button
-                    type="button"
-                    className="tree-toggle"
-                    aria-expanded={open}
-                    aria-label={`${open ? 'Collapse' : 'Expand'} ${group.name}`}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        setOpen((o) => !o)
-                    }}
-                >
-                    <ChevronRight size={15} className={open ? 'chevron chevron--open' : 'chevron'} />
-                </button>
+                <Disclosure open={open} label={group.name} onToggle={() => setOpen((o) => !o)} />
                 <input
                     className="axis-group__name"
                     value={group.name}

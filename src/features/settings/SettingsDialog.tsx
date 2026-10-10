@@ -52,7 +52,7 @@ export function SettingsDialog({ open, onClose }: { open: boolean; onClose: () =
             </div>
 
             <h3 className="settings-section">Targets</h3>
-            <p className="settings-help">Every channel records from one target. Importing a .tsproj adds its target automatically.</p>
+            <p className="settings-help">Every channel records from one target. Symbols from a source with a Net ID (e.g. imported together with a .tsproj) add their target automatically.</p>
             <ul className="target-list">
                 {targets.map((t) => (
                     <li key={t.id} className="target-row">

@@ -1,17 +1,23 @@
 import { create } from 'zustand'
 import type { ScopeDataType } from '@/domain/dataTypes'
 import type { AreaKind } from '@/catalog/model'
-import type { Candidates } from '@/catalog/candidates'
+import type { SymbolKind } from '@/catalog/walk'
+import { sourceKey } from '@/catalog/tree'
 
-/** Something picked in the browser: a tree node or a search result. */
+/**
+ * Something picked in the browser — a tree node (`GVL.aAxis[3]`) or a search result
+ * (`GVL.aAxis[*]`) — as plain data. It is resolved against the current catalog only when
+ * it is added, so it can be serialised for drag & drop and never goes stale.
+ */
 export interface BrowserPick {
     key: string
     sourceId: string
     path: string
-    kind: string
-    /** Computed lazily: a struct can stand for thousands of channels. */
-    candidates: () => Candidates
+    kind: SymbolKind
 }
+
+/** MIME type of a drag carrying browser picks (JSON). */
+export const PICK_MIME = 'application/x-scope-picks'
 
 interface BrowserState {
     query: string
@@ -34,6 +40,10 @@ interface BrowserState {
     setSelection: (picks: BrowserPick[]) => void
     clearSelection: () => void
     setFocused: (pick: BrowserPick | null) => void
+    /** Open these sources in the tree. */
+    expandSources: (sourceIds: string[]) => void
+    /** Forget selection and focus (the catalog changed under them). */
+    resetPicks: () => void
 }
 
 const toggled = <T,>(set: Set<T>, value: T): Set<T> => {
@@ -69,6 +79,8 @@ export const useBrowserStore = create<BrowserState>()((set) => ({
     setSelection: (picks) => set({ selection: new Map(picks.map((p) => [p.key, p])) }),
     clearSelection: () => set({ selection: new Map() }),
     setFocused: (focused) => set({ focused }),
+    expandSources: (ids) => set((s) => ({ expanded: new Set([...s.expanded, ...ids.map(sourceKey)]) })),
+    resetPicks: () => set({ selection: new Map(), focused: null }),
 }))
 
 export const isFiltering = (s: Pick<BrowserState, 'query' | 'scopeTypes' | 'areas' | 'recordableOnly'>) =>

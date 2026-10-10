@@ -79,14 +79,20 @@ export const LOCAL_TARGET_ID = 'local'
 // Factories
 // ---------------------------------------------------------------------------
 
-export interface NewChannel {
+/**
+ * A channel to add, as importers and the browser describe it: the target is given by its
+ * AMS Net ID (if known), not by a project target id.
+ */
+export interface ChannelSpec {
     symbol: string
     dataType: ScopeDataType
     port: number
-    targetId?: string
+    amsNetId?: string
 }
 
-export function createChannel(project: Project, init: Partial<NewChannel> = {}): Channel {
+export type ChannelInit = Partial<Omit<Channel, 'id'>>
+
+export function createChannel(project: Project, init: ChannelInit = {}): Channel {
     return {
         id: uuid(),
         symbol: init.symbol ?? '',
@@ -142,13 +148,13 @@ export function findAxisGroup(project: Project, axisGroupId: string): AxisGroup 
     return undefined
 }
 
-/** Acquisitions a channel produces: its expansion count, 0 when the template is invalid. */
-export function channelAcquisitions(channel: Channel): number {
-    return validateTemplate(channel.symbol).valid ? expansionCount(channel.symbol) : 0
+/** Acquisitions a template produces: its expansion count, 0 when it is invalid or empty. */
+export function templateAcquisitions(symbol: string): number {
+    return validateTemplate(symbol).valid ? expansionCount(symbol) : 0
 }
 
 export function acquisitionCount(group: AxisGroup): number {
-    return group.channels.reduce((n, c) => n + channelAcquisitions(c), 0)
+    return group.channels.reduce((n, c) => n + templateAcquisitions(c.symbol), 0)
 }
 
 export function allChannels(project: Project): Channel[] {
@@ -208,9 +214,10 @@ export const ops = {
     },
 
     // Scope files -----------------------------------------------------------
-    addScopeFile: (p: Project): Project => ({
+    /** `id` lets the caller select the new file right away. */
+    addScopeFile: (p: Project, id: string = uuid()): Project => ({
         ...p,
-        scopeFiles: [...p.scopeFiles, createScopeFile(nextName('Scope_', p.scopeFiles.map((f) => f.name)))],
+        scopeFiles: [...p.scopeFiles, { ...createScopeFile(nextName('Scope_', p.scopeFiles.map((f) => f.name))), id }],
     }),
     updateScopeFile: (p: Project, id: string, patch: Patch<ScopeFile>): Project =>
         mapFiles(p, (f) => (f.id === id ? { ...f, ...patch } : f)),
@@ -253,7 +260,7 @@ export const ops = {
         }),
 
     // Channels --------------------------------------------------------------
-    addChannels: (p: Project, axisGroupId: string, channels: Partial<NewChannel>[]): Project =>
+    addChannels: (p: Project, axisGroupId: string, channels: ChannelInit[]): Project =>
         mapAxisGroups(p, (a) =>
             a.id === axisGroupId
                 ? { ...a, channels: [...a.channels, ...channels.map((c) => createChannel(p, c))] }
@@ -277,6 +284,46 @@ export const ops = {
             return { ...a, channels: a.id === toAxisGroupId ? [...rest, channel] : rest }
         })
     },
+}
+
+export interface MergeResult {
+    project: Project
+    added: number
+    /** Specs the axis group already records (same symbol, port and target). */
+    duplicates: number
+}
+
+/**
+ * Append channel specs to an axis group in one step: Net IDs the project does not know
+ * become new targets (named `targetName`), and specs the group already records are skipped.
+ */
+export function mergeChannelSpecs(p: Project, axisGroupId: string, specs: ChannelSpec[], targetName = 'Target'): MergeResult {
+    const group = findAxisGroup(p, axisGroupId)
+    if (!group) return { project: p, added: 0, duplicates: 0 }
+
+    const targets = [...p.targets]
+    const targetFor = (amsNetId: string | undefined): string => {
+        if (!amsNetId) return targets[0].id
+        let target = targets.find((t) => t.amsNetId === amsNetId)
+        if (!target) targets.push((target = { id: uuid(), name: targetName, amsNetId }))
+        return target.id
+    }
+    const keyOf = (c: { symbol: string; port: number; targetId: string }) => `${c.symbol}|${c.port}|${c.targetId}`
+    const present = new Set(group.channels.map(keyOf))
+    const fresh: Channel[] = []
+    for (const spec of specs) {
+        const channel = { id: uuid(), symbol: spec.symbol, dataType: spec.dataType, port: spec.port, targetId: targetFor(spec.amsNetId) }
+        if (present.has(keyOf(channel))) continue
+        present.add(keyOf(channel))
+        fresh.push(channel)
+    }
+    const project = mapAxisGroups({ ...p, targets }, (a) => (a.id === axisGroupId ? { ...a, channels: [...a.channels, ...fresh] } : a))
+    return { project, added: fresh.length, duplicates: specs.length - fresh.length }
+}
+
+/** Acquisitions of all valid channels of a scope file. */
+export function fileAcquisitionCount(file: ScopeFile): number {
+    return file.axisGroups.reduce((n, a) => n + acquisitionCount(a), 0)
 }
 
 // ---------------------------------------------------------------------------
@@ -360,6 +407,23 @@ export function parseProject(json: unknown): Project {
     }))
 
     return { version: 2, settings, targets, scopeFiles }
+}
+
+/** Above this many acquisitions the export is refused: the XML would run into hundreds of MB. */
+export const MAX_PROJECT_ACQUISITIONS = 20_000
+
+export function projectAcquisitionCount(project: Project): number {
+    return project.scopeFiles.reduce((n, f) => n + fileAcquisitionCount(f), 0)
+}
+
+/** Why the project cannot be exported right now, or null. */
+export function exportBlocker(project: Project): string | null {
+    const count = projectAcquisitionCount(project)
+    if (count === 0) return 'Add at least one valid channel'
+    if (count > MAX_PROJECT_ACQUISITIONS) {
+        return `${count.toLocaleString('en-US')} acquisitions exceed the limit of ${MAX_PROJECT_ACQUISITIONS.toLocaleString('en-US')}`
+    }
+    return null
 }
 
 /** Problems worth telling the user about before exporting. None of them blocks the export. */

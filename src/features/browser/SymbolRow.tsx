@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import type { AreaKind } from '@/catalog/model'
 import type { BrowserPick } from '@/state/browserStore'
 import { useBrowserStore } from '@/state/browserStore'
-import { AREA_LABEL, PICK_MIME, setDraggedPicks } from './picks'
+import { setPickDragData } from '@/state/actions'
+import { AREA_LABEL } from './picks'
 
 interface SymbolRowProps {
     pick: BrowserPick | null
@@ -43,12 +44,8 @@ export function SymbolRow({ pick, indent, toggle, icon, label, title, typeName, 
                 if (!pick) return
                 const { selection } = useBrowserStore.getState()
                 // Dragging a selected row drags the whole selection.
-                const picks = selection.has(pick.key) ? [...selection.values()] : [pick]
-                setDraggedPicks(picks)
-                e.dataTransfer.setData(PICK_MIME, String(picks.length))
-                e.dataTransfer.effectAllowed = 'copy'
+                setPickDragData(e.dataTransfer, selection.has(pick.key) ? [...selection.values()] : [pick])
             }}
-            onDragEnd={() => setDraggedPicks(null)}
             onClick={() => pick && setFocused(pick)}
             onDoubleClick={onActivate}
         >

@@ -1,8 +1,8 @@
 import { Ban, Boxes, Braces, Brackets, Cpu, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
 import type { SourceKind } from '@/catalog/model'
-import type { NodeKind } from '@/catalog/tree'
+import type { BrowserNode } from '@/catalog/tree'
 
-export function KindIcon({ kind, open = false }: { kind: NodeKind; open?: boolean }) {
+export function KindIcon({ kind, open = false }: { kind: BrowserNode['kind']; open?: boolean }) {
     const props = { size: 15, className: `kind-icon kind-icon--${kind}`, 'aria-hidden': true }
     switch (kind) {
         case 'folder':

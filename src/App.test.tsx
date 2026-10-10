@@ -13,6 +13,7 @@ const channels = () => useProjectStore.getState().project.scopeFiles[0].axisGrou
 beforeEach(() => {
     useProjectStore.getState().reset()
     useCatalogStore.getState().clear()
+    useCatalogStore.setState({ hydrated: true })
     useBrowserStore.setState({ expanded: new Set(), selection: new Map(), focused: null })
     useBrowserStore.getState().clearFilters()
     useToasts.setState({ toasts: [] })
@@ -98,7 +99,14 @@ describe('App', () => {
         const port = screen.getByLabelText('ADS port')
         await user.clear(port)
         await user.type(port, '852')
+        // Applied on Enter/blur only: every change re-indexes the source.
+        expect(useCatalogStore.getState().sources[0].port).toBe(851)
+        await user.type(port, '{Enter}')
         expect(useCatalogStore.getState().sources[0].port).toBe(852)
+        const prefix = screen.getByLabelText('Path prefix')
+        await user.type(prefix, 'Object1 (X) ')
+        await user.tab()
+        expect(useCatalogStore.getState().sources[0].pathPrefix).toBe('Object1 (X)')
         await user.click(screen.getByRole('button', { name: 'Remove DemoMachine (PLC)' }))
         expect(screen.getByText('Drop TwinCAT files here')).toBeInTheDocument()
     })

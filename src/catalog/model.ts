@@ -7,10 +7,10 @@
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 
-/** Bounds of one array dimension, e.g. `ARRAY[1..10]` → { lower: 1, length: 10 }. */
+/** Inclusive bounds of one array dimension, e.g. `ARRAY[1..10]` → { lower: 1, upper: 10 }. */
 export interface ArrayDim {
     lower: number
-    length: number
+    upper: number
 }
 
 export interface MemberDef {
@@ -61,6 +61,11 @@ export interface SymbolSource {
     port: number
     /** Target AMS Net ID when the file names one (`.tsproj`). */
     amsNetId?: string
+    /**
+     * True when the source lists every symbol of its runtime (a PLC `.tmc`), false for partial
+     * listings such as the I/O variables of a PLC in a `.tsproj`.
+     */
+    complete: boolean
     types: TypeTable
     roots: SymbolRoot[]
     warnings: string[]

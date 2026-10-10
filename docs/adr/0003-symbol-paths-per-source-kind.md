@@ -1,26 +1,32 @@
 # 3. Symbol paths and ports per source kind, editable per source
 
-Status: accepted (V2.0) — NC and TcCOM parts unverified, see wayfinder tickets 04/05/11
+Status: accepted (V2.0). PLC verified from real `.tmc` files; NC and TcCOM verified from symbol names
+in public `.tcscopex` files saved by TwinCAT Scope (wayfinder tickets 04/05); NC encoder/drive paths
+still assumed.
 
 ## Context
 
-Engineering files describe variables, not always their ADS names. Verified from real files: PLC `.tmc`
-symbol names are full ADS paths and the port is in `ApplicationName`. Not verifiable offline: how NC
-axes and TcCOM instances are named on their ports.
+Engineering files describe variables, not always their ADS names, and there is no target to ask.
 
 ## Decision
 
-| Source | Path | Port |
+| Source | ADS symbol path | Port |
 |---|---|---|
-| PLC (`.tmc`) | symbol name as is | `ApplicationName` (`Port_851`), else 851 |
+| PLC (`.tmc`) | symbol name as is (`MAIN.x`, `GVL.y`) | `ApplicationName` (`Port_851`), else 851 |
 | PLC I/O (`.xti`/`.tsproj`) | var name as is | `Project/@AmsPort` |
-| TcCOM (`.tmc` class / `.xti` object) | `<instance>.<area>.<symbol>`, `<instance>.<parameter>` | 350 |
-| NC (`.xti`/`.tsproj`) | `<axis>[.<Enc\|Drive>].<group>.<var>` | `SafTask/@AmsPort`, else 501 |
+| TcCOM object (`.xti`) | `<object name>.<data area>.<symbol>`; parameters `<object name>.<parameter>` (only with `CreateSymbol`) | 350 (task port; editable) |
+| TcCOM class (`.tmc`) | as above with prefix `Object1 (<class>)`, TwinCAT's default object name | 350 |
+| NC axis (`.xti`/`.tsproj`) | `Axes.<axis>.<member>` — axis state (`ActPos`, `SetPos`, `ActVelo`, …) and the PLC interface (`ToPlc`, `FromPlc`); encoder/drive variables `Axes.<axis>.<Enc\|Drive>.<var>` (assumed) | `SafTask/@AmsPort`, else 501 |
 
-Every source exposes **port**, **path prefix** and **target Net ID** for editing, so a wrong assumption
-can be corrected in the UI without a new release. When a PLC `.tmc` and an I/O listing of the same
-port are both imported, the complete `.tmc` wins.
+- Every source exposes **port**, **path prefix** and **target Net ID** for editing (applied on blur),
+  so a wrong assumption can be corrected without a release.
+- A complete source (PLC `.tmc`) replaces a partial listing of the same runtime (PLC I/O from a
+  `.tsproj`, same kind and port).
+- When the imported files name exactly one Net ID (a `.tsproj`), sources without one adopt it; with
+  several Net IDs the user assigns them per source.
 
 ## Consequences
 
-PLC import is correct by construction. NC/TcCOM imports carry a visible note until verified.
+PLC, NC axis-state and TcCOM paths match what TwinCAT Scope itself saves. Open: whether Scope needs
+real IndexGroup/IndexOffset values for non-PLC symbols (it stores both; the generator writes the PLC
+values) — wayfinder ticket 11.

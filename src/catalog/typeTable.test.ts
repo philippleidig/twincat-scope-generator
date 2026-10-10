@@ -36,13 +36,13 @@ describe('resolveType', () => {
         expect(resolveType(table, 'OTCID')).toMatchObject({ kind: 'scalar', scopeType: 'UINT32', typeName: 'OTCID' })
     })
     it('resolves arrays from symbol dims, alias dims and textual declarations', () => {
-        expect(resolveType(table, 'INT', undefined, [{ lower: 1, length: 2 }])).toMatchObject({ kind: 'array', element: 'INT' })
-        expect(resolveType(table, 'T_Arr')).toMatchObject({ kind: 'array', dims: [{ lower: 0, length: 3 }], element: 'LREAL' })
+        expect(resolveType(table, 'INT', undefined, [{ lower: 1, upper: 2 }])).toMatchObject({ kind: 'array', element: 'INT' })
+        expect(resolveType(table, 'T_Arr')).toMatchObject({ kind: 'array', dims: [{ lower: 0, upper: 2 }], element: 'LREAL' })
         expect(resolveType(table, 'ARRAY [1..2, -1..1] OF BOOL')).toMatchObject({
             kind: 'array',
             dims: [
-                { lower: 1, length: 2 },
-                { lower: -1, length: 3 },
+                { lower: 1, upper: 2 },
+                { lower: -1, upper: 1 },
             ],
             element: 'BOOL',
         })

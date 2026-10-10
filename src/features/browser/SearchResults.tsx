@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSearch } from './useSearch'
 import type { SearchIndex } from '@/catalog/search'
-import { entryTemplate } from '@/catalog/search'
+import { templateOf } from '@/catalog/search'
 import { VirtualList } from '@/ui/components/VirtualList'
 import { useBrowserStore } from '@/state/browserStore'
 import { KindIcon } from './symbolIcons'
@@ -38,12 +38,12 @@ export function SearchResults({ index }: { index: SearchIndex }) {
                 label="Search results"
                 className="symbol-list"
                 renderRow={(entry) => {
-                    const template = entryTemplate(entry)
+                    const template = templateOf(entry)
                     return (
                         <SymbolRow
                             role="option"
                             indent={0}
-                            pick={isPickable(entry.kind) ? entryPick(index, entry) : null}
+                            pick={isPickable(entry.kind) ? entryPick(entry) : null}
                             icon={<KindIcon kind={entry.kind} />}
                             label={<Highlight text={entry.path} words={words} />}
                             title={template}
@@ -53,7 +53,7 @@ export function SearchResults({ index }: { index: SearchIndex }) {
                             extra={
                                 entry.ranges.length > 0 ? (
                                     <span className="badge badge--accent" title={`Added as pattern ${template}`}>
-                                        ×{entry.ranges.reduce((n, r) => n * (r.upper - r.lower + 1), 1)}
+                                        ×{entry.ranges.reduce((n, r) => n * (r.upper - r.lower + 1), 1).toLocaleString()}
                                     </span>
                                 ) : undefined
                             }

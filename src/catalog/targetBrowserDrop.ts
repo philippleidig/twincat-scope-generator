@@ -3,19 +3,12 @@
  * (`<TargetBrowserExportInfo>`) with the target address, the symbols and the
  * data types they use.
  */
-import type { ScopeDataType } from '@/domain/dataTypes'
+import type { ChannelSpec } from '@/domain/project'
 import { readTypeTable, resolveType } from './typeTable'
 import { parseXml, text } from './xml'
 
-export interface DroppedSymbol {
-    symbol: string
-    dataType: ScopeDataType
-    port: number
-    amsNetId?: string
-}
-
 export interface DropResult {
-    symbols: DroppedSymbol[]
+    symbols: ChannelSpec[]
     /** Symbols that were dropped but cannot be recorded, with the reason. */
     skipped: string[]
 }

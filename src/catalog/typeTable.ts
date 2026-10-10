@@ -8,10 +8,10 @@ import { child, children, properties, text } from './xml'
 
 /** `<ArrayInfo><LBound>1</LBound><Elements>10</Elements></ArrayInfo>` (one per dimension). */
 export function readArrayDims(el: Element): ArrayDim[] | undefined {
-    const dims = children(el, 'ArrayInfo').map((a) => ({
-        lower: Number.parseInt(text(a, 'LBound'), 10) || 0,
-        length: Number.parseInt(text(a, 'Elements'), 10) || 0,
-    }))
+    const dims = children(el, 'ArrayInfo').map((a) => {
+        const lower = Number.parseInt(text(a, 'LBound'), 10) || 0
+        return { lower, upper: lower + (Number.parseInt(text(a, 'Elements'), 10) || 0) - 1 }
+    })
     return dims.length > 0 ? dims : undefined
 }
 
@@ -34,7 +34,8 @@ export function typeNameOf(typeEl: Element | null): string {
     return name
 }
 
-function readMember(el: Element): MemberDef | null {
+/** A `<SubItem>` (struct/FB member or inline parameter field); hidden members are skipped. */
+export function readMember(el: Element): MemberDef | null {
     const name = text(el, 'Name')
     const typeEl = child(el, 'Type') ?? child(el, 'BaseType')
     const type = typeNameOf(typeEl)
@@ -118,7 +119,7 @@ function parseDimsText(spec: string): ArrayDim[] | null {
     for (const part of spec.split(',')) {
         const m = /^\s*(-?\d+)\s*\.\.\s*(-?\d+)\s*$/.exec(part)
         if (!m) return null
-        dims.push({ lower: Number(m[1]), length: Number(m[2]) - Number(m[1]) + 1 })
+        dims.push({ lower: Number(m[1]), upper: Number(m[2]) })
     }
     return dims
 }

@@ -1,12 +1,12 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Activity, FilePlus2, FolderOpen, MessageSquarePlus, Monitor, Moon, MoreHorizontal, Save, Settings, Sun } from 'lucide-react'
-import { parseProject } from '@/domain/project'
 import { useProjectStore } from '@/state/projectStore'
 import { toast } from '@/state/toastStore'
-import { downloadText } from '@/export/bundle'
+import { openProjectFile, saveProjectFile } from '@/state/actions'
 import { IconButton } from '@/ui/components/Button'
 import { Menu } from '@/ui/components/Menu'
 import { GithubIcon } from '@/ui/components/GithubIcon'
+import { useFilePicker } from '@/ui/components/useFilePicker'
 import { SettingsDialog } from '@/features/settings/SettingsDialog'
 import { ExportButton } from './ExportButton'
 import type { Theme } from './useTheme'
@@ -21,13 +21,19 @@ export function AppHeader() {
     const updateSettings = useProjectStore((s) => s.updateSettings)
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [theme, setTheme] = useTheme()
-    const openInput = useRef<HTMLInputElement>(null)
     const ThemeIcon = THEME_ICON[theme]
-
-    const saveProject = () => {
-        const { project } = useProjectStore.getState()
-        downloadText(JSON.stringify(project, null, 2), `${project.settings.name.replace(/[^\w.-]+/g, '_') || 'project'}.scope.json`)
-    }
+    const opener = useFilePicker(
+        async (files) => {
+            const file = files[0]
+            try {
+                await openProjectFile(file)
+                toast.success(`Opened ${file.name}`)
+            } catch (err) {
+                toast.warning(`Cannot open ${file.name}: ${err instanceof Error ? err.message : 'invalid file'}`)
+            }
+        },
+        { accept: '.json,application/json' },
+    )
     const newProject = () => {
         if (window.confirm('Start a new project? The current project is replaced (save it first if you need it).')) {
             useProjectStore.getState().reset()
@@ -55,8 +61,8 @@ export function AppHeader() {
                     </button>
                 )}
                 items={[
-                    { label: 'Save project file', icon: <Save size={15} />, onSelect: saveProject },
-                    { label: 'Open project file…', icon: <FolderOpen size={15} />, onSelect: () => openInput.current?.click() },
+                    { label: 'Save project file', icon: <Save size={15} />, onSelect: saveProjectFile },
+                    { label: 'Open project file…', icon: <FolderOpen size={15} />, onSelect: opener.open },
                     { label: 'New project', icon: <FilePlus2 size={15} />, onSelect: newProject, danger: true },
                 ]}
             />
@@ -72,23 +78,7 @@ export function AppHeader() {
             <a className="btn btn--ghost btn--md btn--icon header-link" href={`${REPO_URL}/issues/new/choose`} target="_blank" rel="noopener noreferrer" aria-label="Give feedback" title="Give feedback">
                 <MessageSquarePlus size={18} />
             </a>
-            <input
-                ref={openInput}
-                type="file"
-                accept=".json,application/json"
-                hidden
-                onChange={async (e) => {
-                    const file = e.target.files?.[0]
-                    e.target.value = ''
-                    if (!file) return
-                    try {
-                        useProjectStore.getState().replaceProject(parseProject(JSON.parse(await file.text())))
-                        toast.success(`Opened ${file.name}`)
-                    } catch (err) {
-                        toast.warning(`Cannot open ${file.name}: ${err instanceof Error ? err.message : 'invalid file'}`)
-                    }
-                }}
-            />
+            {opener.input}
             <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         </header>
     )

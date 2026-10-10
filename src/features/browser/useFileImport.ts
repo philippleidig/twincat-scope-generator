@@ -28,10 +28,7 @@ export function useFileImport() {
                 const symbols = ok.reduce((n, r) => n + r.symbols, 0)
                 toast.success(`Imported ${ok.length} file${ok.length === 1 ? '' : 's'} · ${symbols.toLocaleString()} symbols`)
                 // Open the freshly imported sources so the user sees something right away.
-                const { sources } = useCatalogStore.getState()
-                const expanded = new Set(useBrowserStore.getState().expanded)
-                for (const s of sources) if (contents.some((c) => c.name === s.fileName)) expanded.add(`source:${s.id}`)
-                useBrowserStore.setState({ expanded })
+                useBrowserStore.getState().expandSources(ok.flatMap((r) => r.sourceIds))
             }
             for (const r of failed) toast.warning(r.error!)
         },

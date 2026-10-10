@@ -1,84 +1,111 @@
 /**
- * Use cases that span stores: turning browser picks or dropped symbols into
- * channels of the project.
+ * Use cases that span stores: turning browser picks, dropped symbols and project files
+ * into project changes.
  */
-import type { ScopeDataType } from '@/domain/dataTypes'
-import { findAxisGroup } from '@/domain/project'
+import type { ChannelSpec } from '@/domain/project'
+import { mergeChannelSpecs, parseProject, sanitizeFileName } from '@/domain/project'
+import { candidatesAt } from '@/catalog/candidates'
+import { parseTargetBrowserDrop } from '@/catalog/targetBrowserDrop'
+import { downloadText } from '@/export/bundle'
 import type { BrowserPick } from './browserStore'
+import { PICK_MIME } from './browserStore'
 import { useCatalogStore } from './catalogStore'
 import { useProjectStore } from './projectStore'
 
 export interface AddResult {
     added: number
     duplicates: number
-    truncated: boolean
-    /** Picks that yield nothing recordable (strings, pointers, ...). */
+    /** Picks or dropped symbols that yield nothing recordable (strings, pointers, unknown paths). */
     empty: number
+    truncated: boolean
+    /** Array members skipped because one channel would expand to too many acquisitions. */
+    tooLarge: number
 }
 
-interface ChannelSpec {
-    symbol: string
-    dataType: ScopeDataType
-    port: number
-    amsNetId?: string
+/** Add channel specs to an axis group as one change; unknown Net IDs become targets named `targetName`. */
+export function addSpecs(axisGroupId: string, specs: ChannelSpec[], targetName?: string): Pick<AddResult, 'added' | 'duplicates'> {
+    const { project, commit } = useProjectStore.getState()
+    const result = mergeChannelSpecs(project, axisGroupId, specs, targetName)
+    if (result.added > 0) commit(result.project)
+    return { added: result.added, duplicates: result.duplicates }
 }
 
-/** Target id for a Net ID, creating the target when the project does not know it yet. */
-function targetFor(amsNetId: string | undefined, label: string): string | undefined {
-    if (!amsNetId) return undefined
-    const store = useProjectStore.getState()
-    const existing = store.project.targets.find((t) => t.amsNetId === amsNetId)
-    if (existing) return existing.id
-    store.addTarget({ name: label, amsNetId })
-    return useProjectStore.getState().project.targets.find((t) => t.amsNetId === amsNetId)?.id
-}
-
-/** Append channels to an axis group, skipping ones it already records. */
-export function addChannels(axisGroupId: string, specs: ChannelSpec[], sourceLabel = 'Target'): Omit<AddResult, 'truncated' | 'empty'> {
-    const project = useProjectStore.getState().project
-    const group = findAxisGroup(project, axisGroupId)
-    if (!group) return { added: 0, duplicates: 0 }
-
-    const fallbackTarget = project.targets[0].id
-    const existing = new Set(group.channels.map((c) => `${c.symbol}|${c.port}|${c.targetId}`))
-    const fresh = []
-    let duplicates = 0
-    for (const spec of specs) {
-        const targetId = targetFor(spec.amsNetId, sourceLabel) ?? fallbackTarget
-        const key = `${spec.symbol}|${spec.port}|${targetId}`
-        if (existing.has(key)) {
-            duplicates++
-            continue
-        }
-        existing.add(key)
-        fresh.push({ symbol: spec.symbol, dataType: spec.dataType, port: spec.port, targetId })
+/** What adding picks would produce, resolved against the current catalog. */
+export function resolvePicks(picks: BrowserPick[]): Omit<AddResult, 'added' | 'duplicates'> & { specs: ChannelSpec[]; targetName?: string } {
+    const sources = new Map(useCatalogStore.getState().sources.map((s) => [s.id, s]))
+    const specs: ChannelSpec[] = []
+    let empty = 0
+    let truncated = false
+    let tooLarge = 0
+    for (const pick of picks) {
+        const source = sources.get(pick.sourceId)
+        const result = source ? candidatesAt(source, pick.path) : { specs: [], truncated: false, tooLarge: 0 }
+        if (result.specs.length === 0 && result.tooLarge === 0) empty++
+        truncated ||= result.truncated
+        tooLarge += result.tooLarge
+        specs.push(...result.specs)
     }
-    if (fresh.length > 0) useProjectStore.getState().addChannels(axisGroupId, fresh)
-    return { added: fresh.length, duplicates }
+    return { specs, empty, truncated, tooLarge, targetName: picks[0] && sources.get(picks[0].sourceId)?.title }
 }
 
 export function addPicks(axisGroupId: string, picks: BrowserPick[]): AddResult {
-    const sources = new Map(useCatalogStore.getState().sources.map((s) => [s.id, s]))
-    const specs: ChannelSpec[] = []
-    let truncated = false
-    let empty = 0
-    for (const pick of picks) {
-        const { candidates, truncated: t } = pick.candidates()
-        truncated ||= t
-        if (candidates.length === 0) empty++
-        const source = sources.get(pick.sourceId)
-        for (const c of candidates) {
-            specs.push({ symbol: c.template, dataType: c.scopeType, port: c.port, amsNetId: source?.amsNetId })
+    const { specs, targetName, ...rest } = resolvePicks(picks)
+    return { ...addSpecs(axisGroupId, specs, targetName), ...rest }
+}
+
+/** Serialise picks for a drag. */
+export function setPickDragData(dataTransfer: DataTransfer, picks: BrowserPick[]): void {
+    dataTransfer.setData(PICK_MIME, JSON.stringify(picks))
+    dataTransfer.effectAllowed = 'copy'
+}
+
+/**
+ * Drop on an axis group: picks dragged from the symbol browser, or the XML the TwinCAT
+ * Target Browser puts on the clipboard.
+ */
+export function dropOnAxisGroup(axisGroupId: string, data: Pick<DataTransfer, 'types' | 'getData'>): AddResult {
+    if (data.types.includes(PICK_MIME)) {
+        let picks: BrowserPick[] = []
+        try {
+            const parsed: unknown = JSON.parse(data.getData(PICK_MIME))
+            if (Array.isArray(parsed)) picks = parsed.filter((p): p is BrowserPick => typeof p?.sourceId === 'string' && typeof p?.path === 'string')
+        } catch {
+            // Not ours after all: nothing to add.
         }
+        return addPicks(axisGroupId, picks)
     }
-    const label = picks.length > 0 ? (sources.get(picks[0].sourceId)?.title ?? 'Target') : 'Target'
-    return { ...addChannels(axisGroupId, specs, label), truncated, empty }
+    const dropped = parseTargetBrowserDrop(data.getData('text/plain'))
+    return { ...addSpecs(axisGroupId, dropped.symbols, 'Target Browser'), empty: dropped.skipped.length, truncated: false, tooLarge: 0 }
 }
 
 export function describeAddResult(r: AddResult, groupName: string): string {
+    if (r.added === 0 && r.duplicates === 0 && r.empty === 0 && r.tooLarge === 0) {
+        return 'Nothing to add: drop symbols from the symbol browser or the TwinCAT Target Browser.'
+    }
     const parts = [`${r.added} channel${r.added === 1 ? '' : 's'} added to ${groupName}`]
     if (r.duplicates) parts.push(`${r.duplicates} already present`)
     if (r.empty) parts.push(`${r.empty} not recordable`)
+    if (r.tooLarge) parts.push(`${r.tooLarge} array${r.tooLarge === 1 ? '' : 's'} too large for one channel — pick elements in the tree`)
     if (r.truncated) parts.push('limit reached, not everything was added')
     return parts.join(' · ')
+}
+
+// ---------------------------------------------------------------------------
+// Project files
+// ---------------------------------------------------------------------------
+
+export function saveProjectFile(): void {
+    const { project } = useProjectStore.getState()
+    downloadText(JSON.stringify(project, null, 2), `${sanitizeFileName(project.settings.name.replace(/\s+/g, '_'))}.scope.json`)
+}
+
+/** Replace the project with a project file; throws with a readable message on invalid files. */
+export async function openProjectFile(file: File): Promise<void> {
+    let json: unknown
+    try {
+        json = JSON.parse(await file.text())
+    } catch {
+        throw new Error('not a JSON file')
+    }
+    useProjectStore.getState().commit(parseProject(json))
 }

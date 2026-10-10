@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
-import { FileUp, FolderUp, ListTree, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { FileUp, FolderUp, ListTree, Loader2, Sparkles } from 'lucide-react'
 import { useCatalogStore } from '@/state/catalogStore'
 import { isFiltering, useBrowserStore } from '@/state/browserStore'
 import { Button } from '@/ui/components/Button'
+import { useFilePicker } from '@/ui/components/useFilePicker'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
 import { useFileImport } from './useFileImport'
 import { SourceCard } from './SourceCard'
@@ -22,17 +23,18 @@ const ACCEPT = '.tmc,.xti,.tsproj'
 export function SymbolBrowser() {
     const sources = useCatalogStore((s) => s.sources)
     const index = useCatalogStore((s) => s.index)
+    const hydrated = useCatalogStore((s) => s.hydrated)
     const importFiles = useCatalogStore((s) => s.importFiles)
     const filtering = useBrowserStore(isFiltering)
     const collapseAll = useBrowserStore((s) => s.collapseAll)
     const importFromDisk = useFileImport()
-    const fileInput = useRef<HTMLInputElement>(null)
-    const folderInput = useRef<HTMLInputElement>(null)
+    const files = useFilePicker((f) => void importFromDisk(f), { accept: ACCEPT, multiple: true, testId: 'import-input' })
+    const folder = useFilePicker((f) => void importFromDisk(f), { directory: true })
     const [dragOver, setDragOver] = useState(false)
 
     const loadDemo = () => {
-        importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
-        useBrowserStore.setState({ expanded: new Set(['source:DemoMachine.tmc#0']) })
+        const [report] = importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
+        useBrowserStore.getState().expandSources(report.sourceIds)
     }
 
     return (
@@ -49,7 +51,7 @@ export function SymbolBrowser() {
                 if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(false)
             }}
             onDrop={(e) => {
-                if (!e.dataTransfer.types.includes('Files')) return
+                if (!e.dataTransfer.types.includes('Files') || !hydrated) return
                 e.preventDefault()
                 setDragOver(false)
                 void importFromDisk(e.dataTransfer.files)
@@ -66,39 +68,23 @@ export function SymbolBrowser() {
                             Collapse
                         </Button>
                     )}
-                    <Button size="sm" icon={<FolderUp size={15} />} onClick={() => folderInput.current?.click()}>
+                    <Button size="sm" icon={<FolderUp size={15} />} onClick={folder.open} disabled={!hydrated}>
                         Folder
                     </Button>
-                    <Button size="sm" variant="primary" icon={<FileUp size={15} />} onClick={() => fileInput.current?.click()}>
+                    <Button size="sm" variant="primary" icon={<FileUp size={15} />} onClick={files.open} disabled={!hydrated}>
                         Import files
                     </Button>
                 </div>
-                <input
-                    ref={fileInput}
-                    type="file"
-                    accept={ACCEPT}
-                    multiple
-                    hidden
-                    data-testid="import-input"
-                    onChange={(e) => {
-                        if (e.target.files) void importFromDisk(e.target.files)
-                        e.target.value = ''
-                    }}
-                />
-                <input
-                    ref={folderInput}
-                    type="file"
-                    hidden
-                    // Non-standard but supported by every current browser.
-                    {...{ webkitdirectory: '', directory: '' }}
-                    onChange={(e) => {
-                        if (e.target.files) void importFromDisk(e.target.files)
-                        e.target.value = ''
-                    }}
-                />
+                {files.input}
+                {folder.input}
             </header>
 
-            {sources.length === 0 ? (
+            {!hydrated ? (
+                <div className="empty" role="status">
+                    <Loader2 size={20} className="spin" aria-hidden />
+                    <p>Restoring imported files…</p>
+                </div>
+            ) : sources.length === 0 ? (
                 <div className="dropzone">
                     <div className="dropzone__art" aria-hidden>
                         <FileUp size={28} />
@@ -109,7 +95,7 @@ export function SymbolBrowser() {
                         NC axes, TcCOM objects and target addresses. Everything stays in your browser.
                     </p>
                     <div className="dropzone__actions">
-                        <Button variant="primary" icon={<FileUp size={16} />} onClick={() => fileInput.current?.click()}>
+                        <Button variant="primary" icon={<FileUp size={16} />} onClick={files.open}>
                             Choose files
                         </Button>
                         <Button icon={<Sparkles size={16} />} onClick={loadDemo}>

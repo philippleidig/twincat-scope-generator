@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { v4 as uuid } from 'uuid'
 import { Copy, Library, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
-import { acquisitionCount, fileNameError } from '@/domain/project'
+import { fileAcquisitionCount, fileNameError } from '@/domain/project'
 import { PORT_PRESETS } from '@/domain/ports'
 import { useProjectStore } from '@/state/projectStore'
 import { Button } from '@/ui/components/Button'
@@ -24,16 +25,11 @@ export function ProjectPanel() {
 
     const files = project.scopeFiles
     const addAndSelectFile = () => {
-        addScopeFile()
-        const added = useProjectStore.getState().project.scopeFiles.at(-1)
-        if (added) selectFile(added.id)
+        const id = uuid()
+        addScopeFile(id)
+        selectFile(id)
     }
     const shownFile = files.find((f) => f.id === activeFileId) ?? files[0]
-
-    // Keep the selection valid when the shown file was removed.
-    useEffect(() => {
-        if (shownFile && shownFile.id !== activeFileId) selectFile(shownFile.id)
-    }, [shownFile, activeFileId, selectFile])
 
     const nameError = shownFile
         ? fileNameError(shownFile.name, files.filter((f) => f.id !== shownFile.id).map((f) => f.name))
@@ -55,7 +51,7 @@ export function ProjectPanel() {
 
             <div className="file-tabs" role="tablist" aria-label="Scope files">
                 {files.map((f) => {
-                    const count = f.axisGroups.reduce((n, a) => n + acquisitionCount(a), 0)
+                    const count = fileAcquisitionCount(f)
                     return (
                         <button
                             key={f.id}

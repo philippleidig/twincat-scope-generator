@@ -1,37 +1,41 @@
-/** What adding a browser node or search result to the project produces. */
-import type { ChannelCandidate, SearchEntry, SearchIndex } from './search'
-import { MAX_CANDIDATES, channelCandidates, entryTemplate } from './search'
+/** What adding a symbol (and everything below it) to the project produces. */
+import type { ChannelSpec } from '@/domain/project'
+import { MAX_EXPANSION, expansionCount } from '@/domain/pattern'
 import type { SymbolSource } from './model'
-import type { BrowserNode } from './tree'
+import { templateOf } from './search'
+import { resolvePath, walk } from './walk'
+
+/** Upper bound of channels a single "add" may create, so adding a huge FB stays deliberate. */
+export const MAX_CANDIDATES = 2_000
 
 export interface Candidates {
-    candidates: ChannelCandidate[]
-    /** More channels exist than were returned (MAX_CANDIDATES). */
+    specs: ChannelSpec[]
+    /** More channels exist than were returned (MAX_CANDIDATES or the walk's depth limit). */
     truncated: boolean
+    /** Leaves skipped because their arrays expand to more than MAX_EXPANSION acquisitions. */
+    tooLarge: number
 }
 
-/** A tree node: itself if scalar, otherwise every scalar below it (arrays become counters). */
-export function candidatesForNode(source: SymbolSource, node: BrowserNode): Candidates {
-    if (node.kind === 'scalar' && node.scopeType) {
-        return { candidates: [{ template: node.path, scopeType: node.scopeType, port: node.port }], truncated: false }
+/**
+ * The channels for the symbol at `path` (concrete like `GVL.aAxis[3]` or with wildcards like
+ * `GVL.aAxis[*]`): the symbol itself if it is recordable, otherwise every recordable leaf
+ * below it, with array indices turned into counters. Unknown paths yield nothing.
+ */
+export function candidatesAt(source: SymbolSource, path: string): Candidates {
+    const start = resolvePath(source, path)
+    if (!start) return { specs: [], truncated: false, tooLarge: 0 }
+    const stats = { depthLimited: false }
+    const specs: ChannelSpec[] = []
+    let tooLarge = 0
+    for (const node of walk(source, start, stats)) {
+        if (node.resolved.kind !== 'scalar') continue
+        const symbol = templateOf(node)
+        if (expansionCount(symbol) > MAX_EXPANSION) {
+            tooLarge++
+            continue
+        }
+        if (specs.length === MAX_CANDIDATES) return { specs, truncated: true, tooLarge }
+        specs.push({ symbol, dataType: node.resolved.scopeType, port: node.port, amsNetId: source.amsNetId })
     }
-    if (!node.resolved || !node.area) return { candidates: [], truncated: false }
-    return channelCandidates(source, { path: node.path, name: node.label, resolved: node.resolved, area: node.area, port: node.port })
-}
-
-/** A search result: itself if scalar, otherwise the scalar entries below it in the index. */
-export function candidatesForEntry(index: SearchIndex, entry: SearchEntry): Candidates {
-    if (entry.kind === 'scalar' && entry.scopeType) {
-        return { candidates: [{ template: entryTemplate(entry), scopeType: entry.scopeType, port: entry.port }], truncated: false }
-    }
-    const below = index.entries.filter(
-        (e) =>
-            e.kind === 'scalar' &&
-            e.sourceId === entry.sourceId &&
-            (e.path.startsWith(`${entry.path}.`) || e.path.startsWith(`${entry.path}[`)),
-    )
-    return {
-        candidates: below.slice(0, MAX_CANDIDATES).map((e) => ({ template: entryTemplate(e), scopeType: e.scopeType!, port: e.port })),
-        truncated: below.length > MAX_CANDIDATES,
-    }
+    return { specs, truncated: stats.depthLimited, tooLarge }
 }

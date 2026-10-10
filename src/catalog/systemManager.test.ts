@@ -6,17 +6,16 @@ import { buildIndex } from './search'
 const load = (name: string) => importTwinCatFile(name, fixture(name))
 
 describe('NC axis .xti', () => {
-    it('names the axis after the file and builds axis/encoder/drive paths on the NC port', () => {
+    it('builds Axes.<axis>.<member> paths, like the symbols TwinCAT Scope saves, on the NC port', () => {
         const [nc] = load(FIXTURES.ncAxisXti)
-        const axis = FIXTURES.ncAxisXti.replace('.xti', '')
-        expect(nc).toMatchObject({ kind: 'NC', port: 501, pathPrefix: '' })
+        const axis = `Axes.${FIXTURES.ncAxisXti.replace('.xti', '')}`
+        expect(nc).toMatchObject({ kind: 'NC', port: 501, pathPrefix: '', complete: true })
         const names = nc.roots.map((r) => r.name)
-        expect(names).toContain(`${axis}.Inputs.FromPlc`)
-        expect(names).toContain(`${axis}.Outputs.ToPlc`)
-        expect(names).toContain(`${axis}.Enc.Inputs.In`)
-        expect(nc.roots.find((r) => r.name.endsWith('Outputs.ToPlc'))!.area).toBe('output')
-        const actPos = buildIndex([nc]).entries.find((e) => e.path === `${axis}.Outputs.ToPlc.ActPos`)
-        expect(actPos).toMatchObject({ scopeType: 'REAL64' })
+        expect(names).toEqual(expect.arrayContaining([`${axis}.ActPos`, `${axis}.SetPos`, `${axis}.FromPlc`, `${axis}.ToPlc`, `${axis}.Enc.In`]))
+        expect(nc.roots.find((r) => r.name === `${axis}.ToPlc`)!.area).toBe('output')
+        const entries = buildIndex([nc]).entries
+        expect(entries.find((e) => e.path === `${axis}.ActPos`)).toMatchObject({ scopeType: 'REAL64' })
+        expect(entries.find((e) => e.path === `${axis}.ToPlc.StateDWord.NotMoving`)).toMatchObject({ scopeType: 'BIT' })
     })
 })
 
@@ -24,7 +23,7 @@ describe('NC task .xti', () => {
     it('takes the port from the SAF task and lists axes stored in other files', () => {
         const [nc] = load(FIXTURES.ncTaskXti)
         expect(nc.port).toBe(501)
-        expect(nc.roots.some((r) => r.name.startsWith('Axis_NewArchMcMotionBlocks_Test.'))).toBe(true)
+        expect(nc.roots.some((r) => r.name.startsWith('Axes.Axis_NewArchMcMotionBlocks_Test.'))).toBe(true)
         expect(nc.warnings.join(' ')).toMatch(/separate files.*Axis_PositionStateRead_Test\.xti/)
     })
 })
@@ -32,7 +31,7 @@ describe('NC task .xti', () => {
 describe('PLC project .xti', () => {
     it('lists the I/O variables with their ADS port and recommends the .tmc', () => {
         const [plc] = load(FIXTURES.plcXti)
-        expect(plc).toMatchObject({ kind: 'PLC', title: 'Library (PLC I/O)', port: 851, pathPrefix: '' })
+        expect(plc).toMatchObject({ kind: 'PLC', title: 'Library (PLC I/O)', port: 851, pathPrefix: '', complete: false })
         expect(plc.roots.length).toBeGreaterThan(900)
         expect(plc.roots.find((r) => r.name.endsWith('stMotionStage.Axis.NcToPlc'))).toMatchObject({ area: 'input', type: 'NCTOPLC_AXIS_REF' })
         expect(plc.warnings[0]).toMatch(/\.tmc/)
@@ -46,6 +45,12 @@ describe('TcCOM object .xti', () => {
         expect(tcom).toMatchObject({ kind: 'TcCOM', pathPrefix: instance })
         expect(tcom.roots.map((r) => r.name)).toContain('TempCtrl_U.FeedbackTemp')
         expect(tcom.roots.find((r) => r.name === 'TempCtrl_U.FeedbackTemp')!.area).toBe('input')
+    })
+    it('lists only parameters the object creates ADS symbols for', () => {
+        const [tcom] = load(FIXTURES.tcomXti)
+        const params = tcom.roots.filter((r) => r.area === 'parameter').map((r) => r.name)
+        expect(params).toContain('ModuleCaller')
+        expect(params).not.toContain('CallerVerification')
     })
 })
 
@@ -74,6 +79,21 @@ describe('.tsproj', () => {
             ['PLC', 852, '5.6.7.8.1.1'],
             ['NC', 501, '5.6.7.8.1.1'],
         ])
-        expect(sources[1].roots[0].name).toBe('Axis 1.Outputs.ToPlc')
+        expect(sources[1].roots.map((r) => r.name)).toContain('Axes.Axis 1.ToPlc')
+    })
+})
+
+describe('mergeSources', () => {
+    it('shares the single Net ID of a split .tsproj with the other files', async () => {
+        const { mergeSources } = await import('./importFile')
+        const merged = mergeSources(load(FIXTURES.ncTaskXti), load(FIXTURES.splitTsproj))
+        expect(merged.find((s) => s.kind === 'NC')!.amsNetId).toBe('172.21.148.154.1.1')
+    })
+    it('keeps several Net IDs apart', async () => {
+        const { mergeSources } = await import('./importFile')
+        const a = { ...load(FIXTURES.ncTaskXti)[0], amsNetId: '1.1.1.1.1.1' }
+        const b = { ...load(FIXTURES.tcomXti)[0], amsNetId: '2.2.2.2.1.1' }
+        const c = load(FIXTURES.plcXti)[0]
+        expect(mergeSources([a, b], [c]).find((s) => s.kind === 'PLC')!.amsNetId).toBeUndefined()
     })
 })

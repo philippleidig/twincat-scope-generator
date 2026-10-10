@@ -9,6 +9,9 @@ Has a kind, an ADS **port**, an optional **path prefix** and target **AMS Net ID
 its root symbols. One file can yield several sources (a `.tsproj` with PLC and NC).
 _Avoid_: file, project (a file is the container, a source is what it describes).
 
+**Complete source** — A source that lists every symbol of its runtime (a PLC `.tmc`). A partial source
+(the I/O variables of a PLC in a `.tsproj`) is dropped when a complete one for the same kind and port exists.
+
 **Root symbol** — A symbol as declared in the file (`MAIN.fbAxis`, `GVL.nCount`, a TcCOM parameter,
 an NC axis variable). Its members and array elements are derived from the type table on demand.
 
@@ -23,6 +26,13 @@ name + members + indices.
 
 **Recordable** — A symbol whose resolved type maps to a **scope data type** (numeric or BOOL).
 Strings, pointers, references and interfaces are not recordable.
+
+**Pick** — A symbol selected in the browser, as plain data: source and path (concrete like
+`GVL.aAxis[3]` from the tree, or with wildcards like `GVL.aAxis[*]` from search). Resolved against the
+current catalog only when added, into **channel specs**.
+
+**Channel spec** — A channel to add as importers describe it: template, data type, port and target
+**AMS Net ID** (not yet a project target).
 
 **Search entry** — One node of the search index. Array indices are written as `*`
 (`GVL.aAxis[*].fActPos`) together with their **ranges**, so an array contributes one entry, not one per element.

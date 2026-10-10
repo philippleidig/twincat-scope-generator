@@ -21,7 +21,7 @@ describe('PLC .tmc (Beckhoff TF6000 sample)', () => {
         const tp = source.roots.find((r) => r.name === 'MAIN.TP_1')!
         expect(tp).toMatchObject({ type: 'TP', ns: 'tc2_standard, 3.3.0.0 (beckhoff automation gmbh)', area: 'internal' })
         expect(source.roots.find((r) => r.name === 'GVL.REAL32_1')).toMatchObject({ area: 'internal', areaName: 'PlcTask MArea', comment: '1' })
-        expect(source.roots.find((r) => r.name === 'MAIN.PLCArray')!.dims).toEqual([{ lower: 0, length: 100 }])
+        expect(source.roots.find((r) => r.name === 'MAIN.PLCArray')!.dims).toEqual([{ lower: 0, upper: 99 }])
     })
 
     it('expands FB members and maps their types', () => {
@@ -49,8 +49,9 @@ describe('PLC .tmc with FB inheritance and %I* inputs (0w8States sample)', () =>
 describe('TcCOM .tmc (Beckhoff TF6311 sample)', () => {
     it('describes the class, with an editable instance prefix and a task port', () => {
         const [source] = importTwinCatFile(FIXTURES.tcomTmc, fixture(FIXTURES.tcomTmc))
-        expect(source).toMatchObject({ kind: 'TcCOM', pathPrefix: source.title, port: 350 })
-        expect(source.warnings.join(' ')).toMatch(/instance name/)
+        // TwinCAT's default object name; the class file cannot know the real one.
+        expect(source).toMatchObject({ kind: 'TcCOM', pathPrefix: `Object1 (${source.title})`, port: 350 })
+        expect(source.warnings.join(' ')).toMatch(/object's name/)
         // Struct parameter with inline <SubItem>s becomes an expandable struct.
         const index = buildIndex([source])
         const members = index.entries.filter((e) => e.path.startsWith(`${source.pathPrefix}.Parameter.`)).map((e) => e.name)

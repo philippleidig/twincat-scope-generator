@@ -12,8 +12,9 @@ Scope projects can now be built completely offline from TwinCAT project files.
 - Full **type resolution**: structs and function blocks of any depth, FB inheritance (`EXTENDS`),
   enums, aliases, arrays (incl. multi-dimensional), namespaced library types; strings, pointers and
   interfaces are recognised as not recordable.
-- `.xti`/`.tsproj`: PLC I/O variables, TcCOM objects, NC axes, the target AMS Net ID, and a list of
-  parts stored in separate files.
+- `.xti`/`.tsproj`: NC axes (`Axes.<axis>.ActPos` etc., as TwinCAT Scope names them), TcCOM objects
+  (`<object>.<data area>.<symbol>`), PLC I/O variables, the target AMS Net ID (shared with the other
+  imported files), and a list of parts stored in separate files.
 - **Tree** with lazy expansion and **search** over every member path with globs and `type:` / `area:` /
   `port:` terms, plus filter chips. Arrays are added as counter patterns automatically.
 - Port, path prefix and Net ID can be adjusted per imported source.

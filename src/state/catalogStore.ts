@@ -2,17 +2,18 @@ import { create } from 'zustand'
 import type { SymbolSource } from '@/catalog/model'
 import type { SearchIndex } from '@/catalog/search'
 import { buildIndex } from '@/catalog/search'
-import { importTwinCatFile } from '@/catalog/importFile'
+import { importTwinCatFile, mergeSources } from '@/catalog/importFile'
+import { useBrowserStore } from './browserStore'
 import { idbGet, idbSet } from './idb'
 
 export interface ImportReport {
     fileName: string
-    sources: number
+    sourceIds: string[]
     symbols: number
     error?: string
 }
 
-type SourcePatch = Partial<Pick<SymbolSource, 'title' | 'pathPrefix' | 'port' | 'amsNetId'>>
+export type SourcePatch = Partial<Pick<SymbolSource, 'title' | 'pathPrefix' | 'port' | 'amsNetId'>>
 
 interface CatalogState {
     sources: SymbolSource[]
@@ -28,17 +29,10 @@ interface CatalogState {
 
 const STORAGE_KEY = 'sources'
 
-/**
- * A PLC's I/O variables from a `.xti`/`.tsproj` are a subset of its `.tmc` symbols.
- * When both are present for the same port, keep the complete one.
- */
-function withoutRedundantPlcIo(sources: SymbolSource[]): SymbolSource[] {
-    const tmcPorts = new Set(sources.filter((s) => s.kind === 'PLC' && /\.tmc$/i.test(s.fileName)).map((s) => s.port))
-    return sources.filter((s) => !(s.kind === 'PLC' && !/\.tmc$/i.test(s.fileName) && tmcPorts.has(s.port)))
-}
-
+/** New sources: rebuild the index, persist, and drop picks that may point at changed paths. */
 function commit(sources: SymbolSource[]): Pick<CatalogState, 'sources' | 'index'> {
     void idbSet(STORAGE_KEY, sources)
+    useBrowserStore.getState().resetPicks()
     return { sources, index: buildIndex(sources) }
 }
 
@@ -53,18 +47,17 @@ export const useCatalogStore = create<CatalogState>()((set, get) => ({
         for (const file of files) {
             try {
                 const imported = importTwinCatFile(file.name, file.text)
-                // Re-importing a file replaces what it contributed before.
-                sources = [...sources.filter((s) => s.fileName !== file.name), ...imported]
+                sources = mergeSources(sources, imported)
                 reports.push({
                     fileName: file.name,
-                    sources: imported.length,
+                    sourceIds: imported.map((s) => s.id),
                     symbols: imported.reduce((n, s) => n + s.roots.length, 0),
                 })
             } catch (e) {
-                reports.push({ fileName: file.name, sources: 0, symbols: 0, error: e instanceof Error ? e.message : String(e) })
+                reports.push({ fileName: file.name, sourceIds: [], symbols: 0, error: e instanceof Error ? e.message : String(e) })
             }
         }
-        set(commit(withoutRedundantPlcIo(sources)))
+        set(commit(sources))
         return reports
     },
 
@@ -74,7 +67,8 @@ export const useCatalogStore = create<CatalogState>()((set, get) => ({
 
     hydrate: async () => {
         const stored = await idbGet<SymbolSource[]>(STORAGE_KEY)
-        if (Array.isArray(stored) && get().sources.length === 0) {
+        // Files imported while restoring win; stored sources from older versions are dropped.
+        if (Array.isArray(stored) && get().sources.length === 0 && stored.every((s) => typeof s?.complete === 'boolean')) {
             set({ sources: stored, index: buildIndex(stored), hydrated: true })
         } else {
             set({ hydrated: true })

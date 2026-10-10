@@ -23,11 +23,14 @@ menu move it between machines.
 | File | What you get |
 |---|---|
 | PLC `.tmc` (in the PLC project folder) | **Every** PLC symbol with its real ADS path (`MAIN.fbAxis`, `GVL.nCount`), types from `<DataTypes>` incl. structs, function blocks (with inheritance), enums, aliases and arrays. Port from the project (`Port_851`). |
-| TcCOM `.tmc` / object `.xti` | Parameters and data areas of the module, below the instance name. |
-| `.xti` / `.tsproj` | PLC variables linked to I/O, TcCOM objects, NC axes (axis, encoder, drive variables), and the target's AMS Net ID. Parts stored in separate files are listed so you can import them too. |
+| TcCOM `.tmc` / object `.xti` | Data areas and parameters as `<object name>.<data area>.<symbol>` on the task port (350 by default). |
+| `.xti` / `.tsproj` | NC axes as `Axes.<axis>.<member>` on port 501 (axis state such as `ActPos`, `SetPos`, `ActVelo`, and `ToPlc`/`FromPlc`), TcCOM objects, PLC variables linked to I/O, and the target's AMS Net ID. Parts stored in separate files are listed so you can import them too. |
 
-- **Tree** like the Target Browser: sources → `MAIN`/`GVL`/… → symbols → members → array elements,
-  expanded lazily so huge projects stay fast.
+Import the whole solution folder to get everything at once: the PLC `.tmc` supersedes the I/O
+listing of the same PLC, and the Net ID from the `.tsproj` is applied to the other files.
+
+- **Tree** like the Target Browser: sources → `MAIN`/`GVL`/`Axes › Axis 1`… → symbols → members →
+  array elements, expanded lazily so huge projects stay fast (16 MB `.tmc`: ~1 s to import).
 - **Search**: all words must match anywhere in the path (`axis actpos`); `*`/`?` globs match the whole
   path (`*.fActPos`, `MAIN.*Axis*`); `type:LREAL`, `area:input`, `port:852` filter by field.
 - **Filters**: BOOL / Integer / Real, Input / Output / Internal / Parameter, *Recordable only*.
@@ -35,7 +38,8 @@ menu move it between machines.
   `GVL.aAxis[{i:1:4}].fActPos` — one channel, four acquisitions.
 - **Structs and FBs**: adding one adds every recordable member below it.
 - Strings, pointers, references and interfaces are shown but cannot be selected.
-- Each source's **port**, **path prefix** (instance name for TcCOM) and **target Net ID** can be edited.
+- Each source's **port**, **path prefix** (object name for TcCOM) and **target Net ID** can be edited.
+- How paths and ports are derived per source, and how sure we are: [ADR 0003](docs/adr/0003-symbol-paths-per-source-kind.md).
 
 ## Scope project
 

@@ -3,7 +3,8 @@ import { Copy, Trash2 } from 'lucide-react'
 import type { Channel, Target } from '@/domain/project'
 import { SCOPE_DATA_TYPES, SCOPE_DATA_TYPE_IEC } from '@/domain/dataTypes'
 import type { ScopeDataType } from '@/domain/dataTypes'
-import { expansionCount, validateTemplate } from '@/domain/pattern'
+import { validateTemplate } from '@/domain/pattern'
+import { templateAcquisitions } from '@/domain/project'
 import { useProjectStore } from '@/state/projectStore'
 import { IconButton } from '@/ui/components/Button'
 import { useNumberDraft } from '@/ui/components/useNumberDraft'
@@ -23,7 +24,7 @@ export const ChannelRow = memo(function ChannelRow({ channel, targets }: Channel
 
     const portInput = useNumberDraft(channel.port, (port) => port > 0 && updateChannel(channel.id, { port: Math.round(port) }))
     const validation = channel.symbol.trim() ? validateTemplate(channel.symbol) : null
-    const count = validation?.valid ? expansionCount(channel.symbol) : 0
+    const count = templateAcquisitions(channel.symbol)
     const error = validation && !validation.valid ? validation.errors[0] : null
 
     return (

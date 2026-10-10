@@ -1,7 +1,6 @@
 import { ArrowRight, X } from 'lucide-react'
-import { findAxisGroup } from '@/domain/project'
 import { useBrowserStore } from '@/state/browserStore'
-import { useProjectStore } from '@/state/projectStore'
+import { selectActiveFile, selectActiveGroup, useProjectStore } from '@/state/projectStore'
 import { addPicks, describeAddResult } from '@/state/actions'
 import { toast } from '@/state/toastStore'
 import { Button, IconButton } from '@/ui/components/Button'
@@ -10,18 +9,12 @@ import { Button, IconButton } from '@/ui/components/Button'
 export function SelectionBar() {
     const selection = useBrowserStore((s) => s.selection)
     const clearSelection = useBrowserStore((s) => s.clearSelection)
-    const project = useProjectStore((s) => s.project)
-    const activeAxisGroupId = useProjectStore((s) => s.activeAxisGroupId)
-
-    const file = project.scopeFiles.find((f) => f.axisGroups.some((a) => a.id === activeAxisGroupId))
-    const group = activeAxisGroupId ? findAxisGroup(project, activeAxisGroupId) : undefined
+    const file = useProjectStore(selectActiveFile)
+    const group = useProjectStore(selectActiveGroup)
     if (selection.size === 0) return null
 
     const add = () => {
-        if (!group) {
-            toast.warning('Pick an axis group in the project first (click its header).')
-            return
-        }
+        if (!group) return
         const result = addPicks(group.id, [...selection.values()])
         toast[result.added > 0 ? 'success' : 'warning'](describeAddResult(result, group.name))
         if (result.added > 0) clearSelection()
@@ -36,7 +29,7 @@ export function SelectionBar() {
                         to <strong>{file.name}</strong> › <strong>{group.name}</strong>
                     </>
                 ) : (
-                    'no axis group selected'
+                    'add an axis group to the project first'
                 )}
             </span>
             <IconButton label="Clear selection" onClick={clearSelection}>

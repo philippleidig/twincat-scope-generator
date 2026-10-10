@@ -13,11 +13,17 @@
  * be imported too. `__FILENAME__` names stand for the file's own name.
  */
 import type { AreaKind, SymbolRoot, SymbolSource, TypeTable } from './model'
-import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, readModuleRoots } from './tmc'
+import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, parameterNote, readModuleRoots } from './tmc'
 import { readArrayDims, readTypeTable, typeNameOf } from './typeTable'
 import { child, children, text } from './xml'
 
 export const DEFAULT_NC_PORT = 501
+
+/**
+ * Axis state values TwinCAT exposes by name below every NC axis (Infosys: "Index offset
+ * specification for axis state", symbolic access names).
+ */
+const AXIS_STATE = ['ActPos', 'SetPos', 'ActVelo', 'SetVelo', 'ActAcc', 'SetAcc', 'PosDiff', 'ActTorque']
 
 function fileStem(fileName: string): string {
     const base = fileName.split(/[\\/]/).pop() ?? fileName
@@ -87,6 +93,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
             pathPrefix: '',
             port: readPort(project) ?? DEFAULT_PLC_PORT,
             roots,
+            complete: false,
             warnings: [
                 'Only variables linked to I/O are listed here. Import the PLC project\'s .tmc for all symbols.',
             ],
@@ -98,28 +105,31 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         const body = child(module, 'TmcDesc') ?? module
         if (!child(body, 'Parameters') && !child(body, 'DataAreas')) continue
         const instance = nameOf(module, stem)
+        const { roots, parametersWithoutSymbol } = readModuleRoots(body, types, false, `${fileName}#${sources.length}`, true)
         sources.push({
             ...base(sources.length),
             kind: 'TcCOM',
             title: instance,
             pathPrefix: instance,
             port: readPort(module) ?? DEFAULT_TCCOM_PORT,
-            roots: readModuleRoots(body, types, false),
-            warnings: [TCCOM_PREFIX_HINT],
+            roots,
+            complete: true,
+            warnings: [TCCOM_PREFIX_HINT, ...parameterNote(parametersWithoutSymbol)],
         })
     }
 
-    // NC axes
+    // NC axes: symbols are `Axes.<axis>.<member>` (as saved by TwinCAT Scope); the
+    // Inputs/Outputs group is not part of the name.
     const ncPort = all(doc, 'SafTask').map(readPort).find((p) => p !== null) ?? DEFAULT_NC_PORT
     const axisRoots: SymbolRoot[] = []
     for (const axis of all(doc, 'Axis')) {
         if (axis.getAttribute('File')) continue
-        const axisName = nameOf(axis, stem)
-        axisRoots.push(...readVars(axis, (g) => `${axisName}.${g}.`))
+        const axisPath = `Axes.${nameOf(axis, stem)}`
+        axisRoots.push(...AXIS_STATE.map((name) => ({ name: `${axisPath}.${name}`, type: 'LREAL', area: 'internal' as const, areaName: 'Axis state' })))
+        axisRoots.push(...readVars(axis, () => `${axisPath}.`))
         for (const tag of ['Encoder', 'Drive', 'Controller']) {
             for (const part of children(axis, tag)) {
-                const partName = part.getAttribute('Name') || tag
-                axisRoots.push(...readVars(part, (g) => `${axisName}.${partName}.${g}.`))
+                axisRoots.push(...readVars(part, () => `${axisPath}.${part.getAttribute('Name') || tag}.`))
             }
         }
     }
@@ -131,7 +141,10 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
             pathPrefix: '',
             port: ncPort,
             roots: axisRoots,
-            warnings: ['NC symbol paths are built as "<axis>.<Enc|Drive>.<Inputs|Outputs>.<variable>"; verify them against your target.'],
+            complete: true,
+            warnings: [
+                'NC symbols exist only for axes with "Create symbols" enabled. Encoder/drive paths (Axes.<axis>.<Enc>.<variable>) are not verified yet.',
+            ],
         })
     }
 
@@ -143,7 +156,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         warnings.push('EtherCAT process data cannot be recorded by symbol name; record the PLC or TcCOM variables linked to it.')
     }
     if (sources.length === 0) {
-        return [{ ...base(0), kind: 'Other', title: stem, pathPrefix: '', port: DEFAULT_PLC_PORT, roots: [], warnings: warnings.length ? warnings : ['No PLC, TcCOM or NC symbols found in this file.'] }]
+        return [{ ...base(0), kind: 'Other', title: stem, pathPrefix: '', port: DEFAULT_PLC_PORT, roots: [], complete: true, warnings: warnings.length ? warnings : ['No PLC, TcCOM or NC symbols found in this file.'] }]
     }
     sources[0].warnings.push(...warnings)
     return sources

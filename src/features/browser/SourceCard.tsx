@@ -1,16 +1,27 @@
 import { useState } from 'react'
 import { AlertTriangle, Settings2, Trash2 } from 'lucide-react'
 import type { SymbolSource } from '@/catalog/model'
+import { amsNetIdError } from '@/domain/project'
 import { useCatalogStore } from '@/state/catalogStore'
 import { IconButton } from '@/ui/components/Button'
-import { NumberField, TextField } from '@/ui/components/Field'
+import { TextField } from '@/ui/components/Field'
+import { useDraft } from '@/ui/components/useDraft'
 import { SourceIcon } from './symbolIcons'
 
-/** One imported source with its ADS settings (port, path prefix, Net ID) editable in place. */
+/**
+ * One imported source with its ADS settings (port, path prefix, Net ID). Changes apply on
+ * blur or Enter: each one re-indexes the source.
+ */
 export function SourceCard({ source }: { source: SymbolSource }) {
     const updateSource = useCatalogStore((s) => s.updateSource)
     const removeSource = useCatalogStore((s) => s.removeSource)
     const [editing, setEditing] = useState(false)
+    const port = useDraft(String(source.port), (text) => {
+        const n = Number(text)
+        if (Number.isInteger(n) && n > 0) updateSource(source.id, { port: n })
+    })
+    const prefix = useDraft(source.pathPrefix, (text) => updateSource(source.id, { pathPrefix: text.trim() }))
+    const netId = useDraft(source.amsNetId ?? '', (text) => updateSource(source.id, { amsNetId: text.trim() || undefined }))
 
     return (
         <li className="source-card">
@@ -39,26 +50,20 @@ export function SourceCard({ source }: { source: SymbolSource }) {
             </div>
             {editing && (
                 <div className="source-card__settings">
-                    <NumberField
-                        label="ADS port"
-                        value={source.port}
-                        min={1}
-                        onValueChange={(port) => port > 0 && updateSource(source.id, { port })}
-                    />
+                    <TextField label="ADS port" inputMode="numeric" {...port} />
                     <TextField
                         label="Path prefix"
                         mono
-                        value={source.pathPrefix}
                         placeholder="(none)"
-                        hint={source.kind === 'TcCOM' ? 'Instance name of the TcCOM object' : 'Prepended to every symbol path'}
-                        onChange={(e) => updateSource(source.id, { pathPrefix: e.target.value.trim() })}
+                        hint={source.kind === 'TcCOM' ? "The TcCOM object's name" : 'Prepended to every symbol path'}
+                        {...prefix}
                     />
                     <TextField
                         label="Target AMS Net ID"
                         mono
-                        value={source.amsNetId ?? ''}
                         placeholder="Project default"
-                        onChange={(e) => updateSource(source.id, { amsNetId: e.target.value.trim() || undefined })}
+                        error={netId.value.trim() ? amsNetIdError(netId.value) : null}
+                        {...netId}
                     />
                     {source.warnings.length > 0 && (
                         <ul className="source-card__notes">
