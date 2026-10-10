@@ -1,0 +1,372 @@
+/* ---------- Buttons ---------- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-weight: 550;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, color 120ms, box-shadow 120ms;
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.btn--md {
+    height: 36px;
+    padding: 0 14px;
+}
+.btn--sm {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 13px;
+}
+.btn--icon.btn--sm {
+    width: 30px;
+    padding: 0;
+}
+.btn--icon.btn--md {
+    width: 36px;
+    padding: 0;
+}
+.btn--primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-sm);
+}
+.btn--primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+.btn--secondary {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+}
+.btn--secondary:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+}
+.btn--ghost {
+    background: transparent;
+    color: var(--text-2);
+}
+.btn--ghost:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+.btn--danger {
+    background: transparent;
+    color: var(--danger);
+}
+.btn--danger:hover:not(:disabled) {
+    background: var(--danger-soft);
+}
+
+/* ---------- Fields ---------- */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.field__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-2);
+}
+.field__hint {
+    font-size: 12px;
+    color: var(--text-3);
+}
+.field__error {
+    font-size: 12px;
+    color: var(--danger);
+}
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    transition: border-color 120ms, box-shadow 120ms;
+}
+.input:hover {
+    border-color: var(--border-strong);
+}
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--focus);
+}
+.field--error .input,
+.input[aria-invalid='true'] {
+    border-color: var(--danger);
+}
+.input-suffix {
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    color: var(--text-3);
+    pointer-events: none;
+}
+.select {
+    appearance: none;
+    padding-right: 28px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%),
+        linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+    background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+}
+
+/* ---------- Badges / chips ---------- */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--surface-hover);
+    color: var(--text-2);
+    white-space: nowrap;
+}
+.badge--accent {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+.badge--success {
+    background: var(--success-soft);
+    color: var(--success);
+}
+.badge--warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+.badge--danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 12.5px;
+    color: var(--text-2);
+    cursor: pointer;
+}
+.chip:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+}
+.chip[aria-pressed='true'] {
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    color: var(--accent-text);
+}
+
+/* ---------- Segmented control ---------- */
+.segmented {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-hover);
+}
+.segmented button {
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 550;
+    cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+/* ---------- Dialog ---------- */
+.dialog {
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    max-height: calc(100vh - 48px);
+}
+.dialog::backdrop {
+    background: rgb(10 14 22 / 45%);
+    backdrop-filter: blur(2px);
+}
+.dialog__body {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 50px);
+}
+.dialog__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-5) var(--space-3);
+}
+.dialog__header h2 {
+    margin: 0;
+    font-size: 17px;
+}
+.dialog__description {
+    margin: 4px 0 0;
+    color: var(--text-2);
+    font-size: 13px;
+}
+.dialog__content {
+    padding: var(--space-2) var(--space-5) var(--space-5);
+}
+.dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* ---------- Menu ---------- */
+.menu {
+    position: relative;
+}
+.menu__list {
+    position: absolute;
+    top: calc(100% + 4px);
+    z-index: 30;
+    min-width: 200px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+}
+.menu__list--end {
+    right: 0;
+}
+.menu__list--start {
+    left: 0;
+}
+.menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 32px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+.menu__item:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+.menu__item--danger {
+    color: var(--danger);
+}
+
+/* ---------- Virtual list ---------- */
+.vlist {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ---------- Toasts ---------- */
+.toaster {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(420px, calc(100vw - 32px));
+}
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 12px 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    animation: toast-in 160ms ease-out;
+}
+.toast span {
+    flex: 1;
+}
+.toast--success svg:first-child {
+    color: var(--success);
+}
+.toast--warning svg:first-child {
+    color: var(--warning);
+}
+.toast--info svg:first-child {
+    color: var(--accent);
+}
+.toast__close {
+    border: 0;
+    background: none;
+    color: var(--text-3);
+    cursor: pointer;
+}
+@keyframes toast-in {
+    from {
+        transform: translateY(8px);
+        opacity: 0;
+    }
+}
+
+/* ---------- Empty state ---------- */
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
+    color: var(--text-2);
+}
+.empty h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 15px;
+}
+.empty p {
+    margin: 0;
+    max-width: 380px;
+    font-size: 13px;
+}

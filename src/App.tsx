@@ -1,81 +1,43 @@
-import { GlobalSettings } from '@/components/GlobalSettings'
-import { ScopeFileManager } from '@/components/ScopeFileManager'
-import { ExamplePatterns } from '@/components/ExamplePatterns'
-import { DownloadButton } from '@/components/DownloadButton'
-import { SettingsIcon, GithubIcon, FeedbackIcon } from '@/components/ui'
-
-const APP_VERSION = 'V1.8'
-
-const ISSUES_URL = 'https://github.com/philippleidig/twincat-scope-generator/issues/new/choose'
+import { useEffect, useState } from 'react'
+import { Binary, LayoutList } from 'lucide-react'
+import { AppHeader } from '@/features/shell/AppHeader'
+import { SymbolBrowser } from '@/features/browser/SymbolBrowser'
+import { ProjectPanel } from '@/features/project/ProjectPanel'
+import { Toaster } from '@/ui/components/Toaster'
+import { useCatalogStore } from '@/state/catalogStore'
 import './App.css'
 
-function App() {
+type Pane = 'browser' | 'project'
+
+export default function App() {
+    const hydrate = useCatalogStore((s) => s.hydrate)
+    // On narrow screens only one pane is shown at a time.
+    const [pane, setPane] = useState<Pane>('browser')
+
+    useEffect(() => {
+        void hydrate()
+    }, [hydrate])
+
     return (
         <div className="app">
-            <header className="app-header">
-                <div className="header-content">
-                    <div className="header-left">
-                        <div className="logo">
-                            <SettingsIcon size={28} className="logo-icon" />
-                            <h1>TwinCAT Scope Generator</h1>
-                        </div>
-                        <p className="tagline">
-                            Generate TwinCAT Scope configuration files with pattern-based symbol expansion
-                        </p>
-                    </div>
-                    <div className="header-actions">
-                        <span className="version-badge">{APP_VERSION}</span>
-                        <a
-                            href="https://github.com/philippleidig/twincat-scope-generator"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="header-link"
-                            title="GitHub Repository"
-                        >
-                            <GithubIcon size={20} />
-                        </a>
-                        <a
-                            href={ISSUES_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="header-link"
-                            title="Give Feedback"
-                        >
-                            <FeedbackIcon size={20} />
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <main className="app-main">
-                <div className="app-content">
-                    <div className="left-column">
-                        <GlobalSettings />
-                        <DownloadButton />
-                    </div>
-
-                    <div className="center-column">
-                        <ScopeFileManager />
-                    </div>
-
-                    <div className="right-column">
-                        <ExamplePatterns />
-                    </div>
-                </div>
+            <AppHeader />
+            <nav className="pane-switch segmented" aria-label="View">
+                <button type="button" aria-pressed={pane === 'browser'} onClick={() => setPane('browser')}>
+                    <Binary size={14} /> Symbols
+                </button>
+                <button type="button" aria-pressed={pane === 'project'} onClick={() => setPane('project')}>
+                    <LayoutList size={14} /> Project
+                </button>
+            </nav>
+            <main className={`workspace workspace--${pane}`}>
+                <SymbolBrowser />
+                <ProjectPanel />
             </main>
-
             <footer className="app-footer">
-                <p>
-                    TwinCAT Scope Configuration Generator •
-                    Uses <code>.tcscopex</code> and <code>.tcmproj</code> formats
-                </p>
-                <p className="app-disclaimer">
-                    This is an independent, personal open-source tool — <strong>not a Beckhoff product</strong> and not affiliated with or endorsed by Beckhoff Automation GmbH &amp; Co. KG.
-                    "TwinCAT" and related names are trademarks of their respective owners.
-                </p>
+                Independent open-source tool — <strong>not a Beckhoff product</strong>, not affiliated with or endorsed by Beckhoff Automation
+                GmbH &amp; Co. KG. “TwinCAT” is a trademark of its owner. Files never leave your browser.
             </footer>
+            <Toaster />
         </div>
     )
 }
-
-export default App

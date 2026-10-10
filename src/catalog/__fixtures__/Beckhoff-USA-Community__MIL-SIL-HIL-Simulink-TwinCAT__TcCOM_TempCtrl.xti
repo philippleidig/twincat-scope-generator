@@ -1,0 +1,1183 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.27" ClassName="CTComObjDef">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{B566122F-9A53-AB9F-6F63-5AB41F0B3B05}">ITcTempCtrl</Name>
+			<BitSize X64="64">32</BitSize>
+			<BaseType GUID="{00000001-0000-0000-E000-000000000064}">ITcUnknown</BaseType>
+			<Method>
+				<Name VTableIndex="0">TempCtrl_step</Name>
+				<ReturnType GUID="{18071995-0000-0000-0000-000000000019}">HRESULT</ReturnType>
+				<ReturnBitSize>32</ReturnBitSize>
+			</Method>
+			<Properties>
+				<Property>
+					<Name>TcComWrapper_GenerateGetter</Name>
+					<Value>FALSE</Value>
+				</Property>
+				<Property>
+					<Name>TcComWrapper_GenerateMethods</Name>
+					<Value>TRUE</Value>
+				</Property>
+			</Properties>
+		</DataType>
+		<DataType>
+			<Name GUID="{D94EAD20-451D-4AE0-87CC-9A9884043E25}" Namespace="TcMgSdk" CName="TcMgSdk::ModuleCaller">ModuleCaller</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[CyclicTask]]></Text>
+				<Enum>0</Enum>
+				<Comment><![CDATA[Add to the specified cyclic caller tasks.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[Module]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Don't add to cyclic callers. The module can be called from other TwinCAT modules (e. g. a PLC).]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{1F89595E-59E5-47C7-9A58-A611A4C98DEC}" Namespace="TcMgSdk" CName="TcMgSdk::CallerVerification">CallerVerification</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[Default]]></Text>
+				<Enum>0</Enum>
+				<Comment><![CDATA[Verify the caller task only if the "ModuleCaller" parameter is set to "Module" but not when added to cyclic caller tasks.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[Always]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Always verify the caller context to prevent concurrent execution of model code and corresponding DataArea mappings.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[Never]]></Text>
+				<Enum>2</Enum>
+				<Comment><![CDATA[Skip caller verification to reduce execution times.]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{65804E5D-07CA-41C0-AEDC-C5051585B216}" Namespace="TcMgSdk" CName="TcMgSdk::StepSizeAdaptation">StepSizeAdaptation</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[RequireMatchingTaskCycleTime]]></Text>
+				<Enum>0</Enum>
+				<Comment><![CDATA[Don't accept task cycle times other than the Simulink step sizes.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[UseTaskCycleTime]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Adapt the Smulink step sizes to the task cycle times.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[UseModelStepSize]]></Text>
+				<Enum>2</Enum>
+				<Comment><![CDATA[Keep the Smulink step sizes, independent of the callers cycle time.]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{3856C4C8-CCAF-403F-A7C8-4E1502F2FFFC}" Namespace="TcMgSdk" CName="TcMgSdk::ExecutionSequence1">ExecutionSequence1</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[UpdateBeforeOutputMapping]]></Text>
+				<Enum>0</Enum>
+				<Comment><![CDATA[Input mapping -> State and output update -> Output mapping -> ADS processing]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[IoAtTaskBegin]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Input mapping -> Code execution -> Output update -> ADS processing]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000061}" TcBaseType="true" CName="TCOM_STATE">TCOM_STATE</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[TCOM_STATE_INIT]]></Text>
+				<Enum>1</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[TCOM_STATE_PREOP]]></Text>
+				<Enum>2</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[TCOM_STATE_SAFEOP]]></Text>
+				<Enum>4</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[TCOM_STATE_OP]]></Text>
+				<Enum>8</Enum>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{DAC090EE-CC7B-4AD4-8FB6-95BC035207E1}" Namespace="TcMgSdk" CName="TcMgSdk::FpExcptCtrlSet">FpExcptCtrlSet</Name>
+			<BitSize>8</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000002}">USINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[CallerExceptions]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Use the floating point exception settings provided by the caller]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[ThrowExceptions]]></Text>
+				<Enum>3</Enum>
+				<Comment><![CDATA[Enable floating point exceptions on invalid operations and divisions by zero]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SuppressExceptions]]></Text>
+				<Enum>5</Enum>
+				<Comment><![CDATA[Disable floating point exceptions.]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{F26DC700-AACE-4548-857F-B87D9CC2BED8}" Namespace="TcMgSdk" CName="TcMgSdk::FpExcptCtrlSet">FpExcptCtrlSetEx</Name>
+			<BitSize>8</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000002}">USINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[CallerExceptions]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[Use the floating point exception settings provided by the caller]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[ThrowExceptions]]></Text>
+				<Enum>3</Enum>
+				<Comment><![CDATA[Enable floating point exceptions on invalid operations and divisions by zero]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SuppressExceptions]]></Text>
+				<Enum>13</Enum>
+				<Comment><![CDATA[Disable floating point exceptions.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogExceptions]]></Text>
+				<Enum>19</Enum>
+				<Comment><![CDATA[Log exception information.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogAndHold]]></Text>
+				<Enum>51</Enum>
+				<Comment><![CDATA[Log exception information and puase execution of the cyclic code after completion of the actual cycle]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogAndCatch]]></Text>
+				<Enum>83</Enum>
+				<Comment><![CDATA[Log exception information and immediately terminate execution of the cyclic code. Reinitialization is required to restart.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogAndDump]]></Text>
+				<Enum>147</Enum>
+				<Comment><![CDATA[Log exception information, create a dump file with detailed exception information and try to continue execution of the cyclic code]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogHoldAndDump]]></Text>
+				<Enum>179</Enum>
+				<Comment><![CDATA[Log exception information, create a dump file with detailed exception information and puase execution of the cyclic code after completion of the actual cycle]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[LogCatchAndDump]]></Text>
+				<Enum>211</Enum>
+				<Comment><![CDATA[Log exception information, create a dump file with detailed exception information and immediately terminate execution of the cyclic code. Reinitialization is required to restart.]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{0564A6B7-D0A7-47F6-9375-C2F05C960A28}" Namespace="TcMgSdk" CName="TcMgSdk::ModuleBuildInfo">ModuleBuildInfo</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>TcBuild</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TcRevision</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Debug</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{4D64EEAF-7506-47D8-B2A9-577AA0A0C3D9}" Namespace="TcMgSdk" CName="TcMgSdk::LibraryInfo">LibraryInfo</Name>
+			<BitSize>4800</BitSize>
+			<SubItem>
+				<Name>FileVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ProductVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>VendorName</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>256</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>LibraryName</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>1280</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>LibraryVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>2304</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>LibraryId</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>2432</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>LibraryGUID</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000024}">CLSID</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>3456</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TcSdkVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>3584</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Compiler</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>3712</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Debug</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>4736</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{7019D80E-1AD0-4B74-BBC6-9C50FCA14FE8}" Namespace="TcMgSdk" CName="TcMgSdk::ModuleInfo">ModuleInfo</Name>
+			<BitSize>1280</BitSize>
+			<SubItem>
+				<Name>ClassName</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CommonClassId</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000024}">CLSID</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>1024</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>VersionClassId</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000024}">CLSID</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>1152</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{BB79F3C5-FCA6-44F0-A017-6CA6C8C2A9DA}" Namespace="TcMatSim">ModuleGeneratorInfo</Name>
+			<BitSize>256</BitSize>
+			<SubItem>
+				<Name>MatlabVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TE140xVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{24B309D5-81B5-4BC2-A814-E85159BFD98A}" Namespace="TcMatSim">SimulinkModelInfo</Name>
+			<BitSize>1408</BitSize>
+			<SubItem>
+				<Name>ModelName</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SimulinkVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>1024</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModelVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>1152</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModelChecksum</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>1280</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{A78D7BE8-0230-AF77-53C9-A237295FD718}">TempCtrl_U_T</Name>
+			<BitSize>128</BitSize>
+			<SubItem>
+				<Name>FeedbackTemp</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Setpoint</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{7831F806-0191-4166-9213-A229779C1CAA}">ParameterSharingType</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[Define]]></Text>
+				<Enum>0</Enum>
+				<Comment><![CDATA[This module instance defines the parameter values for all further instances of this module class. Exactly one instance of this module class must use this option.]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[Inherit]]></Text>
+				<Enum>1</Enum>
+				<Comment><![CDATA[This module instance inherits the parameter values from the instance of this module class configured to "Define" the parameter values. Model parameters configured at this instsance are ignored.]]></Comment>
+			</EnumInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{24C2F409-5B87-7E52-2D7A-D94F026882AF}">matrix2xdouble</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>2</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{38CC7BE2-FF29-68CC-B1B4-612706371204}">P_TempCtrl_T</Name>
+			<BitSize>832</BitSize>
+			<SubItem>
+				<Name>Kp</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetpointDefault</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Tn</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>sawtooth_rep_seq_y</Name>
+				<Type GUID="{24C2F409-5B87-7E52-2D7A-D94F026882AF}">matrix2xdouble</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PI_y_max</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>320</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PI_y_min</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>384</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetpointSel_Threshold</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>448</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>scale_Gain</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>512</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Integrator_IC</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>576</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Constant_Value</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>640</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>LookUpTable1_bp01Data</Name>
+				<Type GUID="{24C2F409-5B87-7E52-2D7A-D94F026882AF}">matrix2xdouble</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>704</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{241597CD-DFF8-4569-90EE-6B470D7A1D92}" Namespace="TcMgSdk" CName="TcMgSdk::ExceptionInfo">ExceptionInfo</Name>
+			<BitSize>1376</BitSize>
+			<SubItem>
+				<Name>ExceptionCode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TmxName</Name>
+				<Type GUID="{18071995-0000-0000-0000-00010000007F}">STRING(127)</Type>
+				<BitSize>1024</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TmxVersion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>1056</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>InstructionAddr</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1184</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ReturnAddr</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>1216</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>DumpCreated</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>1344</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{ECA9740C-770E-535F-679D-15DC9C6F9057}">MonitoringSignalsType</Name>
+			<BitSize>128</BitSize>
+			<SubItem>
+				<Name>setpoint</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>actual</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+		</DataType>
+	</DataTypes>
+	<ImageDatas>
+		<ImageData Id="1000">424d360300000000000036000000280000001000000010000000010018000000000000030000000000000000000000000000000000000000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000803d94833d94833a937d398f7a358c73358c7333886d32876c2f81662e7c622b7c5d29775927745424704f000080000080419b8c3d9a833d94833d94833a937d3a937d358c73358c7332876c3083672e7c622b7c5d2b7c5d277454000080000080439e913d8d702e66232e66232e66232e66232e66232e66232e66232e66232e66232e66233d7c5029775900008000008047a5992e6623419b8c419b8c3d9a833d94833a937d398f7a358c7332876c32876c2e7c622e6623468b6f0000800000804caa9e2e66234caa9e3d7c5057ad9c43a390419b8c3d9a833a937d3a937d358c7333886d2e6623478c700000800000805eb5aa2e662360b7ac2d6523326c2d539b7c46a497419b8c3d9a833a937d3a937d358c732e6623488f7300008000008070bfb52e662373c3b82d65235ea997326c3645784a53a996419b8c3d9a833a937d378f782e66234b947b00008000008085ccc42e662385ccc42d65237cc8be72c2b6488a6e326c2d539b7c419b8c3d9a833a937d2e66234b947b00008000008092d2c92e662392d2c92d65238cd1c985ccc472c2b659a79a3473453c73444fa28e3d94832e66234b947b000080000080a2d9d22e6623adddd72d65239ad9d18cd1c97cc8be6dbeb25ab2a43d8d702a612a4d92712e66234b9883000080000080b1dfd92e6623bce6e02d6523abdfd89bd7d08bcdc57bc5bc68baae57ad9c49a2923977532e66234b9883000080000080bde3de87aa942e66232e66232e66232e66232e66232e66232e66232e66232e66232e662332794f3d9483000080000080c2e6e1d3edead3edeac2e6e1b1e0d9a2d9d28bcdc57bc5bc6dbeb254aea246a497439e91419b8c3d9483000080000080bde3dec9e8e4c9e8e4bde3deadddd79dd5ce8bcdc57bc5bc67b9ae54aea247a59946a497419b8c3d9483000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080</ImageData>
+	</ImageDatas>
+	<Module Id="#x01010010" KeepUnrestoredLinks="2" ClassFactoryId="TE140x Module Vendor|TempCtrl|0.0.0.14">
+		<Name>__FILENAME__</Name>
+		<ImageId>1000</ImageId>
+		<TmcDesc GUID="{E3FA70DE-D2CA-41D8-D11C-5A65E73FF80D}" ClassFactoryId="TE140x Module Vendor|TempCtrl|0.0.0.14">
+			<Name>TempCtrl</Name>
+			<CLSID ClassFactory="TempCtrl" RealTimeInstantiable="true">{E3FA70DE-D2CA-41D8-D11C-5A65E73FF80D}</CLSID>
+			<Info>
+				<ImageData>424d360300000000000036000000280000001000000010000000010018000000000000030000000000000000000000000000000000000000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000803d94833d94833a937d398f7a358c73358c7333886d32876c2f81662e7c622b7c5d29775927745424704f000080000080419b8c3d9a833d94833d94833a937d3a937d358c73358c7332876c3083672e7c622b7c5d2b7c5d277454000080000080439e913d8d702e66232e66232e66232e66232e66232e66232e66232e66232e66232e66233d7c5029775900008000008047a5992e6623419b8c419b8c3d9a833d94833a937d398f7a358c7332876c32876c2e7c622e6623468b6f0000800000804caa9e2e66234caa9e3d7c5057ad9c43a390419b8c3d9a833a937d3a937d358c7333886d2e6623478c700000800000805eb5aa2e662360b7ac2d6523326c2d539b7c46a497419b8c3d9a833a937d3a937d358c732e6623488f7300008000008070bfb52e662373c3b82d65235ea997326c3645784a53a996419b8c3d9a833a937d378f782e66234b947b00008000008085ccc42e662385ccc42d65237cc8be72c2b6488a6e326c2d539b7c419b8c3d9a833a937d2e66234b947b00008000008092d2c92e662392d2c92d65238cd1c985ccc472c2b659a79a3473453c73444fa28e3d94832e66234b947b000080000080a2d9d22e6623adddd72d65239ad9d18cd1c97cc8be6dbeb25ab2a43d8d702a612a4d92712e66234b9883000080000080b1dfd92e6623bce6e02d6523abdfd89bd7d08bcdc57bc5bc68baae57ad9c49a2923977532e66234b9883000080000080bde3de87aa942e66232e66232e66232e66232e66232e66232e66232e66232e66232e662332794f3d9483000080000080c2e6e1d3edead3edeac2e6e1b1e0d9a2d9d28bcdc57bc5bc6dbeb254aea246a497439e91419b8c3d9483000080000080bde3dec9e8e4c9e8e4bde3deadddd79dd5ce8bcdc57bc5bc67b9ae54aea247a59946a497419b8c3d9483000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080000080</ImageData>
+				<TabExtension GUID="{BB6DDFDC-900F-473F-83FC-D83513217B55}"/>
+			</Info>
+			<Licenses>
+				<License>
+					<LicenseId>{2D6F11C0-6F75-4E5D-A07D-D83A5E0C9F10}</LicenseId>
+				</License>
+			</Licenses>
+			<InitSequence>PSO</InitSequence>
+			<Contexts>
+				<Context>
+					<Id>0</Id>
+					<Name>Context0 (5 ms)</Name>
+					<ManualConfig>
+						<OTCID>#x02010020</OTCID>
+					</ManualConfig>
+					<Priority>1</Priority>
+					<CycleTime>5000000</CycleTime>
+				</Context>
+			</Contexts>
+			<Interfaces>
+				<Interface>
+					<Type GUID="{00000001-0000-0000-E000-000000000064}">ITcUnknown</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{00000002-0000-0000-E000-000000000064}">ITcPersist</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{00000012-0000-0000-E000-000000000064}">ITComObject</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{03000018-0000-0000-E000-000000000064}">ITcWatchSource</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{03000010-0000-0000-E000-000000000064}">ITcCyclic</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{03000025-0000-0000-E000-000000000064}">ITcPostCyclic</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{03000012-0000-0000-E000-000000000064}">ITcADI</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{00000041-0000-0000-E000-000000000064}">ITcObjParaAsync</Type>
+				</Interface>
+				<Interface>
+					<Type GUID="{B566122F-9A53-AB9F-6F63-5AB41F0B3B05}">ITcTempCtrl</Type>
+					<ContextId>0</ContextId>
+				</Interface>
+			</Interfaces>
+			<Parameters>
+				<Parameter HideParameter="true" CreateSymbol="true">
+					<Name>TaskOid</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-00000000000F}">OTCID</BaseType>
+					<PTCID>#x03002060</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true" CreateSymbol="true">
+					<Name>TaskPriority</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+					<PTCID>#x03002070</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true" CreateSymbol="true">
+					<Name>TaskCycleTimeNs</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+					<PTCID>#x03002080</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true" CreateSymbol="true">
+					<Name>TaskPort</Name>
+					<BitSize>16</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000005}">UINT</BaseType>
+					<PTCID>#x03002090</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true" CreateSymbol="true">
+					<Name>TaskSortOrder</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+					<PTCID>#x030020b0</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true">
+					<Name>TraceLevelMax</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{8007AE3B-86BB-40F2-B385-EF87FCC239A4}">TcTraceLevel</BaseType>
+					<Default>
+						<EnumText>tlInfo</EnumText>
+					</Default>
+					<PTCID>#x00000001</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>ModuleCaller</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{D94EAD20-451D-4AE0-87CC-9A9884043E25}" Namespace="TcMgSdk">ModuleCaller</BaseType>
+					<Default>
+						<EnumText>CyclicTask</EnumText>
+					</Default>
+					<PTCID>#x00000002</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true">
+					<Name>CallerVerification</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{1F89595E-59E5-47C7-9A58-A611A4C98DEC}" Namespace="TcMgSdk">CallerVerification</BaseType>
+					<Default>
+						<EnumText>Default</EnumText>
+					</Default>
+					<PTCID>#x00000003</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>StepSizeAdaptation</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{65804E5D-07CA-41C0-AEDC-C5051585B216}" Namespace="TcMgSdk">StepSizeAdaptation</BaseType>
+					<Default>
+						<EnumText>RequireMatchingTaskCycleTime</EnumText>
+					</Default>
+					<PTCID>#x00000004</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>ExecutionSequence</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{3856C4C8-CCAF-403F-A7C8-4E1502F2FFFC}" Namespace="TcMgSdk">ExecutionSequence1</BaseType>
+					<Default>
+						<EnumText>UpdateBeforeOutputMapping</EnumText>
+					</Default>
+					<PTCID>#x00000005</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>Execute</Name>
+					<BitSize>8</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+					<Default>
+						<EnumText>TRUE</EnumText>
+					</Default>
+					<PTCID>#x00000006</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true">
+					<Name>AccessLockState</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000061}">TCOM_STATE</BaseType>
+					<Default>
+						<EnumText>TCOM_STATE_OP</EnumText>
+					</Default>
+					<PTCID>#x00000007</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true">
+					<Name>InitExceptionHandling</Name>
+					<BitSize>8</BitSize>
+					<BaseType GUID="{DAC090EE-CC7B-4AD4-8FB6-95BC035207E1}" Namespace="TcMgSdk">FpExcptCtrlSet</BaseType>
+					<Default>
+						<EnumText>CallerExceptions</EnumText>
+					</Default>
+					<PTCID>#x00000008</PTCID>
+				</Parameter>
+				<Parameter HideParameter="true">
+					<Name>UpdateExceptionHandling</Name>
+					<BitSize>8</BitSize>
+					<BaseType GUID="{F26DC700-AACE-4548-857F-B87D9CC2BED8}" Namespace="TcMgSdk">FpExcptCtrlSetEx</BaseType>
+					<Default>
+						<EnumText>CallerExceptions</EnumText>
+					</Default>
+					<PTCID>#x00000009</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>ModuleBuildInfo</Name>
+					<Comment><![CDATA[Legacy! Please use 'LibraryInfo' to read build information.]]></Comment>
+					<BitSize>96</BitSize>
+					<BaseType GUID="{0564A6B7-D0A7-47F6-9375-C2F05C960A28}" Namespace="TcMgSdk">ModuleBuildInfo</BaseType>
+					<PTCID>#x0000000a</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>Initialized</Name>
+					<BitSize>8</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+					<Default>
+						<EnumText>FALSE</EnumText>
+					</Default>
+					<PTCID>#x0000000b</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>SkippedExecutionCount</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+					<Default>
+						<Value>0</Value>
+					</Default>
+					<PTCID>#x0000000c</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>LibraryInfo</Name>
+					<BitSize>4800</BitSize>
+					<BaseType GUID="{4D64EEAF-7506-47D8-B2A9-577AA0A0C3D9}" Namespace="TcMgSdk">LibraryInfo</BaseType>
+					<PTCID>#x0000000d</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>ModuleInfo</Name>
+					<BitSize>1280</BitSize>
+					<BaseType GUID="{7019D80E-1AD0-4B74-BBC6-9C50FCA14FE8}" Namespace="TcMgSdk">ModuleInfo</BaseType>
+					<PTCID>#x0000000e</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true">
+					<Name>ModuleGeneratorInfo</Name>
+					<BitSize>256</BitSize>
+					<BaseType GUID="{BB79F3C5-FCA6-44F0-A017-6CA6C8C2A9DA}" Namespace="TcMatSim">ModuleGeneratorInfo</BaseType>
+					<PTCID>#x0000000f</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true">
+					<Name>SimulinkModelInfo</Name>
+					<BitSize>1408</BitSize>
+					<BaseType GUID="{24B309D5-81B5-4BC2-A814-E85159BFD98A}" Namespace="TcMatSim">SimulinkModelInfo</BaseType>
+					<PTCID>#x00000010</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>TempCtrl_U</Name>
+					<BitSize>128</BitSize>
+					<BaseType GUID="{A78D7BE8-0230-AF77-53C9-A237295FD718}">TempCtrl_U_T</BaseType>
+					<PTCID>#x80000000</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>TempCtrl_P_Sharing</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{7831F806-0191-4166-9213-A229779C1CAA}">ParameterSharingType</BaseType>
+					<Default>
+						<EnumText>Define</EnumText>
+					</Default>
+					<PTCID>#x00000011</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>TempCtrl_P_Definer</Name>
+					<BitSize>32</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-00000000000F}">OTCID</BaseType>
+					<PTCID>#x00000012</PTCID>
+				</Parameter>
+				<Parameter CreateSymbol="true">
+					<Name>TempCtrl_P</Name>
+					<BitSize>832</BitSize>
+					<BaseType GUID="{38CC7BE2-FF29-68CC-B1B4-612706371204}">P_TempCtrl_T</BaseType>
+					<Default>
+						<SubItem>
+							<Name>.Kp</Name>
+							<Value>50</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.SetpointDefault</Name>
+							<Value>37</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.Tn</Name>
+							<Value>200</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.sawtooth_rep_seq_y</Name>
+							<Data>00000000000000000000000000004E40</Data>
+						</SubItem>
+						<SubItem>
+							<Name>.PI_y_max</Name>
+							<Value>60</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.PI_y_min</Name>
+							<Value>0</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.SetpointSel_Threshold</Name>
+							<Value>0</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.scale_Gain</Name>
+							<Value>0.1</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.Integrator_IC</Name>
+							<Value>0</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.Constant_Value</Name>
+							<Value>0.1</Value>
+						</SubItem>
+						<SubItem>
+							<Name>.LookUpTable1_bp01Data</Name>
+							<Data>00000000000000009A9999999999B93F</Data>
+						</SubItem>
+					</Default>
+					<PTCID>#x00000013</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>SimulationTime</Name>
+					<BitSize>64</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+					<PTCID>#x00000014</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>CycleCount</Name>
+					<BitSize>64</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-00000000000B}">ULINT</BaseType>
+					<PTCID>#x00000015</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>ExceptionCount</Name>
+					<BitSize>64</BitSize>
+					<BaseType GUID="{18071995-0000-0000-0000-00000000000B}">ULINT</BaseType>
+					<PTCID>#x00000016</PTCID>
+				</Parameter>
+				<Parameter OnlineParameter="true" HideParameter="true" CreateSymbol="true" ReadOnly="true">
+					<Name>ExceptionInfo</Name>
+					<BitSize>1376</BitSize>
+					<BaseType GUID="{241597CD-DFF8-4569-90EE-6B470D7A1D92}" Namespace="TcMgSdk">ExceptionInfo</BaseType>
+					<PTCID>#x00000017</PTCID>
+				</Parameter>
+			</Parameters>
+			<DataAreas>
+				<DataArea>
+					<AreaNo AreaType="InputDst" CreateSymbols="true">0</AreaNo>
+					<Name>TempCtrl_U</Name>
+					<ContextId>0</ContextId>
+					<ByteSize>16</ByteSize>
+					<Symbol>
+						<Name>FeedbackTemp</Name>
+						<BitSize>16</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
+						<PTCID>#x80000000</PTCID>
+						<BitOffs>0</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Setpoint</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x80000008</PTCID>
+						<BitOffs>64</BitOffs>
+					</Symbol>
+				</DataArea>
+				<DataArea>
+					<AreaNo AreaType="OutputSrc" CreateSymbols="true">1</AreaNo>
+					<Name>TempCtrl_Y</Name>
+					<ContextId>0</ContextId>
+					<ByteSize>24</ByteSize>
+					<Symbol>
+						<Name>HeaterOn</Name>
+						<BitSize>8</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+						<PTCID>#x81000000</PTCID>
+						<BitOffs>0</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>MonitoringSignals</Name>
+						<BitSize>128</BitSize>
+						<BaseType GUID="{ECA9740C-770E-535F-679D-15DC9C6F9057}">MonitoringSignalsType</BaseType>
+						<PTCID>#x81000008</PTCID>
+						<BitOffs>64</BitOffs>
+					</Symbol>
+				</DataArea>
+				<DataArea>
+					<AreaNo AreaType="Internal" CreateSymbols="true">2</AreaNo>
+					<Name>TempCtrl_B</Name>
+					<ContextId>0</ContextId>
+					<ByteSize>136</ByteSize>
+					<Symbol>
+						<Name>BusCreator</Name>
+						<BitSize>128</BitSize>
+						<BaseType GUID="{ECA9740C-770E-535F-679D-15DC9C6F9057}">MonitoringSignalsType</BaseType>
+						<PTCID>#x82000000</PTCID>
+						<BitOffs>0</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>setpoint</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000010</PTCID>
+						<BitOffs>128</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>setpoint_e</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000018</PTCID>
+						<BitOffs>192</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>actual</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000020</PTCID>
+						<BitOffs>256</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>e</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000028</PTCID>
+						<BitOffs>320</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>P</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000030</PTCID>
+						<BitOffs>384</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Integrator</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000038</PTCID>
+						<BitOffs>448</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Sum</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000040</PTCID>
+						<BitOffs>512</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Saturation</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000048</PTCID>
+						<BitOffs>576</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Clock</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000050</PTCID>
+						<BitOffs>640</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Sum_g</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000058</PTCID>
+						<BitOffs>704</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>MathFunction</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000060</PTCID>
+						<BitOffs>768</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>LookUpTable1</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000068</PTCID>
+						<BitOffs>832</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>Switch</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000070</PTCID>
+						<BitOffs>896</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>I</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x82000078</PTCID>
+						<BitOffs>960</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>comparator</Name>
+						<BitSize>8</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+						<PTCID>#x82000080</PTCID>
+						<BitOffs>1024</BitOffs>
+					</Symbol>
+					<Symbol>
+						<Name>ARW</Name>
+						<BitSize>8</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+						<PTCID>#x82000081</PTCID>
+						<BitOffs>1032</BitOffs>
+					</Symbol>
+				</DataArea>
+				<DataArea>
+					<AreaNo AreaType="Internal" CreateSymbols="true">3</AreaNo>
+					<Name>TempCtrl_X</Name>
+					<ContextId>0</ContextId>
+					<ByteSize>8</ByteSize>
+					<Symbol>
+						<Name>Integrator_CSTATE</Name>
+						<BitSize>64</BitSize>
+						<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+						<PTCID>#x83000000</PTCID>
+						<BitOffs>0</BitOffs>
+					</Symbol>
+				</DataArea>
+			</DataAreas>
+			<Xml>
+				<GeneratedModuleInfoFile>TempCtrl_ModuleInfo.xml</GeneratedModuleInfoFile>
+			</Xml>
+			<ParameterValues>
+				<Value>
+					<Name>TaskOid</Name>
+					<Value>33620000</Value>
+				</Value>
+				<Value>
+					<Name>TaskPriority</Name>
+					<Value>1</Value>
+				</Value>
+				<Value>
+					<Name>TaskCycleTimeNs</Name>
+					<Value>5000000</Value>
+				</Value>
+				<Value>
+					<Name>TaskPort</Name>
+					<Value>350</Value>
+				</Value>
+				<Value>
+					<Name>TaskSortOrder</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TraceLevelMax</Name>
+					<EnumText>tlInfo</EnumText>
+				</Value>
+				<Value>
+					<Name>ModuleCaller</Name>
+					<EnumText>CyclicTask</EnumText>
+				</Value>
+				<Value>
+					<Name>CallerVerification</Name>
+					<EnumText>Default</EnumText>
+				</Value>
+				<Value>
+					<Name>StepSizeAdaptation</Name>
+					<EnumText>RequireMatchingTaskCycleTime</EnumText>
+				</Value>
+				<Value>
+					<Name>ExecutionSequence</Name>
+					<EnumText>UpdateBeforeOutputMapping</EnumText>
+				</Value>
+				<Value>
+					<Name>Execute</Name>
+					<EnumText>TRUE</EnumText>
+				</Value>
+				<Value>
+					<Name>AccessLockState</Name>
+					<EnumText>TCOM_STATE_OP</EnumText>
+				</Value>
+				<Value>
+					<Name>InitExceptionHandling</Name>
+					<EnumText>CallerExceptions</EnumText>
+				</Value>
+				<Value>
+					<Name>UpdateExceptionHandling</Name>
+					<EnumText>CallerExceptions</EnumText>
+				</Value>
+				<Value>
+					<Name>TempCtrl_U.FeedbackTemp</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_U.Setpoint</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P_Sharing</Name>
+					<EnumText>Define</EnumText>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.Kp</Name>
+					<Value>50</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.SetpointDefault</Name>
+					<Value>37</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.Tn</Name>
+					<Value>200</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.sawtooth_rep_seq_y[0]</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.sawtooth_rep_seq_y[1]</Name>
+					<Value>60</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.PI_y_max</Name>
+					<Value>60</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.PI_y_min</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.SetpointSel_Threshold</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.scale_Gain</Name>
+					<Value>0.1</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.Integrator_IC</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.Constant_Value</Name>
+					<Value>0.1</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.LookUpTable1_bp01Data[0]</Name>
+					<Value>0</Value>
+				</Value>
+				<Value>
+					<Name>TempCtrl_P.LookUpTable1_bp01Data[1]</Name>
+					<Value>0.1</Value>
+				</Value>
+			</ParameterValues>
+		</TmcDesc>
+	</Module>
+	<Mappings>
+		<OwnerA>
+			<OwnerB Name="TIRC^TcCOM Objects^SimIo^TempCtrlSysPT2">
+				<Link VarA="TempCtrl_U^FeedbackTemp" VarB="Inputs^Temp"/>
+				<Link VarA="TempCtrl_Y^HeaterOn" VarB="Outputs^Heat_On"/>
+				<Link VarA="TempCtrl_Y^MonitoringSignals" VarB="Outputs^MonitoringSignals"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmItem>

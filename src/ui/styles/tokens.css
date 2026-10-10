@@ -1,0 +1,130 @@
+/* Design tokens. Light is the default; dark applies with the OS setting unless the
+   user picked a theme explicitly (data-theme on <html>). */
+:root {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, 'SFMono-Regular', monospace;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --row-h: 32px;
+    --header-h: 60px;
+
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #f9fafb;
+    --surface-hover: #f1f3f6;
+    --border: #e3e6eb;
+    --border-strong: #cfd4dc;
+    --text: #111827;
+    --text-2: #4b5563;
+    --text-3: #8a93a1;
+
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-soft: #eef0ff;
+    --accent-text: #3730a3;
+    --on-accent: #ffffff;
+    --focus: color-mix(in srgb, var(--accent) 40%, transparent);
+
+    --success: #0f8a5f;
+    --success-soft: #e7f6ef;
+    --warning: #b45309;
+    --warning-soft: #fdf3e2;
+    --danger: #d92d20;
+    --danger-soft: #fdecea;
+
+    /* Symbol kinds, used for icons and badges in the browser */
+    --kind-scalar: #0e7490;
+    --kind-struct: #7c3aed;
+    --kind-array: #c2410c;
+    --kind-folder: #64748b;
+    --area-input: #0f8a5f;
+    --area-output: #b45309;
+    --area-internal: #64748b;
+    --area-parameter: #7c3aed;
+
+    --shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
+    --shadow: 0 1px 3px rgb(16 24 40 / 8%), 0 1px 2px rgb(16 24 40 / 4%);
+    --shadow-lg: 0 12px 32px rgb(16 24 40 / 16%);
+
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --bg: #0d1016;
+        --surface: #151922;
+        --surface-2: #1a1f2a;
+        --surface-hover: #212734;
+        --border: #272e3b;
+        --border-strong: #353d4d;
+        --text: #e8ebf1;
+        --text-2: #aab2c0;
+        --text-3: #717b8c;
+        --accent: #818cf8;
+        --accent-hover: #a5b4fc;
+        --accent-soft: #23264a;
+        --accent-text: #c7d2fe;
+        --on-accent: #0d1016;
+        --success: #34d399;
+        --success-soft: #11291f;
+        --warning: #fbbf24;
+        --warning-soft: #2c2311;
+        --danger: #f87171;
+        --danger-soft: #2f1517;
+        --kind-scalar: #22d3ee;
+        --kind-struct: #a78bfa;
+        --kind-array: #fb923c;
+        --kind-folder: #94a3b8;
+        --area-input: #34d399;
+        --area-output: #fbbf24;
+        --area-internal: #94a3b8;
+        --area-parameter: #a78bfa;
+        --shadow-sm: none;
+        --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+        --shadow-lg: 0 16px 40px rgb(0 0 0 / 50%);
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme='dark'] {
+    --bg: #0d1016;
+    --surface: #151922;
+    --surface-2: #1a1f2a;
+    --surface-hover: #212734;
+    --border: #272e3b;
+    --border-strong: #353d4d;
+    --text: #e8ebf1;
+    --text-2: #aab2c0;
+    --text-3: #717b8c;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --accent-soft: #23264a;
+    --accent-text: #c7d2fe;
+    --on-accent: #0d1016;
+    --success: #34d399;
+    --success-soft: #11291f;
+    --warning: #fbbf24;
+    --warning-soft: #2c2311;
+    --danger: #f87171;
+    --danger-soft: #2f1517;
+    --kind-scalar: #22d3ee;
+    --kind-struct: #a78bfa;
+    --kind-array: #fb923c;
+    --kind-folder: #94a3b8;
+    --area-input: #34d399;
+    --area-output: #fbbf24;
+    --area-internal: #94a3b8;
+    --area-parameter: #a78bfa;
+    --shadow-sm: none;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 50%);
+    color-scheme: dark;
+}

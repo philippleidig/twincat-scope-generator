@@ -126,3 +126,7 @@ Desktop.ini
 .vscode
 *.swp
 *.swo
+
+# Playwright
+test-results/
+playwright-report/

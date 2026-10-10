@@ -1,113 +1,56 @@
 import { test, expect } from '@playwright/test'
+import { readFileSync } from 'node:fs'
 
-test.describe('TwinCAT Scope Generator', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/')
-        await page.evaluate(() => localStorage.clear())
-        await page.reload()
-    })
+test.beforeEach(async ({ page }) => {
+    await page.goto('./')
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+})
 
-    test('should display the header', async ({ page }) => {
-        await expect(page.locator('h1')).toContainText('TwinCAT Scope Generator')
-    })
+test('starts with an empty browser and a default project', async ({ page }) => {
+    await expect(page.getByText('Drop TwinCAT files here')).toBeVisible()
+    await expect(page.getByLabel('Scope file name')).toHaveValue('Scope_1')
+    await expect(page.getByRole('button', { name: /Export ZIP/ })).toBeDisabled()
+})
 
-    test('should show global settings section', async ({ page }) => {
-        await expect(page.getByText('Global Settings')).toBeVisible()
-        await expect(page.getByLabel('Project Name')).toBeVisible()
-        await expect(page.getByLabel('AMS Net ID')).toBeVisible()
-    })
+test('builds a scope project offline from the demo machine and exports it', async ({ page }) => {
+    await page.getByRole('button', { name: 'Try the demo machine' }).click()
+    await page.getByLabel('Search symbols').fill('fActPos')
+    await page.getByRole('option').getByRole('checkbox').check()
+    await page.getByLabel('Search symbols').fill('fbConveyor')
+    await page.getByRole('checkbox', { name: 'Select MAIN.fbConveyor', exact: true }).check()
+    await page.getByRole('button', { name: /Add to scope/ }).click()
 
-    test('should have a default scope file', async ({ page }) => {
-        await expect(page.getByLabel('Scope file name')).toHaveValue('Scope_1')
-        await expect(page.locator('.file-ext')).toHaveText('.tcscopex')
-    })
+    await expect(page.getByLabel('Symbol path')).toHaveCount(6)
+    await expect(page.getByLabel('Symbol path').first()).toHaveValue('GVL.aAxis[{i:1:4}].fActPos')
 
-    test('should label each level of the hierarchy', async ({ page }) => {
-        await expect(page.locator('.level-kicker--file')).toHaveText('Scope File')
-        await expect(page.locator('.level-kicker--group')).toHaveText('Axis Group')
-        await expect(page.getByText('Pattern 1')).toBeVisible()
-    })
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: /Export ZIP/ }).click()
+    const file = await download
+    expect(file.suggestedFilename()).toBe('Scope_Project_scope.zip')
+    const zip = readFileSync((await file.path())!)
+    expect(zip.subarray(0, 2).toString()).toBe('PK')
+})
 
-    test('should add a new scope file', async ({ page }) => {
-        await page.getByRole('button', { name: /add file/i }).click()
-        await expect(page.getByLabel('Scope file name')).toHaveCount(2)
-        await expect(page.getByLabel('Scope file name').nth(1)).toHaveValue('Scope_2')
-    })
+test('drags symbols from the browser onto an axis group', async ({ page }) => {
+    await page.getByRole('button', { name: 'Try the demo machine' }).click()
+    await page.getByRole('button', { name: 'Expand MAIN', exact: true }).click()
+    await page.getByRole('treeitem', { name: /nCycle/ }).dragTo(page.getByRole('region', { name: 'Axis group Axis Group 1' }))
+    await expect(page.getByLabel('Symbol path')).toHaveValue('MAIN.nCycle')
+})
 
-    test('should configure symbol template', async ({ page }) => {
-        const input = page.getByPlaceholder(/MAIN\.mover/)
-        await input.fill('MAIN.mover[{i:1:5}].position')
-        await expect(page.getByText(/5 acquisition/).first()).toBeVisible()
-    })
+test('keeps the project across reloads', async ({ page }) => {
+    await page.getByRole('button', { name: 'Add channel' }).click()
+    await page.getByLabel('Symbol path').fill('MAIN.mover[{i:1:5}].position')
+    await expect(page.getByText('×5')).toBeVisible()
+    await page.reload()
+    await expect(page.getByLabel('Symbol path')).toHaveValue('MAIN.mover[{i:1:5}].position')
+})
 
-    test('should validate invalid counter syntax', async ({ page }) => {
-        const input = page.getByPlaceholder(/MAIN\.mover/)
-        await input.fill('MAIN.item[{n:10:5}]')
-        await expect(page.getByText(/start \(10\) must be <= end \(5\)/)).toBeVisible()
-    })
-
-    test('should add pattern to an axis group', async ({ page }) => {
-        await page.getByRole('button', { name: /add pattern/i }).click()
-        await expect(page.getByText('Pattern 2')).toBeVisible()
-    })
-
-    test('should add axis group to a file', async ({ page }) => {
-        await page.getByRole('button', { name: /add axis group/i }).click()
-        await expect(page.getByLabel('Axis group name')).toHaveCount(2)
-        await expect(page.getByLabel('Axis group name').nth(1)).toHaveValue('Axis Group 2')
-    })
-
-    test('should add symbol to pattern', async ({ page }) => {
-        await page.getByRole('button', { name: /add symbol/i }).click()
-        await expect(page.getByPlaceholder(/MAIN\.mover/)).toHaveCount(2)
-    })
-
-    test('should collapse and expand an axis group', async ({ page }) => {
-        await page.getByPlaceholder(/MAIN\.mover/).fill('MAIN.mover[{i:1:5}].position')
-
-        const collapse = page.getByRole('button', { name: 'Collapse Axis Group 1' })
-        await collapse.click()
-
-        // Contents are hidden, but the header still summarises the group.
-        await expect(page.getByPlaceholder(/MAIN\.mover/)).toHaveCount(0)
-        await expect(page.getByText('1 pattern')).toBeVisible()
-        await expect(page.getByText('5 acq.')).toBeVisible()
-
-        await page.getByRole('button', { name: 'Expand Axis Group 1' }).click()
-        await expect(page.getByPlaceholder(/MAIN\.mover/)).toHaveCount(1)
-    })
-
-    test('should enable download button when patterns are valid', async ({ page }) => {
-        const downloadButton = page.getByRole('button', { name: /download zip/i })
-
-        await page.getByPlaceholder(/MAIN\.mover/).fill('MAIN.value')
-
-        await expect(downloadButton).toBeEnabled()
-    })
-
-    test('should display sample patterns', async ({ page }) => {
-        await expect(page.getByRole('heading', { name: 'Sample Patterns' })).toBeVisible()
-    })
-
-    test('should show syntax help', async ({ page }) => {
-        await expect(page.getByText('{name:start:end}')).toBeVisible()
-    })
-
-    // Note: only the sample-pattern store is persisted (zustand `persist`).
-    // The scope configuration itself lives in memory and is lost on reload.
-    test('should persist sample patterns in localStorage', async ({ page }) => {
-        await page.getByTitle('Add new sample').click()
-        await page.getByPlaceholder('Pattern template...').fill('MAIN.persisted[{i:1:2}]')
-        await page.getByRole('button', { name: 'Add', exact: true }).click()
-
-        await page.reload()
-
-        await expect(page.getByText('MAIN.persisted[{i:1:2}]')).toBeVisible()
-    })
-
-    test('should change data type', async ({ page }) => {
-        const select = page.locator('.symbol-input-row select').first()
-        await select.selectOption('INT32')
-        await expect(select).toHaveValue('INT32')
-    })
+test('switches panes on small screens', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 })
+    await expect(page.getByRole('region', { name: 'Symbol browser' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Scope project' })).toBeHidden()
+    await page.getByRole('button', { name: 'Project', exact: true }).click()
+    await expect(page.getByRole('region', { name: 'Scope project' })).toBeVisible()
 })

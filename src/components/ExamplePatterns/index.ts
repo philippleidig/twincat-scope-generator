@@ -1,1 +1,0 @@
-export { ExamplePatterns } from './ExamplePatterns'
