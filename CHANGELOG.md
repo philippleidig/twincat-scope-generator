@@ -1,5 +1,53 @@
 # Changelog
 
+## V2.0 (2026-10-10)
+
+Scope projects can now be built completely offline from TwinCAT project files.
+
+### Offline symbol browser (new)
+
+- **Import** `.tmc`, `.xti` and `.tsproj` files (several at once, whole folders, or by drag & drop).
+- **PLC `.tmc` imports are correct now**: symbol names are used as the real ADS paths (`MAIN.x`). V1
+  prefixed them with the PLC project name (`PLC1.MAIN.x`), which TwinCAT Scope could not resolve.
+- Full **type resolution**: structs and function blocks of any depth, FB inheritance (`EXTENDS`),
+  enums, aliases, arrays (incl. multi-dimensional), namespaced library types; strings, pointers and
+  interfaces are recognised as not recordable.
+- `.xti`/`.tsproj`: PLC I/O variables, TcCOM objects, NC axes, the target AMS Net ID, and a list of
+  parts stored in separate files.
+- **Tree** with lazy expansion and **search** over every member path with globs and `type:` / `area:` /
+  `port:` terms, plus filter chips. Arrays are added as counter patterns automatically.
+- Port, path prefix and Net ID can be adjusted per imported source.
+- A bundled **demo machine** to try everything without own files.
+
+### Project
+
+- Hierarchy simplified to **Scope file → Axis group → Channel** (the "Pattern" level is gone; each
+  former symbol is a channel).
+- **Targets**: several AMS Net IDs per project, chosen per channel.
+- The project is **saved in the browser** (V1 lost it on reload, although the README claimed otherwise)
+  and can be saved to / opened from a `.scope.json` file.
+- Record time is editable; sample time is entered in ms.
+
+### Fixes
+
+- Scope files with the same name no longer overwrite each other in the ZIP; file names are sanitized.
+- Invalid templates are no longer exported literally; empty and invalid channels are skipped with a warning.
+- Counter expansion is capped (5,000 per channel) instead of freezing the browser.
+- Counters support leading zeros (`{i:01:12}`) and negative bounds; reusing a counter name with another range is an error.
+- Drag & drop from the Target Browser maps all IEC types (BYTE, WORD, DWORD, TIME, …) and reports unrecordable symbols.
+
+### UI
+
+- New design: two-pane workspace (symbol browser | scope project), design tokens, **dark mode**
+  (follows the system or set manually), responsive single-pane layout on small screens, toasts,
+  native dialogs, keyboard shortcut `/` for search.
+
+### Engineering
+
+- New architecture (`domain`, `catalog`, `export`, `state`, `features`, `ui`); see README.
+- Generated XML is unchanged and now pinned by a golden-file test.
+- Tests run against real TwinCAT files; coverage from 63 % to 90 % with enforced thresholds; e2e specs rewritten.
+
 ## V1.8 (2026-08-16)
 
 ### ADS Ports
