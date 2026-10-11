@@ -50,7 +50,8 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
   - **pointers** are disabled themselves but expand to one child `^`: `MAIN.pData^.fValue` is
     recorded through the pointer, `PointerTo="2"` gives `^^`. Search lists the `^` paths too;
   - **references and `VAR_IN_OUT`** expand like the referenced type (no `^`) and are recordable, with a
-    warning icon: the value is valid only while the reference is bound;
+    warning icon: the value is valid only while the reference is bound. Search lists the reference
+    member but not what it points to (find that under its real symbol); the tree expands it;
   - `TcNoSymbol 'unused'` symbols stay recordable with a note (no symbol if the code never uses them).
 - Each source's **port**, **path prefix** (object name for TcCOM) and **target Net ID** can be edited.
 - How paths and ports are derived per source, and how sure we are: [ADR 0003](docs/adr/0003-symbol-paths-per-source-kind.md).

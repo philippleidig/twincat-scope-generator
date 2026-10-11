@@ -53,7 +53,8 @@ export function buildIndex(sources: SymbolSource[]): SearchIndex {
     const stats = { depthLimited: false }
     for (const source of sources) {
         for (const root of source.roots) {
-            for (const node of walk(source, rootNode(source, root), stats)) {
+            // References are listed, not expanded (WalkOptions.references).
+            for (const node of walk(source, rootNode(source, root), stats, { references: false })) {
                 if (entries.length >= MAX_ENTRIES) return { entries, truncated: true }
                 // The same path can be reachable twice (a struct root and its separately declared member).
                 const key = `${source.id}|${node.path}`

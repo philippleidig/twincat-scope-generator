@@ -130,6 +130,12 @@ export interface WalkOptions {
      * reach; the user adds `p^` or the reference itself for that.
      */
     indirection?: boolean
+    /**
+     * Expand what a reference / VAR_IN_OUT points to (default true). Off for the search index: the
+     * reference member is listed, its target is found under its real symbol (an MC function
+     * block's `Axis` would otherwise repeat the whole AXIS_REF); the tree and "Add" expand it.
+     */
+    references?: boolean
 }
 
 /** A node entered through a pointer or a reference, keyed by the type it leads to. */
@@ -148,12 +154,17 @@ function indirectionKey(node: PathNode): string | null {
  */
 export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimited: false }, options: WalkOptions = {}): Generator<PathNode> {
     const indirection = options.indirection ?? true
+    const references = options.references ?? true
     const visit = function* (node: PathNode, depth: number, emitSelf: boolean, entered: string[]): Generator<PathNode> {
         if (depth > MAX_DEPTH) {
             stats.depthLimited = true
             return
         }
         if (node.resolved.kind === 'hidden') return
+        if (!references && node.resolved.viaReference) {
+            yield node
+            return
+        }
         let path = entered
         if (depth > 0) {
             const key = indirectionKey(node)

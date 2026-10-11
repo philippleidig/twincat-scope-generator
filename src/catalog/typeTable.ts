@@ -221,9 +221,19 @@ export function resolveType(table: TypeTable, typeName: string, ns?: string, dim
     return resolveNamed(table, typeName.trim(), ns, 0)
 }
 
-/** Roots that have an ADS symbol (their type is not `hide`/`TcNoSymbol`, no empty array). */
+/**
+ * Roots that have an ADS symbol (their type is not `hide`/`TcNoSymbol`, no empty array), once per
+ * name: a file can declare the same name twice (two versions of a library GVL); ADS names are
+ * unique and case-insensitive, so the first declaration wins everywhere.
+ */
 export function visibleRoots(table: TypeTable, roots: SymbolRoot[]): SymbolRoot[] {
-    return roots.filter((r) => resolveType(table, r.type, r.ns, r.dims).kind !== 'hidden')
+    const seen = new Set<string>()
+    return roots.filter((r) => {
+        const key = r.name.toLowerCase()
+        if (seen.has(key) || resolveType(table, r.type, r.ns, r.dims).kind === 'hidden') return false
+        seen.add(key)
+        return true
+    })
 }
 
 /** Empty arrays and arrays of hidden types have no symbol. */

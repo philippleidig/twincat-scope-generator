@@ -12,7 +12,7 @@ import { buildIndex } from './search'
 import type { BrowserNode, SymbolNode } from './tree'
 import { childrenOf, isExpandable, sourceChildren } from './tree'
 import { NOTE, REASON } from './typeTable'
-import { resolvePath } from './walk'
+import { resolvePath, rootNode, walk } from './walk'
 
 const prop = (name: string, value?: string) => `<Property><Name>${name}</Name>${value === undefined ? '' : `<Value>${value}</Value>`}</Property>`
 const props = (...p: string[]) => `<Properties>${p.join('')}</Properties>`
@@ -237,23 +237,35 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
                 '<SubItem><Name>refSelf</Name><Type ReferenceTo="true">FB_Use</Type><BitOffs>128</BitOffs></SubItem>' +
                 sub('n', 'INT'),
         )
-    const s = plc(types, symbol('MAIN.fbUse', 'FB_Use'))
+    const s = plc(types, symbol('MAIN.fbUse', 'FB_Use') + symbol('GVL.point', 'ST_Point'))
 
-    it('expands like the referenced type, without ^, flagged as via reference', () => {
+    it('expands like the referenced type in the tree, without ^, flagged as via reference', () => {
         expect(treeLabels(s, 'MAIN', 'fbUse', 'refPoint')).toEqual(['x', 'y'])
         const x = treeNode(s, 'MAIN', 'fbUse', 'refPoint', 'x')
         expect(x).toMatchObject({ kind: 'scalar', viaReference: true, warning: NOTE.viaReference })
-        expect(entry(s, 'MAIN.fbUse.refPoint.x')).toMatchObject({ kind: 'scalar', viaReference: true, warning: 'Valid only while the reference is bound' })
+        expect(resolvePath(s, 'MAIN.fbUse.refPoint.x')).toMatchObject({ viaReference: true, resolved: { kind: 'scalar' } })
+    })
+    it('lists the reference member in search but not what it points to', () => {
+        expect(entry(s, 'MAIN.fbUse.refPoint')).toMatchObject({ kind: 'struct', viaReference: true, warning: 'Valid only while the reference is bound' })
+        expect(entry(s, 'MAIN.fbUse.refPoint.x')).toBeUndefined()
         expect(entry(s, 'MAIN.fbUse.n')?.viaReference).toBeUndefined()
+        // A member search finds the real symbol, not a copy through every reference.
+        expect(paths(s).filter((p) => p.endsWith('.x'))).toEqual(['GVL.point.x'])
     })
     it('treats VAR_IN_OUT (ItemType InOut) as a reference', () => {
-        expect(entry(s, 'MAIN.fbUse.Target.y')).toMatchObject({ kind: 'scalar', viaReference: true })
+        expect(entry(s, 'MAIN.fbUse.Target')).toMatchObject({ kind: 'struct', viaReference: true })
+        expect(resolvePath(s, 'MAIN.fbUse.Target.y')).toMatchObject({ viaReference: true })
     })
     it('stays recordable when added directly; "Add" on the owner does not follow references', () => {
         expect(adds(s, 'MAIN.fbUse.refPoint')).toEqual(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refPoint.y'])
         expect(adds(s, 'MAIN.fbUse')).toEqual(['MAIN.fbUse.n'])
-        expect(paths(s)).toContain('MAIN.fbUse.refSelf.n')
-        expect(paths(s)).not.toContain('MAIN.fbUse.refSelf.refSelf.n')
+        expect(paths(s)).toContain('MAIN.fbUse.refSelf')
+        expect(paths(s)).not.toContain('MAIN.fbUse.refSelf.n')
+    })
+    it('walks through references once when asked to, without running around cycles', () => {
+        const all = [...walk(s, rootNode(s, s.roots[0]))].map((n) => n.path)
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refSelf.n', 'MAIN.fbUse.refSelf.refSelf']))
+        expect(all).not.toContain('MAIN.fbUse.refSelf.refSelf.n')
     })
 })
 
@@ -290,6 +302,11 @@ describe('other types', () => {
         expect(rootNames(s)).not.toContain('GVL.empty')
         expect(treeLabels(s, 'GVL', 'withEmpty')).toEqual(['k'])
         expect(resolvePath(s, 'GVL.withEmpty.none')).toBeNull()
+    })
+    it('keeps the first of two roots with the same name, in tree, search and path lookup alike', () => {
+        const dup = plc(ST_POINT, symbol('GVL.p', 'ST_Point') + symbol('gvl.P', 'INT'))
+        expect(rootNames(dup)).toEqual(['GVL.p'])
+        expect(resolvePath(dup, 'GVL.p.x')).not.toBeNull()
     })
     it('ignores qualified_only and the CODESYS symbol attribute', () => {
         expect(entry(s, 'GVL.range')).toMatchObject({ kind: 'scalar', typeName: 'T_Range' })
