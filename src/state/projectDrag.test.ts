@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { PICK_MIME } from './browserStore'
-import { AXIS_GROUP_MIME, CHANNEL_MIME, dragKind, readProjectDrag, setAxisGroupDragData, setChannelDragData } from './projectDrag'
+import {
+    AXIS_GROUP_MIME,
+    CHANNEL_MIME,
+    PICK_MIME,
+    dragKind,
+    readProjectDrag,
+    setAxisGroupDragData,
+    setChannelDragData,
+    setPickDragData,
+} from './projectDrag'
 
 const data = (type: string, value: string) => ({ types: [type], getData: (t: string) => (t === type ? value : '') })
 
@@ -21,6 +29,15 @@ describe('projectDrag', () => {
         expect(dt.effectAllowed).toBe('copyMove')
         expect(readProjectDrag(data(CHANNEL_MIME, stored.get(CHANNEL_MIME)!))).toEqual({ kind: 'channel', id: 'c1' })
         expect(readProjectDrag(data(AXIS_GROUP_MIME, stored.get(AXIS_GROUP_MIME)!))).toEqual({ kind: 'axis-group', id: 'g1' })
+    })
+
+    it('round-trips browser picks', () => {
+        const stored = new Map<string, string>()
+        const dt = { setData: (t: string, v: string) => stored.set(t, v), effectAllowed: 'all' } as unknown as DataTransfer
+        const pick = { key: 'k', sourceId: 's', path: 'MAIN.x', kind: 'scalar' as const }
+        setPickDragData(dt, [pick])
+        expect(dt.effectAllowed).toBe('copy')
+        expect(readProjectDrag(data(PICK_MIME, stored.get(PICK_MIME)!))).toEqual({ kind: 'picks', picks: [pick] })
     })
 
     it('decodes picks and text, and rejects malformed payloads', () => {

@@ -3,11 +3,11 @@ import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
 import { selectActiveGroup, useProjectStore } from './projectStore'
 import { useCatalogStore } from './catalogStore'
 import { useSampleStore, DEFAULT_SAMPLES } from './sampleStore'
-import { PICK_MIME, useBrowserStore, isFiltering } from './browserStore'
+import { useBrowserStore, isFiltering } from './browserStore'
 import { addPicks, addSpecs, applyDrop, describeAddResult, openProjectFile, resolvePicks, saveProjectFile } from './actions'
 import { toast, useToasts } from './toastStore'
 import type { BrowserPick } from './browserStore'
-import { readProjectDrag } from './projectDrag'
+import { PICK_MIME, readProjectDrag } from './projectDrag'
 
 const group = () => useProjectStore.getState().project.scopeFiles[0].axisGroups[0]
 

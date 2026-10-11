@@ -9,7 +9,6 @@ import { candidatesAt } from '@/catalog/candidates'
 import { parseTargetBrowserDrop } from '@/catalog/targetBrowserDrop'
 import { downloadText } from '@/export/bundle'
 import type { BrowserPick } from './browserStore'
-import { PICK_MIME } from './browserStore'
 import type { ProjectDrag } from './projectDrag'
 import { useCatalogStore } from './catalogStore'
 import { useProjectStore } from './projectStore'
@@ -67,12 +66,6 @@ export function addPicks(axisGroupId: string, picks: BrowserPick[], index?: numb
 export function addTargetBrowserXml(axisGroupId: string, text: string, index?: number): AddResult {
     const dropped = parseTargetBrowserDrop(text)
     return { ...addSpecs(axisGroupId, dropped.symbols, 'Target Browser', index), empty: dropped.skipped.length, truncated: false, tooLarge: 0 }
-}
-
-/** Serialise picks for a drag. */
-export function setPickDragData(dataTransfer: DataTransfer, picks: BrowserPick[]): void {
-    dataTransfer.setData(PICK_MIME, JSON.stringify(picks))
-    dataTransfer.effectAllowed = 'copy'
 }
 
 export interface DropDestination {
