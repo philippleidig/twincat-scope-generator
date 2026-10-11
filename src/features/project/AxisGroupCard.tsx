@@ -95,6 +95,7 @@ export function AxisGroupCard({ group, fileId, index, targets, active, canRemove
         <section
             className={`axis-group ${active ? 'axis-group--active' : ''} ${overlay ? 'axis-group--drop' : ''}`}
             aria-label={`Axis group ${group.name}`}
+            data-axis-group-id={group.id}
             {...dropAttrs(cardEdge, !!drop?.copy)}
             onDragOver={(e) => {
                 const target = dropTargetOf(e)

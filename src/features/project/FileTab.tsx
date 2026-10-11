@@ -31,6 +31,7 @@ export function FileTab({ file, selected }: FileTabProps) {
             type="button"
             role="tab"
             aria-selected={selected}
+            data-file-id={file.id}
             className={`file-tab ${drop ? 'file-tab--drop' : ''}`}
             onClick={() => selectFile(file.id)}
             onDragOver={(e) => {

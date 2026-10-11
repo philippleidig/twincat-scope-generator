@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createEvent, fireEvent, render, screen, within } from '@testing-library/react'
+import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { allChannels } from '@/domain/project'
 import { useProjectStore } from '@/state/projectStore'
@@ -246,6 +246,19 @@ describe('"Move to…" menus', () => {
         expect(symbols(1, 0)).toEqual(['c'])
     })
 
+    it('keeps focus on a channel moved to another axis group, or on the tab of its new file', async () => {
+        const user = userEvent.setup()
+        render(<ProjectPanel />)
+        await user.click(within(rows('Axis Group 1')[0]).getByRole('button', { name: 'Move channel to…' }))
+        await user.click(screen.getByRole('menuitem', { name: 'Move to Scope_1 › Axis Group 2' }))
+        expect(symbols(0, 1)).toEqual(['d', 'a'])
+        await waitFor(() => expect(within(rows('Axis Group 2')[1]).getByRole('button', { name: 'Move channel to…' })).toHaveFocus())
+
+        await user.click(within(rows('Axis Group 2')[1]).getByRole('button', { name: 'Move channel to…' }))
+        await user.click(screen.getByRole('menuitem', { name: 'Move to Scope_2 › Axis Group 1' }))
+        await waitFor(() => expect(screen.getByRole('tab', { name: /Scope_2/ })).toHaveFocus())
+    })
+
     it('moves an axis group up, down and to another file', async () => {
         const user = userEvent.setup()
         render(<ProjectPanel />)
@@ -262,6 +275,7 @@ describe('"Move to…" menus', () => {
         await user.click(screen.getByRole('menuitem', { name: 'Move to Scope_2' }))
         expect(groupNames(0)).toEqual(['Axis Group 2'])
         expect(groupNames(1)).toEqual(['Axis Group 1', 'Axis Group 1'])
+        await waitFor(() => expect(screen.getByRole('tab', { name: /Scope_2/ })).toHaveFocus())
     })
 
     it('can be used with the keyboard and names untitled files like the tabs', async () => {
