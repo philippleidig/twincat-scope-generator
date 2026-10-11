@@ -7,6 +7,7 @@ import {
     createProject,
     fileNameError,
     findAxisGroup,
+    mergeChannelSpecs,
     nextName,
     ops,
     parseProject,
@@ -101,16 +102,6 @@ describe('ops', () => {
         expect(p.scopeFiles[0].axisGroups).toHaveLength(2)
     })
 
-    it('moves a channel between axis groups', () => {
-        let p = withChannels(['MAIN.a'])
-        p = ops.addAxisGroup(p, p.scopeFiles[0].id)
-        const [from, to] = p.scopeFiles[0].axisGroups
-        p = ops.moveChannel(p, from.channels[0].id, to.id)
-        expect(findAxisGroup(p, from.id)!.channels).toEqual([])
-        expect(findAxisGroup(p, to.id)!.channels[0].symbol).toBe('MAIN.a')
-        expect(ops.moveChannel(p, 'nope', to.id)).toBe(p)
-    })
-
     it('reassigns channels when their target is removed and keeps the last target', () => {
         let p = ops.addTarget(createProject(), { name: 'IPC', amsNetId: '10.0.0.1.1.1' })
         const ipc = p.targets[1].id
@@ -166,5 +157,153 @@ describe('projectIssues', () => {
         expect(issues).toHaveLength(6)
         expect(issues[0]).toMatch(/1 channel has an invalid/)
         expect(issues[1]).toMatch(/1 empty channel/)
+    })
+})
+
+describe('moving and copying', () => {
+    /** Scope_1: [A: a b c, B: d], Scope_2: [C: (empty)] */
+    function setup() {
+        let p = withChannels(['a', 'b', 'c'])
+        p = ops.addAxisGroup(p, p.scopeFiles[0].id)
+        p = ops.updateAxisGroup(p, p.scopeFiles[0].axisGroups[0].id, { name: 'A' })
+        p = ops.updateAxisGroup(p, p.scopeFiles[0].axisGroups[1].id, { name: 'B' })
+        p = ops.addChannels(p, p.scopeFiles[0].axisGroups[1].id, [{ symbol: 'd' }])
+        p = ops.addScopeFile(p)
+        p = ops.updateAxisGroup(p, p.scopeFiles[1].axisGroups[0].id, { name: 'C' })
+        const [A, B] = p.scopeFiles[0].axisGroups
+        const C = p.scopeFiles[1].axisGroups[0]
+        const ch = (symbol: string) => allChannels(p).find((c) => c.symbol === symbol)!.id
+        return { p, A: A.id, B: B.id, C: C.id, f1: p.scopeFiles[0].id, f2: p.scopeFiles[1].id, ch }
+    }
+    const symbols = (p: ReturnType<typeof setup>['p'], groupId: string) => findAxisGroup(p, groupId)!.channels.map((c) => c.symbol)
+    const groupNames = (p: ReturnType<typeof setup>['p'], fileIndex: number) => p.scopeFiles[fileIndex].axisGroups.map((a) => a.name)
+
+    describe('moveChannel', () => {
+        it('reorders within a group using slots of the list as shown', () => {
+            const { p, A, ch } = setup()
+            expect(symbols(ops.moveChannel(p, ch('a'), A, 2), A)).toEqual(['b', 'a', 'c'])
+            expect(symbols(ops.moveChannel(p, ch('a'), A, 3), A)).toEqual(['b', 'c', 'a'])
+            expect(symbols(ops.moveChannel(p, ch('c'), A, 0), A)).toEqual(['c', 'a', 'b'])
+            expect(symbols(ops.moveChannel(p, ch('c'), A, 1), A)).toEqual(['a', 'c', 'b'])
+        })
+
+        it('returns the same project when the position does not change', () => {
+            const { p, A, ch } = setup()
+            expect(ops.moveChannel(p, ch('b'), A, 1)).toBe(p)
+            expect(ops.moveChannel(p, ch('b'), A, 2)).toBe(p)
+            expect(ops.moveChannel(p, ch('c'), A)).toBe(p)
+            expect(ops.moveChannel(p, ch('c'), A, 99)).toBe(p)
+        })
+
+        it('moves to the last position when the index is omitted or out of range', () => {
+            const { p, A, B, ch } = setup()
+            expect(symbols(ops.moveChannel(p, ch('a'), A), A)).toEqual(['b', 'c', 'a'])
+            expect(symbols(ops.moveChannel(p, ch('a'), B), B)).toEqual(['d', 'a'])
+            expect(symbols(ops.moveChannel(p, ch('a'), B, 42), B)).toEqual(['d', 'a'])
+            expect(symbols(ops.moveChannel(p, ch('a'), B, NaN), B)).toEqual(['d', 'a'])
+            expect(symbols(ops.moveChannel(p, ch('a'), B, -3), B)).toEqual(['a', 'd'])
+        })
+
+        it('moves into another group and another file, keeping the id', () => {
+            const { p, A, B, C, ch } = setup()
+            let q = ops.moveChannel(p, ch('b'), B, 0)
+            expect(symbols(q, A)).toEqual(['a', 'c'])
+            expect(symbols(q, B)).toEqual(['b', 'd'])
+            expect(findAxisGroup(q, B)!.channels[0].id).toBe(ch('b'))
+            q = ops.moveChannel(q, ch('b'), C)
+            expect(symbols(q, B)).toEqual(['d'])
+            expect(symbols(q, C)).toEqual(['b'])
+            expect(allChannels(q)).toHaveLength(4)
+        })
+
+        it('ignores unknown ids', () => {
+            const { p, A, ch } = setup()
+            expect(ops.moveChannel(p, 'nope', A)).toBe(p)
+            expect(ops.moveChannel(p, ch('a'), 'nope')).toBe(p)
+        })
+    })
+
+    describe('copyChannel', () => {
+        it('inserts a copy with a new id at the position', () => {
+            const { p, A, B, C, ch } = setup()
+            let q = ops.copyChannel(p, ch('a'), A, 1)
+            expect(symbols(q, A)).toEqual(['a', 'a', 'b', 'c'])
+            expect(new Set(allChannels(q).map((c) => c.id)).size).toBe(5)
+            q = ops.copyChannel(q, ch('c'), B)
+            expect(symbols(q, B)).toEqual(['d', 'c'])
+            q = ops.copyChannel(q, ch('d'), C, 7)
+            expect(symbols(q, C)).toEqual(['d'])
+            expect(findAxisGroup(q, C)!.channels[0]).toMatchObject({ dataType: 'REAL64', port: 851, targetId: LOCAL_TARGET_ID })
+            expect(symbols(q, B)).toEqual(['d', 'c'])
+        })
+
+        it('ignores unknown ids', () => {
+            const { p, A, ch } = setup()
+            expect(ops.copyChannel(p, 'nope', A)).toBe(p)
+            expect(ops.copyChannel(p, ch('a'), 'nope')).toBe(p)
+        })
+    })
+
+    describe('moveAxisGroup', () => {
+        it('reorders within its file', () => {
+            const { p, A, B, f1 } = setup()
+            expect(groupNames(ops.moveAxisGroup(p, A, f1, 2), 0)).toEqual(['B', 'A'])
+            expect(groupNames(ops.moveAxisGroup(p, B, f1, 0), 0)).toEqual(['B', 'A'])
+            expect(groupNames(ops.moveAxisGroup(p, A, f1), 0)).toEqual(['B', 'A'])
+        })
+
+        it('returns the same project when the position does not change, also for its own file', () => {
+            const { p, A, B, f1 } = setup()
+            expect(ops.moveAxisGroup(p, A, f1, 0)).toBe(p)
+            expect(ops.moveAxisGroup(p, A, f1, 1)).toBe(p)
+            expect(ops.moveAxisGroup(p, B, f1)).toBe(p)
+        })
+
+        it('moves to another file with its channels', () => {
+            const { p, A, f2 } = setup()
+            const q = ops.moveAxisGroup(p, A, f2, 0)
+            expect(groupNames(q, 0)).toEqual(['B'])
+            expect(groupNames(q, 1)).toEqual(['A', 'C'])
+            expect(symbols(q, A)).toEqual(['a', 'b', 'c'])
+            expect(groupNames(ops.moveAxisGroup(p, A, f2), 1)).toEqual(['C', 'A'])
+        })
+
+        it('may leave a file without axis groups', () => {
+            const { p, C, f1 } = setup()
+            const q = ops.moveAxisGroup(p, C, f1)
+            expect(q.scopeFiles[1].axisGroups).toEqual([])
+            expect(groupNames(q, 0)).toEqual(['A', 'B', 'C'])
+        })
+
+        it('ignores unknown ids', () => {
+            const { p, A, f1 } = setup()
+            expect(ops.moveAxisGroup(p, 'nope', f1)).toBe(p)
+            expect(ops.moveAxisGroup(p, A, 'nope')).toBe(p)
+        })
+    })
+
+    describe('copyAxisGroup', () => {
+        it('copies with new ids; "(copy)" only within the same file', () => {
+            const { p, A, f1, f2 } = setup()
+            let q = ops.copyAxisGroup(p, A, f1, 1)
+            expect(groupNames(q, 0)).toEqual(['A', 'A (copy)', 'B'])
+            q = ops.copyAxisGroup(q, A, f2)
+            expect(groupNames(q, 1)).toEqual(['C', 'A'])
+            const ids = [...allChannels(q).map((c) => c.id), ...q.scopeFiles.flatMap((f) => f.axisGroups.map((a) => a.id))]
+            expect(new Set(ids).size).toBe(ids.length)
+            expect(allChannels(q)).toHaveLength(10)
+        })
+
+        it('ignores unknown ids', () => {
+            const { p, A, f1 } = setup()
+            expect(ops.copyAxisGroup(p, 'nope', f1)).toBe(p)
+            expect(ops.copyAxisGroup(p, A, 'nope')).toBe(p)
+        })
+    })
+
+    it('mergeChannelSpecs inserts at a position', () => {
+        const { p, A } = setup()
+        const { project } = mergeChannelSpecs(p, A, [{ symbol: 'x', dataType: 'BIT', port: 851 }], 'T', 1)
+        expect(symbols(project, A)).toEqual(['a', 'x', 'b', 'c'])
     })
 })

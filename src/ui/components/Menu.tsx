@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 export interface MenuItem {
+    /** React key; defaults to the label (set it when labels can repeat). */
+    key?: string
     label: string
     icon?: ReactNode
     onSelect: () => void
@@ -12,7 +14,8 @@ export interface MenuItem {
 interface MenuProps {
     /** Renders the trigger; spread the props onto a button. */
     trigger: (props: { onClick: () => void; 'aria-expanded': boolean; 'aria-haspopup': 'menu' }) => ReactNode
-    items: MenuItem[]
+    /** Items, or a function evaluated only while the menu is open (for lists derived from changing state). */
+    items: MenuItem[] | (() => MenuItem[])
     align?: 'start' | 'end'
 }
 
@@ -38,9 +41,9 @@ export function Menu({ trigger, items, align = 'end' }: MenuProps) {
             {trigger({ onClick: () => setOpen((o) => !o), 'aria-expanded': open, 'aria-haspopup': 'menu' })}
             {open && (
                 <div className={`menu__list menu__list--${align}`} role="menu">
-                    {items.map((item) => (
+                    {(typeof items === 'function' ? items() : items).map((item) => (
                         <button
-                            key={item.label}
+                            key={item.key ?? item.label}
                             type="button"
                             role="menuitem"
                             disabled={item.disabled}

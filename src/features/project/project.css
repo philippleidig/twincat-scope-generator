@@ -296,3 +296,104 @@
         flex-basis: calc(100% - 40px);
     }
 }
+
+/* ---------- Drag & drop ---------- */
+.drag-handle {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 18px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+    cursor: grab;
+}
+.drag-handle:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+/* Indicator line between rows / axis groups where the drop inserts. */
+.channel {
+    position: relative;
+}
+.channel[data-drop]::before,
+.axis-group[data-drop]::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 2;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    pointer-events: none;
+}
+.channel[data-drop='before']::before {
+    top: -4px;
+}
+.channel[data-drop='after']::before {
+    bottom: -4px;
+}
+.axis-group[data-drop='before']::before {
+    top: calc(-1 * var(--space-3) / 2 - 1px);
+}
+.axis-group[data-drop='after']::before {
+    bottom: calc(-1 * var(--space-3) / 2 - 1px);
+}
+/* "+" badge on the indicator while the drop copies. */
+.channel[data-drop-copy]::after,
+.axis-group[data-drop-copy]::after {
+    content: '+';
+    position: absolute;
+    left: -6px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+.channel[data-drop='before'][data-drop-copy]::after {
+    top: -11px;
+}
+.channel[data-drop='after'][data-drop-copy]::after {
+    bottom: -11px;
+}
+.axis-group[data-drop='before'][data-drop-copy]::after {
+    top: calc(-1 * var(--space-3) / 2 - 8px);
+}
+.axis-group[data-drop='after'][data-drop-copy]::after {
+    bottom: calc(-1 * var(--space-3) / 2 - 8px);
+}
+.drop-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+    line-height: 1;
+}
+.file-tab--drop {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+.file-tab .drop-badge {
+    width: 16px;
+    height: 16px;
+    margin-right: 0;
+    font-size: 12px;
+}

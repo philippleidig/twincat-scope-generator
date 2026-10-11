@@ -52,6 +52,21 @@ describe('projectStore', () => {
         expect(useProjectStore.getState().activeFileId).toBe(fileId)
     })
 
+    it('keeps the selection valid when the active group moves to another file', () => {
+        const s = useProjectStore.getState()
+        const fileId = s.project.scopeFiles[0].id
+        s.addAxisGroup(fileId)
+        s.addScopeFile('f2')
+        const [first, second] = useProjectStore.getState().project.scopeFiles[0].axisGroups
+        s.setActiveAxisGroup(second.id)
+        s.moveAxisGroup(second.id, 'f2')
+        expect(useProjectStore.getState()).toMatchObject({ activeFileId: fileId, activeAxisGroupId: first.id })
+        s.moveAxisGroup(first.id, 'f2', 0)
+        expect(useProjectStore.getState()).toMatchObject({ activeFileId: fileId, activeAxisGroupId: null })
+        s.copyAxisGroup(first.id, fileId)
+        expect(selectActiveGroup(useProjectStore.getState())?.name).toBe('Axis Group 1')
+    })
+
     it('persists the project to localStorage and restores it validated', async () => {
         useProjectStore.getState().addChannels(group().id, [{ symbol: 'GVL.x' }])
         const stored = JSON.parse(localStorage.getItem('twincat-scope-project')!)
@@ -163,7 +178,8 @@ describe('actions', () => {
         expect(dropOnAxisGroup(group().id, data(PICK_MIME, JSON.stringify([pick('MAIN.nCycle')]))).added).toBe(1)
         expect(dropOnAxisGroup(group().id, data(PICK_MIME, '{broken')).added).toBe(0)
         const xml = '<TargetBrowserExportInfo><Symbols><Symbol><Name>MAIN.q</Name><BaseType>BOOL</BaseType></Symbol></Symbols></TargetBrowserExportInfo>'
-        expect(dropOnAxisGroup(group().id, data('text/plain', xml))).toMatchObject({ added: 1 })
+        expect(dropOnAxisGroup(group().id, data('text/plain', xml), 0)).toMatchObject({ added: 1 })
+        expect(group().channels.map((c) => c.symbol)).toEqual(['MAIN.q', 'MAIN.nCycle'])
         expect(describeAddResult(dropOnAxisGroup(group().id, data('text/plain', 'hello')), 'G')).toMatch(/Nothing to add/)
     })
 

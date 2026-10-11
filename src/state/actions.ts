@@ -22,10 +22,18 @@ export interface AddResult {
     tooLarge: number
 }
 
-/** Add channel specs to an axis group as one change; unknown Net IDs become targets named `targetName`. */
-export function addSpecs(axisGroupId: string, specs: ChannelSpec[], targetName?: string): Pick<AddResult, 'added' | 'duplicates'> {
+/**
+ * Add channel specs to an axis group as one change (at `index`, appended when omitted);
+ * unknown Net IDs become targets named `targetName`.
+ */
+export function addSpecs(
+    axisGroupId: string,
+    specs: ChannelSpec[],
+    targetName?: string,
+    index?: number,
+): Pick<AddResult, 'added' | 'duplicates'> {
     const { project, commit } = useProjectStore.getState()
-    const result = mergeChannelSpecs(project, axisGroupId, specs, targetName)
+    const result = mergeChannelSpecs(project, axisGroupId, specs, targetName, index)
     if (result.added > 0) commit(result.project)
     return { added: result.added, duplicates: result.duplicates }
 }
@@ -48,9 +56,9 @@ export function resolvePicks(picks: BrowserPick[]): Omit<AddResult, 'added' | 'd
     return { specs, empty, truncated, tooLarge, targetName: picks[0] && sources.get(picks[0].sourceId)?.title }
 }
 
-export function addPicks(axisGroupId: string, picks: BrowserPick[]): AddResult {
+export function addPicks(axisGroupId: string, picks: BrowserPick[], index?: number): AddResult {
     const { specs, targetName, ...rest } = resolvePicks(picks)
-    return { ...addSpecs(axisGroupId, specs, targetName), ...rest }
+    return { ...addSpecs(axisGroupId, specs, targetName, index), ...rest }
 }
 
 /** Serialise picks for a drag. */
@@ -60,10 +68,10 @@ export function setPickDragData(dataTransfer: DataTransfer, picks: BrowserPick[]
 }
 
 /**
- * Drop on an axis group: picks dragged from the symbol browser, or the XML the TwinCAT
- * Target Browser puts on the clipboard.
+ * Drop on an axis group (at `index`, appended when omitted): picks dragged from the symbol
+ * browser, or the XML the TwinCAT Target Browser puts on the clipboard.
  */
-export function dropOnAxisGroup(axisGroupId: string, data: Pick<DataTransfer, 'types' | 'getData'>): AddResult {
+export function dropOnAxisGroup(axisGroupId: string, data: Pick<DataTransfer, 'types' | 'getData'>, index?: number): AddResult {
     if (data.types.includes(PICK_MIME)) {
         let picks: BrowserPick[] = []
         try {
@@ -72,10 +80,10 @@ export function dropOnAxisGroup(axisGroupId: string, data: Pick<DataTransfer, 't
         } catch {
             // Not ours after all: nothing to add.
         }
-        return addPicks(axisGroupId, picks)
+        return addPicks(axisGroupId, picks, index)
     }
     const dropped = parseTargetBrowserDrop(data.getData('text/plain'))
-    return { ...addSpecs(axisGroupId, dropped.symbols, 'Target Browser'), empty: dropped.skipped.length, truncated: false, tooLarge: 0 }
+    return { ...addSpecs(axisGroupId, dropped.symbols, 'Target Browser', index), empty: dropped.skipped.length, truncated: false, tooLarge: 0 }
 }
 
 export function describeAddResult(r: AddResult, groupName: string): string {

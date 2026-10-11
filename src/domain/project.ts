@@ -183,6 +183,46 @@ function insertAfter<T extends { id: string }>(list: T[], id: string, item: T): 
     return i === -1 ? list : [...list.slice(0, i + 1), item, ...list.slice(i + 1)]
 }
 
+/** A slot `0..length` in a list; omitted or not a number means the end. */
+const clampSlot = (index: number | undefined, length: number): number =>
+    index === undefined || Number.isNaN(index) ? length : Math.max(0, Math.min(Math.trunc(index), length))
+
+/** `items` inserted before `index` (clamped); appended when `index` is omitted. */
+function insertAt<T>(list: T[], items: T[], index?: number): T[] {
+    const i = clampSlot(index, list.length)
+    return [...list.slice(0, i), ...items, ...list.slice(i)]
+}
+
+/**
+ * Where a moved item lands in its destination list once it has been taken out, given the slot
+ * it was dropped on (`0..length` of the list as shown, appended when omitted). `fromIndex` is the
+ * item's index when it stays in the same list, else -1. Null when the move changes nothing.
+ */
+function moveSlot(fromIndex: number, length: number, index?: number): number | null {
+    let slot = clampSlot(index, length)
+    if (fromIndex === -1) return slot
+    if (slot > fromIndex) slot--
+    return slot === fromIndex ? null : slot
+}
+
+function locateChannel(p: Project, id: string): { group: AxisGroup; index: number } | undefined {
+    for (const f of p.scopeFiles) {
+        for (const group of f.axisGroups) {
+            const index = group.channels.findIndex((c) => c.id === id)
+            if (index !== -1) return { group, index }
+        }
+    }
+    return undefined
+}
+
+function locateAxisGroup(p: Project, id: string): { file: ScopeFile; index: number } | undefined {
+    for (const file of p.scopeFiles) {
+        const index = file.axisGroups.findIndex((a) => a.id === id)
+        if (index !== -1) return { file, index }
+    }
+    return undefined
+}
+
 const cloneChannel = (c: Channel): Channel => ({ ...c, id: uuid() })
 const cloneAxisGroup = (a: AxisGroup, name = a.name): AxisGroup => ({
     id: uuid(),
@@ -275,14 +315,53 @@ export const ops = {
             const c = a.channels.find((x) => x.id === id)
             return c ? { ...a, channels: insertAfter(a.channels, id, cloneChannel(c)) } : a
         }),
-    /** Moves a channel to another axis group (appended), possibly in another scope file. */
-    moveChannel: (p: Project, id: string, toAxisGroupId: string): Project => {
-        const channel = allChannels(p).find((c) => c.id === id)
-        if (!channel || !findAxisGroup(p, toAxisGroupId)) return p
+    /**
+     * Moves a channel to `index` of an axis group, possibly in another scope file (appended
+     * when `index` is omitted). `index` is a slot in the destination as it is shown now, i.e.
+     * still including the channel when it stays in its group.
+     */
+    moveChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project => {
+        const from = locateChannel(p, id)
+        const to = findAxisGroup(p, toAxisGroupId)
+        if (!from || !to) return p
+        const channel = from.group.channels[from.index]
+        const slot = moveSlot(from.group === to ? from.index : -1, to.channels.length, index)
+        if (slot === null) return p
         return mapAxisGroups(p, (a) => {
-            const rest = a.channels.filter((c) => c.id !== id)
-            return { ...a, channels: a.id === toAxisGroupId ? [...rest, channel] : rest }
+            const channels = a.id === from.group.id ? a.channels.filter((c) => c.id !== id) : a.channels
+            return a.id === to.id ? { ...a, channels: insertAt(channels, [channel], slot) } : { ...a, channels }
         })
+    },
+    /** Inserts a copy (new id) of a channel at `index` of an axis group (appended when omitted). */
+    copyChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project => {
+        const from = locateChannel(p, id)
+        if (!from || !findAxisGroup(p, toAxisGroupId)) return p
+        const copy = cloneChannel(from.group.channels[from.index])
+        return mapAxisGroups(p, (a) => (a.id === toAxisGroupId ? { ...a, channels: insertAt(a.channels, [copy], index) } : a))
+    },
+    /** Moves an axis group to `index` of a scope file (appended when omitted); `index` as in `moveChannel`. */
+    moveAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project => {
+        const from = locateAxisGroup(p, id)
+        const to = p.scopeFiles.find((f) => f.id === toFileId)
+        if (!from || !to) return p
+        const group = from.file.axisGroups[from.index]
+        const slot = moveSlot(from.file === to ? from.index : -1, to.axisGroups.length, index)
+        if (slot === null) return p
+        return mapFiles(p, (f) => {
+            const axisGroups = f.id === from.file.id ? f.axisGroups.filter((a) => a.id !== id) : f.axisGroups
+            return f.id === to.id ? { ...f, axisGroups: insertAt(axisGroups, [group], slot) } : { ...f, axisGroups }
+        })
+    },
+    /**
+     * Inserts a copy (new ids) of an axis group at `index` of a scope file (appended when omitted).
+     * A copy into its own file is named like a duplicate.
+     */
+    copyAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project => {
+        const from = locateAxisGroup(p, id)
+        if (!from || !p.scopeFiles.some((f) => f.id === toFileId)) return p
+        const group = from.file.axisGroups[from.index]
+        const copy = cloneAxisGroup(group, from.file.id === toFileId ? `${group.name} (copy)` : group.name)
+        return mapFiles(p, (f) => (f.id === toFileId ? { ...f, axisGroups: insertAt(f.axisGroups, [copy], index) } : f))
     },
 }
 
@@ -294,10 +373,17 @@ export interface MergeResult {
 }
 
 /**
- * Append channel specs to an axis group in one step: Net IDs the project does not know
- * become new targets (named `targetName`), and specs the group already records are skipped.
+ * Add channel specs to an axis group in one step (at `index`, appended when omitted): Net IDs
+ * the project does not know become new targets (named `targetName`), and specs the group
+ * already records are skipped.
  */
-export function mergeChannelSpecs(p: Project, axisGroupId: string, specs: ChannelSpec[], targetName = 'Target'): MergeResult {
+export function mergeChannelSpecs(
+    p: Project,
+    axisGroupId: string,
+    specs: ChannelSpec[],
+    targetName = 'Target',
+    index?: number,
+): MergeResult {
     const group = findAxisGroup(p, axisGroupId)
     if (!group) return { project: p, added: 0, duplicates: 0 }
 
@@ -317,7 +403,7 @@ export function mergeChannelSpecs(p: Project, axisGroupId: string, specs: Channe
         present.add(keyOf(channel))
         fresh.push(channel)
     }
-    const project = mapAxisGroups({ ...p, targets }, (a) => (a.id === axisGroupId ? { ...a, channels: [...a.channels, ...fresh] } : a))
+    const project = mapAxisGroups({ ...p, targets }, (a) => (a.id === axisGroupId ? { ...a, channels: insertAt(a.channels, fresh, index) } : a))
     return { project, added: fresh.length, duplicates: specs.length - fresh.length }
 }
 
