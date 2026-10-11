@@ -1,6 +1,6 @@
 # TwinCAT Scope Generator
 
-> **Disclaimer**: This is an independent, personal open-source tool. It is **not a Beckhoff product** and is **not affiliated with, sponsored by, or endorsed by Beckhoff Automation GmbH & Co. KG**. "TwinCAT", "TwinCAT Scope", and related names are trademarks of their respective owners and are used here only to describe the file formats this tool generates and consumes. Use at your own risk.
+> **Disclaimer**: This is an independent, personal open-source tool. It is **not a Beckhoff product** and is **not affiliated with, sponsored by, or endorsed by Beckhoff Automation GmbH & Co. KG**. "TwinCAT", "TwinCAT Scope", and related names are trademarks of their respective owners and are used here only to describe the file formats this tool generates and consumes. The TwinCAT Scope and Solution Explorer icons are Beckhoff's artwork ([sources](src/features/browser/icons/README.md)). Use at your own risk.
 
 Build TwinCAT Scope projects **offline, in the browser**: import the files of your TwinCAT solution,
 browse and search every symbol like in the TwinCAT Target Browser, pick what to record, and download a
@@ -36,6 +36,8 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
   by path, arrays as patterns; search text and filters narrow it. The choice is remembered.
 - **Search**: all words must match anywhere in the path (`axis actpos`); `*`/`?` globs match the whole
   path (`*.fActPos`, `MAIN.*Axis*`); `type:LREAL`, `area:input`, `port:852` filter by field.
+- **Icons** as in the Solution Explorer: PLC, MOTION, I/O device, TcCOM; terminals and TcCOM objects
+  with the icon stored in the imported file.
 - **Filters** (only those that apply to the imported files, with counts): runtime *PLC / NC / I/O /
   TcCOM*; PLC *Global* (GVLs) / *Programs*; *Inputs / Outputs*; *Hide system* (on by default) leaves
   out TwinCAT's own symbols — `TwinCAT_SystemInfoVarList`, `Global_Version`, …, the EtherCAT frame

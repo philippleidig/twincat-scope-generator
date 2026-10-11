@@ -1,6 +1,11 @@
-import { Ban, Boxes, Braces, Brackets, CornerDownRight, Cpu, EthernetPort, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
+import { Ban, Braces, Brackets, CornerDownRight, Folder, FolderOpen, Variable } from 'lucide-react'
 import type { SourceKind } from '@/catalog/model'
 import type { BrowserNode } from '@/catalog/tree'
+import deviceIcon from './icons/device.png'
+import motionIcon from './icons/motion.png'
+import plcIcon from './icons/plc.png'
+import systemIcon from './icons/system.png'
+import tccomIcon from './icons/tccom.png'
 
 export function KindIcon({ kind, open = false }: { kind: BrowserNode['kind']; open?: boolean }) {
     const props = { size: 15, className: `kind-icon kind-icon--${kind}`, 'aria-hidden': true }
@@ -20,18 +25,13 @@ export function KindIcon({ kind, open = false }: { kind: BrowserNode['kind']; op
     }
 }
 
-export function SourceIcon({ kind, size = 16 }: { kind: SourceKind; size?: number }) {
-    const props = { size, className: `source-icon source-icon--${kind}`, 'aria-hidden': true }
-    switch (kind) {
-        case 'PLC':
-            return <Cpu {...props} />
-        case 'NC':
-            return <Move3d {...props} />
-        case 'TcCOM':
-            return <Boxes {...props} />
-        case 'IO':
-            return <EthernetPort {...props} />
-        default:
-            return <FileCode2 {...props} />
-    }
+/** The Solution Explorer node of each runtime: PLC, MOTION, the I/O device, TcCOM Objects, SYSTEM. */
+const SOURCE_ICON: Record<SourceKind, string> = { PLC: plcIcon, NC: motionIcon, IO: deviceIcon, TcCOM: tccomIcon, Other: systemIcon }
+
+/** The icon of a source kind, or `src` — an icon the file brought along (`sourceIcon`). */
+export function SourceIcon({ kind, src, size = 16 }: { kind: SourceKind; src?: string; size?: number }) {
+    return <img className="source-icon" src={src ?? SOURCE_ICON[kind]} width={size} height={size} alt="" draggable={false} />
 }
+
+/** An icon from the imported file, e.g. an I/O box's, in place of the folder icon. */
+export const FileIcon = ({ src }: { src: string }) => <img className="file-icon" src={src} width={16} height={16} alt="" draggable={false} />

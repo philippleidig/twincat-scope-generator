@@ -87,21 +87,9 @@
     flex: none;
     width: 28px;
     height: 28px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-.source-card__icon--NC {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-.source-card__icon--TcCOM {
-    background: color-mix(in srgb, var(--kind-struct) 14%, transparent);
-    color: var(--kind-struct);
-}
-.source-card__icon--IO {
-    background: color-mix(in srgb, var(--kind-scalar) 14%, transparent);
-    color: var(--kind-scalar);
+    background: var(--surface);
 }
 .source-card__titles {
     display: flex;
@@ -326,9 +314,12 @@
 .kind-icon--unsupported {
     color: var(--text-3);
 }
-.source-icon {
+/* TwinCAT's 16×16 bitmaps: scaled by whole pixels on high-density screens, never smoothed. */
+.source-icon,
+.file-icon {
     flex: none;
-    color: var(--accent);
+    object-fit: contain;
+    image-rendering: pixelated;
 }
 .type-tag {
     flex: none;

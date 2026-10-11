@@ -18,6 +18,7 @@
  * first image and the rest into the second, as in that project.
  */
 import type { AreaKind, MemberDef, SymbolRoot, SymbolSource, TypeTable } from './model'
+import { sourceIcons } from './bitmap'
 import { finalizeSource, readTypeRef, withSymbols } from './typeTable'
 import { child, children, text } from './xml'
 
@@ -46,6 +47,9 @@ export const IO_HINT =
     'I/O symbols exist only with "Enable ADS Server" and "Create symbols" on the ADS tab of the device\'s Image; the port is 27904 + the image id. Keep "Generate hierarchical symbol names" off.'
 
 type Base = (index: number) => Pick<SymbolSource, 'id' | 'fileName' | 'types' | 'amsNetId'>
+
+/** The icon an item references by `<ImageId>`, as a data URL (`fileImages`). */
+type IconOf = (el: Element) => string | undefined
 
 const intAttr = (el: Element, name: string): number | null => {
     const raw = el.getAttribute(name)?.trim() ?? ''
@@ -152,7 +156,10 @@ function entryGroup(pdo: Element): Group {
 interface BoxSymbols {
     /** Tree path below the device, as used by `<Mappings>` (`Term 1 (EK1100)^Term 2 (EL1008)`). */
     treePath: string
+    /** Box name: the first segment of its roots, so the tree shows it as a folder. */
+    name: string
     roots: SymbolRoot[]
+    icon?: string
 }
 
 /** Roots of an EtherCAT box: one struct per assigned PDO, plus `WcState`/`InputToggle`. */
@@ -238,17 +245,20 @@ function fieldbusBoxRoots(box: Element, boxName: string): SymbolRoot[] {
 }
 
 /** Every enabled box below `parent` (depth first), with its roots. */
-function collectBoxes(parent: Element, parentPath: string, fileStem: string, types: TypeBuilder, out: BoxSymbols[]): void {
+function collectBoxes(parent: Element, parentPath: string, fileStem: string, types: TypeBuilder, iconOf: IconOf, out: BoxSymbols[]): void {
     for (const box of children(parent, 'Box')) {
         if (box.getAttribute('File') || isDisabled(box)) continue
         const name = itemName(box, fileStem)
         if (!name) continue
         const treePath = parentPath ? `${parentPath}^${name}` : name
         const ecat = child(box, 'EtherCAT')
-        out.push({ treePath, roots: ecat ? etherCatBoxRoots(ecat, name, types) : fieldbusBoxRoots(box, name) })
-        collectBoxes(box, treePath, fileStem, types, out)
+        out.push({ treePath, name, roots: ecat ? etherCatBoxRoots(ecat, name, types) : fieldbusBoxRoots(box, name), icon: iconOf(box) })
+        collectBoxes(box, treePath, fileStem, types, iconOf, out)
     }
 }
+
+/** Folder icons of the boxes that have roots here. */
+const boxIcons = (boxes: BoxSymbols[]) => boxes.filter((b) => b.roots.length > 0).map((b): [string, string | undefined] => [b.name, b.icon])
 
 // ---------------------------------------------------------------------------
 // Devices and images
@@ -283,7 +293,7 @@ function ncLinkedBoxes(doc: Document, deviceName: string, boxes: BoxSymbols[]): 
 const imageAdsEnabled = (image: Element) => ((intAttr(image, 'ImageFlags') ?? 0) & IMAGE_ADS_SYMBOLS) === IMAGE_ADS_SYMBOLS
 
 /** One source per process image of an I/O device. */
-function deviceSources(doc: Document, device: Element, fileStem: string, builder: TypeBuilder, base: Base, firstIndex: number): SymbolSource[] {
+function deviceSources(doc: Document, device: Element, fileStem: string, builder: TypeBuilder, iconOf: IconOf, base: Base, firstIndex: number): SymbolSource[] {
     const images = children(device, 'Image')
     if (images.length === 0) return []
     const deviceName = itemName(device, fileStem) || `Device ${device.getAttribute('Id') ?? ''}`.trim()
@@ -293,14 +303,19 @@ function deviceSources(doc: Document, device: Element, fileStem: string, builder
         ? ETHERCAT_DEVICE_VARS.map(({ name, area }) => ({ name, type: 'UINT', area, areaName: area === 'input' ? 'Inputs' : 'Outputs', system: true }))
         : varsRoots(device, '')
     const boxes: BoxSymbols[] = []
-    collectBoxes(device, '', fileStem, builder, boxes)
+    collectBoxes(device, '', fileStem, builder, iconOf, boxes)
 
     // Several images: one per task accessing the device; boxes go where their variables are linked.
     const perImage: SymbolRoot[][] = images.map(() => [])
+    const boxesPerImage: BoxSymbols[][] = images.map(() => [])
     perImage[0].push(...deviceRoots)
     const nc = images.length > 1 ? ncLinkedBoxes(doc, deviceName, boxes) : new Set<string>()
     const split = nc.size > 0
-    for (const box of boxes) perImage[!split || nc.has(box.treePath) ? 0 : 1].push(...box.roots)
+    for (const box of boxes) {
+        const i = !split || nc.has(box.treePath) ? 0 : 1
+        perImage[i].push(...box.roots)
+        boxesPerImage[i].push(box)
+    }
 
     const sources: SymbolSource[] = []
     images.forEach((image, i) => {
@@ -331,6 +346,7 @@ function deviceSources(doc: Document, device: Element, fileStem: string, builder
             roots,
             complete: true,
             warnings,
+            icons: sourceIcons(undefined, boxIcons(boxesPerImage[i])),
         })
     })
     return sources
@@ -340,18 +356,18 @@ function deviceSources(doc: Document, device: Element, fileStem: string, builder
  * I/O sources of a System Manager file: every `<Device>` with a process image, and boxes exported
  * on their own (`.xti` of a terminal), whose device and port the file does not know.
  */
-export function readIoSources(doc: Document, fileStem: string, base: Base, firstIndex: number): SymbolSource[] {
+export function readIoSources(doc: Document, fileStem: string, base: Base, firstIndex: number, iconOf: IconOf = () => undefined): SymbolSource[] {
     const sources: SymbolSource[] = []
     // One type table per file: equal PDO layouts share a type across devices.
     const builder = new TypeBuilder(base(firstIndex).types)
     for (const device of doc.getElementsByTagName('Device')) {
         if (device.getAttribute('File')) continue
-        sources.push(...deviceSources(doc, device, fileStem, builder, base, firstIndex + sources.length))
+        sources.push(...deviceSources(doc, device, fileStem, builder, iconOf, base, firstIndex + sources.length))
     }
     const root = doc.documentElement
     if (root.tagName === 'TcSmItem') {
         const boxes: BoxSymbols[] = []
-        collectBoxes(root, '', fileStem, builder, boxes)
+        collectBoxes(root, '', fileStem, builder, iconOf, boxes)
         const roots = finalizeSource(builder.types, boxes.flatMap((b) => b.roots))
         if (roots.length > 0) {
             sources.push({
@@ -366,6 +382,7 @@ export function readIoSources(doc: Document, fileStem: string, base: Base, first
                     "This file holds a box without its device: set the port to the one of the device's image (27904 + image id, 27905 for the first).",
                     IO_HINT,
                 ],
+                icons: sourceIcons(boxes[0].icon, boxIcons(boxes)),
             })
         }
     }

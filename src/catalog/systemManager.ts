@@ -14,6 +14,7 @@
  * be imported too. `__FILENAME__` names stand for the file's own name.
  */
 import type { AreaKind, SymbolRoot, SymbolSource, TypeTable } from './model'
+import { fileImages, sourceIcons } from './bitmap'
 import { readIoSources } from './io'
 import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, parameterNote, readModuleRoots } from './tmc'
 import { finalizeSource, readTypeRef, readTypeTable } from './typeTable'
@@ -75,6 +76,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         return !n || n === '__FILENAME__' ? fallback : n
     }
     const amsNetId = all(doc, 'Project').map((p) => p.getAttribute('TargetNetId')).find(Boolean) ?? undefined
+    const { iconOf } = fileImages(doc)
     const sources: SymbolSource[] = []
     const references: string[] = []
     const base = (index: number) => ({ id: `${fileName}#${index}`, fileName, types, amsNetId })
@@ -116,6 +118,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
             roots,
             complete: true,
             warnings: [TCCOM_PREFIX_HINT, ...parameterNote(parametersWithoutSymbol)],
+            icons: sourceIcons(iconOf(module), []),
         })
     }
 
@@ -149,7 +152,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         })
     }
 
-    sources.push(...readIoSources(doc, stem, base, sources.length))
+    sources.push(...readIoSources(doc, stem, base, sources.length, iconOf))
 
     const warnings: string[] = []
     if (references.length > 0) {

@@ -55,7 +55,7 @@ export function BrowserToolbar() {
             key: 'kinds',
             chips: kinds.map(({ kind, label }) => (
                 <button key={kind} type="button" className="chip" aria-pressed={state.kinds.has(kind)} onClick={() => state.toggleKind(kind)}>
-                    <SourceIcon kind={kind} size={13} />
+                    <SourceIcon kind={kind} />
                     {label}
                     <Count n={counts.kinds.get(kind) ?? 0} />
                 </button>

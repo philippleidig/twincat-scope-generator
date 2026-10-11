@@ -6,6 +6,7 @@ import { useCatalogStore } from '@/state/catalogStore'
 import { IconButton } from '@/ui/components/Button'
 import { TextField } from '@/ui/components/Field'
 import { useDraft } from '@/ui/components/useDraft'
+import { sourceIcon } from '@/catalog/bitmap'
 import { SourceIcon } from './symbolIcons'
 
 /**
@@ -26,8 +27,8 @@ export function SourceCard({ source }: { source: SymbolSource }) {
     return (
         <li className="source-card">
             <div className="source-card__head">
-                <span className={`source-card__icon source-card__icon--${source.kind}`}>
-                    <SourceIcon kind={source.kind} />
+                <span className="source-card__icon">
+                    <SourceIcon kind={source.kind} src={sourceIcon(source)} />
                 </span>
                 <div className="source-card__titles">
                     <span className="source-card__title">{source.title}</span>

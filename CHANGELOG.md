@@ -2,6 +2,15 @@
 
 ## V2.2 (unreleased)
 
+### Icons
+
+- Sources show the icon of their Solution Explorer node: PLC, MOTION (NC), the EtherCAT device (I/O),
+  TcCOM Objects; in the source cards, the tree and the runtime filter.
+- Terminals and TcCOM objects show **their own icon from the imported file** (`<ImageDatas>`, as
+  TwinCAT stores it with the project), e.g. the EL2008 next to `Term 3 (EL2008)` in the tree. Items
+  that use one of TwinCAT's built-in images keep the folder icon.
+- The header shows the TwinCAT Scope icon.
+
 ### Filters
 
 - New filter chips, shown only when they narrow what is imported and with the number of symbols each

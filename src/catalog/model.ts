@@ -72,6 +72,16 @@ export interface SymbolRoot extends Access {
 
 export type SourceKind = 'PLC' | 'TcCOM' | 'NC' | 'IO' | 'Other'
 
+/** Icons a System Manager file brings along (`<ImageDatas>`), each image stored once. */
+export interface SourceIcons {
+    /** PNG data URLs. */
+    images: string[]
+    /** Index into `images` of the source's own icon: a TcCOM object's, or that of a box exported alone. */
+    source?: number
+    /** Index into `images` by folder prefix: the I/O box behind that tree folder (`Term 2 (EL1008)`). */
+    folders?: Record<string, number>
+}
+
 export interface SymbolSource {
     id: string
     fileName: string
@@ -91,6 +101,7 @@ export interface SymbolSource {
     types: TypeTable
     roots: SymbolRoot[]
     warnings: string[]
+    icons?: SourceIcons
 }
 
 /**

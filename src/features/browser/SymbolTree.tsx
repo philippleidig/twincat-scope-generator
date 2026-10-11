@@ -1,24 +1,26 @@
 import { useMemo } from 'react'
 import type { SymbolSource } from '@/catalog/model'
+import { folderIcon, sourceIcon } from '@/catalog/bitmap'
 import type { BrowserNode } from '@/catalog/tree'
 import { cachedChildren, childrenOf, isExpandable, sourceChildren, sourceKey } from '@/catalog/tree'
 import { VirtualList } from '@/ui/components/VirtualList'
 import { Disclosure } from '@/ui/components/Disclosure'
 import { useBrowserStore } from '@/state/browserStore'
-import { KindIcon, SourceIcon } from './symbolIcons'
+import { FileIcon, KindIcon, SourceIcon } from './symbolIcons'
 import { isPickable, nodePick } from './picks'
 import { SymbolRow } from './SymbolRow'
 
 type Row =
     | { type: 'source'; key: string; source: SymbolSource }
-    | { type: 'node'; key: string; node: BrowserNode }
+    /** `icon`: a folder's icon from the file (an I/O box), shown instead of the folder icon. */
+    | { type: 'node'; key: string; node: BrowserNode; icon?: string }
     | { type: 'more'; key: string; depth: number; hidden: number }
 
 function visibleRows(sources: SymbolSource[], expanded: Set<string>): Row[] {
     const rows: Row[] = []
     const addNodes = (source: SymbolSource, nodes: BrowserNode[], total?: number) => {
         for (const node of nodes) {
-            rows.push({ type: 'node', key: node.key, node })
+            rows.push({ type: 'node', key: node.key, node, icon: node.kind === 'folder' ? folderIcon(source, node.prefix) : undefined })
             if (expanded.has(node.key) && isExpandable(node)) {
                 const children = cachedChildren(source, node.key, () => childrenOf(source, node))
                 addNodes(source, children, node.kind === 'array' ? arrayElementCount(node) : undefined)
@@ -67,7 +69,7 @@ export function SymbolTree({ sources }: { sources: SymbolSource[] }) {
                     return (
                         <div role="treeitem" aria-expanded={open} aria-level={1} className="tree-row tree-row--source">
                             <Disclosure open={open} label={row.source.title} onToggle={() => toggleExpanded(row.key)} />
-                            <SourceIcon kind={row.source.kind} />
+                            <SourceIcon kind={row.source.kind} src={sourceIcon(row.source)} />
                             <span className="tree-row__label">{row.source.title}</span>
                             <span className="badge">{row.source.roots.length}</span>
                             <span className="tree-row__meta">port {row.source.port}</span>
@@ -86,7 +88,7 @@ export function SymbolTree({ sources }: { sources: SymbolSource[] }) {
                         indent={node.depth}
                         pick={symbol && isPickable(symbol.kind) ? nodePick(symbol) : null}
                         toggle={expandable ? <Disclosure open={open} label={node.label} onToggle={() => toggleExpanded(node.key)} /> : <span className="disclosure" />}
-                        icon={<KindIcon kind={node.kind} open={open} />}
+                        icon={row.icon ? <FileIcon src={row.icon} /> : <KindIcon kind={node.kind} open={open} />}
                         label={node.label}
                         title={node.kind === 'folder' ? node.path : node.symbol.path}
                         typeName={symbol?.typeName}
