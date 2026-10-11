@@ -33,6 +33,7 @@ export interface SearchEntry {
 }
 
 export interface SearchIndex {
+    /** Sorted by path: case-insensitively, then exactly, then by source. */
     entries: SearchEntry[]
     /** True when the index stopped at MAX_ENTRIES or the walk's depth limit and is incomplete. */
     truncated: boolean
@@ -40,7 +41,16 @@ export interface SearchIndex {
 
 export const MAX_ENTRIES = 250_000
 
+const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+const byPath = (a: SearchEntry, b: SearchEntry) => compare(a.haystack, b.haystack) || compare(a.path, b.path) || compare(a.sourceId, b.sourceId)
+
 export function buildIndex(sources: SymbolSource[]): SearchIndex {
+    const { entries, truncated } = collectEntries(sources)
+    // Sorted once here, so a path-ordered list is a plain filter and relevance ties fall back to path order.
+    return { entries: entries.sort(byPath), truncated }
+}
+
+function collectEntries(sources: SymbolSource[]): SearchIndex {
     const entries: SearchEntry[] = []
     const seen = new Set<string>()
     const stats = { depthLimited: false }
@@ -89,7 +99,7 @@ export interface SearchQuery {
     sourceIds?: ReadonlySet<string>
     /** Only entries that can become channels directly (scalars). */
     recordableOnly?: boolean
-    /** `relevance` (default) ranks name matches of the first word first; `path` sorts by path. */
+    /** `relevance` (default) ranks name matches of the first word first; `path` keeps the index's path order. */
     order?: 'relevance' | 'path'
 }
 
@@ -147,24 +157,10 @@ function rank(e: SearchEntry, firstWord: string): number {
     return 3
 }
 
-const byPathCache = new WeakMap<SearchIndex, SearchEntry[]>()
-
-/** The index entries sorted by path (case-insensitive, then exact path and source), computed once per index. */
-function entriesByPath(index: SearchIndex): SearchEntry[] {
-    let sorted = byPathCache.get(index)
-    if (!sorted) {
-        const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
-        sorted = [...index.entries].sort((a, b) => cmp(a.haystack, b.haystack) || cmp(a.path, b.path) || cmp(a.sourceId, b.sourceId))
-        byPathCache.set(index, sorted)
-    }
-    return sorted
-}
-
 export function search(index: SearchIndex, query: SearchQuery, limit = 500): SearchResult {
     const terms = parseTerms(query.text)
-    const byPath = query.order === 'path'
-    const firstWord = byPath ? '' : (query.text.trim().split(/\s+/).find((w) => !w.includes(':'))?.toLowerCase() ?? '')
-    const matches = (byPath ? entriesByPath(index) : index.entries).filter(
+    const firstWord = query.text.trim().split(/\s+/).find((w) => !w.includes(':'))?.toLowerCase() ?? ''
+    const matches = index.entries.filter(
         (e) =>
             (!query.recordableOnly || e.kind === 'scalar') &&
             (!query.scopeTypes?.size || (e.scopeType !== undefined && query.scopeTypes.has(e.scopeType))) &&
@@ -172,7 +168,7 @@ export function search(index: SearchIndex, query: SearchQuery, limit = 500): Sea
             (!query.sourceIds?.size || query.sourceIds.has(e.sourceId)) &&
             terms.every((t) => t.test(e)),
     )
-    if (firstWord) {
+    if (firstWord && query.order !== 'path') {
         matches.sort((a, b) => rank(a, firstWord) - rank(b, firstWord) || a.path.length - b.path.length)
     }
     return { entries: matches.slice(0, limit), total: matches.length }

@@ -1,43 +1,54 @@
 import { useMemo } from 'react'
 import { useSearch } from './useSearch'
-import type { SearchIndex } from '@/catalog/search'
+import type { SearchIndex, SearchQuery } from '@/catalog/search'
 import { templateOf } from '@/catalog/search'
 import { VirtualList } from '@/ui/components/VirtualList'
-import { useBrowserStore } from '@/state/browserStore'
+import { isFiltering, useBrowserStore } from '@/state/browserStore'
 import { KindIcon } from './symbolIcons'
 import { entryPick, isPickable } from './picks'
 import { SymbolRow } from './SymbolRow'
 import { Highlight } from './Highlight'
 import { highlightWords } from './highlightWords'
 
-/**
- * Search entries as a flat, virtualised list. `results` mode shows search hits ranked by
- * relevance; `list` mode is the browser's List view: every entry sorted by path, narrowed by
- * the same query and filters.
- */
-export function SearchResults({ index, mode = 'results' }: { index: SearchIndex; mode?: 'results' | 'list' }) {
-    const list = mode === 'list'
-    const result = useSearch(index, list ? 'path' : 'relevance')
+export type EntryListMode = 'results' | 'list'
+
+const MODES = {
+    // Search results in the tree view: best name matches first.
+    results: { order: 'relevance', label: 'Search results', noun: ['match', 'matches'] },
+    // The List view: every entry by path, narrowed by query and filters.
+    list: { order: 'path', label: 'Symbol list', noun: ['symbol', 'symbols'] },
+} satisfies Record<EntryListMode, { order: SearchQuery['order']; label: string; noun: [string, string] }>
+
+/** Search entries as a flat, virtualised list of pickable rows. */
+export function EntryList({ index, mode }: { index: SearchIndex; mode: EntryListMode }) {
+    const { order, label, noun } = MODES[mode]
+    const result = useSearch(index, order)
     const query = useBrowserStore((s) => s.query)
+    const filtering = useBrowserStore(isFiltering)
     const words = useMemo(() => highlightWords(query), [query])
 
     if (result.total === 0) {
-        return (
+        return filtering ? (
             <div className="empty">
                 <h3>No matching symbols</h3>
                 <p>Try fewer words, a wildcard like <code>*ActPos</code>, or remove filters.</p>
+            </div>
+        ) : (
+            <div className="empty">
+                <h3>No symbols</h3>
+                <p>The imported files declare no symbols.</p>
             </div>
         )
     }
     return (
         <>
-            <div className="result-summary">{summary(result.entries.length, result.total, list ? ['symbol', 'symbols'] : ['match', 'matches'])}</div>
+            <div className="result-summary">{summary(result.entries.length, result.total, noun)}</div>
             <VirtualList
                 items={result.entries}
                 rowHeight={32}
                 getKey={(e) => e.key}
                 role="listbox"
-                label={list ? 'Symbol list' : 'Search results'}
+                label={label}
                 className="symbol-list"
                 renderRow={(entry) => {
                     const template = templateOf(entry)

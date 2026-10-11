@@ -1,8 +1,10 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import type { ScopeDataType } from '@/domain/dataTypes'
 import type { AreaKind } from '@/catalog/model'
 import type { SymbolKind } from '@/catalog/walk'
 import { sourceKey } from '@/catalog/tree'
+import { safeLocalStorage } from './safeStorage'
 
 /**
  * Something picked in the browser — a tree node (`GVL.aAxis[3]`) or a search result
@@ -21,25 +23,6 @@ export const PICK_MIME = 'application/x-scope-picks'
 
 /** How the browser shows symbols: the hierarchical tree or a flat list of every search entry. */
 export type BrowserView = 'tree' | 'list'
-
-const VIEW_KEY = 'twincat-scope-browser-view'
-
-/** The stored view preference; storage may be blocked (private mode), then the tree. */
-export function readStoredView(): BrowserView {
-    try {
-        return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'tree'
-    } catch {
-        return 'tree'
-    }
-}
-
-function storeView(view: BrowserView) {
-    try {
-        localStorage.setItem(VIEW_KEY, view)
-    } catch {
-        // Storage blocked: the choice just won't survive a reload.
-    }
-}
 
 interface BrowserState {
     view: BrowserView
@@ -77,40 +60,57 @@ const toggled = <T,>(set: Set<T>, value: T): Set<T> => {
     return next
 }
 
-export const useBrowserStore = create<BrowserState>()((set) => ({
-    view: readStoredView(),
-    query: '',
-    scopeTypes: new Set(),
-    areas: new Set(),
-    recordableOnly: false,
-    expanded: new Set(),
-    selection: new Map(),
-    focused: null,
+export const useBrowserStore = create<BrowserState>()(
+    persist(
+        (set) => ({
+            view: 'tree',
+            query: '',
+            scopeTypes: new Set(),
+            areas: new Set(),
+            recordableOnly: false,
+            expanded: new Set(),
+            selection: new Map(),
+            focused: null,
 
-    setView: (view) => {
-        storeView(view)
-        set({ view })
-    },
-    setQuery: (query) => set({ query }),
-    toggleScopeType: (t) => set((s) => ({ scopeTypes: toggled(s.scopeTypes, t) })),
-    toggleArea: (a) => set((s) => ({ areas: toggled(s.areas, a) })),
-    setRecordableOnly: (recordableOnly) => set({ recordableOnly }),
-    clearFilters: () => set({ query: '', scopeTypes: new Set(), areas: new Set(), recordableOnly: false }),
-    toggleExpanded: (key) => set((s) => ({ expanded: toggled(s.expanded, key) })),
-    collapseAll: () => set({ expanded: new Set() }),
-    toggleSelected: (pick) =>
-        set((s) => {
-            const selection = new Map(s.selection)
-            if (selection.has(pick.key)) selection.delete(pick.key)
-            else selection.set(pick.key, pick)
-            return { selection }
+            setView: (view) => set({ view }),
+            setQuery: (query) => set({ query }),
+            toggleScopeType: (t) => set((s) => ({ scopeTypes: toggled(s.scopeTypes, t) })),
+            toggleArea: (a) => set((s) => ({ areas: toggled(s.areas, a) })),
+            setRecordableOnly: (recordableOnly) => set({ recordableOnly }),
+            clearFilters: () => set({ query: '', scopeTypes: new Set(), areas: new Set(), recordableOnly: false }),
+            toggleExpanded: (key) => set((s) => ({ expanded: toggled(s.expanded, key) })),
+            collapseAll: () => set({ expanded: new Set() }),
+            toggleSelected: (pick) =>
+                set((s) => {
+                    const selection = new Map(s.selection)
+                    if (selection.has(pick.key)) selection.delete(pick.key)
+                    else selection.set(pick.key, pick)
+                    return { selection }
+                }),
+            setSelection: (picks) => set({ selection: new Map(picks.map((p) => [p.key, p])) }),
+            clearSelection: () => set({ selection: new Map() }),
+            setFocused: (focused) => set({ focused }),
+            expandSources: (ids) => set((s) => ({ expanded: new Set([...s.expanded, ...ids.map(sourceKey)]) })),
+            resetPicks: () => set({ selection: new Map(), focused: null }),
         }),
-    setSelection: (picks) => set({ selection: new Map(picks.map((p) => [p.key, p])) }),
-    clearSelection: () => set({ selection: new Map() }),
-    setFocused: (focused) => set({ focused }),
-    expandSources: (ids) => set((s) => ({ expanded: new Set([...s.expanded, ...ids.map(sourceKey)]) })),
-    resetPicks: () => set({ selection: new Map(), focused: null }),
-}))
+        {
+            // Only the view is a preference; query, filters, expansion and selection are per session.
+            name: 'twincat-scope-browser-view',
+            storage: createJSONStorage(() => safeLocalStorage),
+            partialize: (s) => ({ view: s.view }),
+            merge: (persisted, current) => {
+                const view = (persisted as { view?: unknown } | undefined)?.view
+                return view === 'list' || view === 'tree' ? { ...current, view } : current
+            },
+        },
+    ),
+)
 
 export const isFiltering = (s: Pick<BrowserState, 'query' | 'scopeTypes' | 'areas' | 'recordableOnly'>) =>
     s.query.trim() !== '' || s.scopeTypes.size > 0 || s.areas.size > 0 || s.recordableOnly
+
+/** What the browser body shows: the tree, search results (tree view while filtering) or the flat list. */
+export type BrowserBody = 'tree' | 'results' | 'list'
+
+export const browserBody = (s: Pick<BrowserState, 'view' | 'query' | 'scopeTypes' | 'areas' | 'recordableOnly'>): BrowserBody =>
+    s.view === 'list' ? 'list' : isFiltering(s) ? 'results' : 'tree'

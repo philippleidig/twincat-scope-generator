@@ -3,6 +3,7 @@ import demoTmc from './demo/DemoMachine.tmc?raw'
 import { importTwinCatFile } from './importFile'
 import { MAX_ENTRIES, buildIndex, parseTerms, search, templateOf } from './search'
 import type { SymbolSource } from './model'
+import { expectSortedByPath } from '@/test/sortedByPath'
 
 const [demo] = importTwinCatFile('DemoMachine.tmc', demoTmc)
 const index = buildIndex([demo])
@@ -15,6 +16,9 @@ describe('buildIndex', () => {
         expect(templateOf(e)).toBe('GVL.aAxis[{i:1:4}].fActPos')
         expect(index.entries.some((x) => x.path.includes('aAxis[1]'))).toBe(false)
         expect(index.truncated).toBe(false)
+    })
+    it('sorts entries by path', () => {
+        expectSortedByPath(index.entries.map((e) => e.path))
     })
     it('never contains a path twice', () => {
         const keys = index.entries.map((e) => e.key)
@@ -60,14 +64,13 @@ describe('search', () => {
         expect(r.entries).toHaveLength(3)
         expect(r.total).toBe(index.entries.length)
     })
-    it('sorts by path instead of relevance on request, before the limit', () => {
+    it('keeps path order instead of ranking on request', () => {
         const all = index.entries.map((e) => e.path)
-        const sorted = [...all].sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0))
-        expect(paths('', { order: 'path' })).toEqual(sorted)
-        expect(search(index, { text: '', order: 'path' }, 2).entries.map((e) => e.path)).toEqual(sorted.slice(0, 2))
+        expect(paths('', { order: 'path' })).toEqual(all)
+        expect(search(index, { text: '', order: 'path' }, 2).entries.map((e) => e.path)).toEqual(all.slice(0, 2))
         // A query narrows but does not re-rank.
         const state = paths('state', { order: 'path' })
-        expect(state).toEqual(sorted.filter((p) => p.toLowerCase().includes('state')))
+        expect(state).toEqual(all.filter((p) => p.toLowerCase().includes('state')))
         expect(state).not.toEqual(paths('state'))
     })
     it('parses an empty query to no terms', () => {

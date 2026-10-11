@@ -5,7 +5,7 @@ import { useBrowserStore } from '@/state/browserStore'
 
 export const RESULT_LIMIT = 2000
 
-export function useSearch(index: SearchIndex, order: SearchQuery['order'] = 'relevance') {
+export function useSearch(index: SearchIndex, order: SearchQuery['order']) {
     // Typing stays responsive on large indexes: results catch up a frame later.
     const query = useDeferredValue(useBrowserStore((s) => s.query))
     const scopeTypes = useBrowserStore((s) => s.scopeTypes)

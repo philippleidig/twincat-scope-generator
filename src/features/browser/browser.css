@@ -155,11 +155,6 @@
 .browser-toolbar__row .segmented {
     flex: none;
 }
-.browser-toolbar__row .segmented button {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
 .search-box {
     flex: 1;
     min-width: 0;

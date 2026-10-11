@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
-import type { SearchEntry, SearchIndex } from '@/catalog/search'
+import { buildIndex } from '@/catalog/search'
+import { importTwinCatFile } from '@/catalog/importFile'
+import { expectSortedByPath } from '@/test/sortedByPath'
 import { useCatalogStore } from '@/state/catalogStore'
 import { useBrowserStore } from '@/state/browserStore'
 import { useProjectStore } from '@/state/projectStore'
 import { SymbolBrowser } from './SymbolBrowser'
-import { SearchResults } from './SearchResults'
+import { EntryList } from './EntryList'
 import { RESULT_LIMIT } from './useSearch'
 
 const VIEW_KEY = 'twincat-scope-browser-view'
@@ -19,6 +21,11 @@ function loadDemo() {
 
 const viewButton = (name: 'Tree' | 'List') => within(screen.getByRole('group', { name: 'Browser view' })).getByRole('button', { name })
 const symbolList = () => screen.getByRole('listbox', { name: 'Symbol list' })
+/** Paths of the rendered list rows, top to bottom. */
+const renderedPaths = () =>
+    within(symbolList())
+        .getAllByRole('option')
+        .map((row) => row.querySelector('.tree-row__label')!.textContent)
 
 beforeEach(() => {
     useProjectStore.getState().reset()
@@ -36,6 +43,12 @@ describe('browser views', () => {
         expect(viewButton('Tree')).toHaveAttribute('aria-pressed', 'true')
         expect(screen.getByRole('tree', { name: 'Symbols' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Collapse' })).toBeInTheDocument()
+
+        // A query in the tree view shows search results; Collapse only goes with the tree.
+        await user.type(screen.getByLabelText('Search symbols'), 'fActPos')
+        expect(screen.getByRole('listbox', { name: 'Search results' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Collapse' })).not.toBeInTheDocument()
+        await user.clear(screen.getByLabelText('Search symbols'))
 
         await user.click(viewButton('List'))
         expect(viewButton('List')).toHaveAttribute('aria-pressed', 'true')
@@ -55,10 +68,10 @@ describe('browser views', () => {
 
         const { entries } = useCatalogStore.getState().index
         expect(screen.getByText(`${entries.length} symbols`)).toBeInTheDocument()
-        const rows = within(symbolList()).getAllByRole('option')
-        const shown = rows.map((r) => r.getAttribute('title')!.split(' — ')[0])
-        const sortedPaths = entries.map((e) => e.path).sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1))
-        expect(shown[0]).toBe(sortedPaths[0])
+        const shown = renderedPaths()
+        expect(shown.length).toBeGreaterThan(10)
+        expect(shown).toEqual(entries.slice(0, shown.length).map((e) => e.path))
+        expectSortedByPath(shown)
         // Arrays appear once, as patterns with their element count.
         expect(within(symbolList()).getAllByText('×4').length).toBeGreaterThan(0)
     })
@@ -116,25 +129,29 @@ describe('browser views', () => {
         const user = userEvent.setup()
         render(<SymbolBrowser />)
         await user.click(viewButton('List'))
-        expect(localStorage.getItem(VIEW_KEY)).toBe('list')
+        expect(JSON.parse(localStorage.getItem(VIEW_KEY)!).state).toEqual({ view: 'list' })
 
-        // A fresh store module reads the stored preference, as after a reload.
-        vi.resetModules()
-        const reloaded = await import('@/state/browserStore')
-        expect(reloaded.useBrowserStore.getState().view).toBe('list')
-        localStorage.setItem(VIEW_KEY, 'bogus')
-        expect(reloaded.readStoredView()).toBe('tree')
+        // A reload reads the stored preference; anything else stored is ignored.
+        useBrowserStore.setState({ view: 'tree' })
+        localStorage.setItem(VIEW_KEY, JSON.stringify({ state: { view: 'list', query: 'x' }, version: 0 }))
+        await act(() => useBrowserStore.persist.rehydrate())
+        expect(useBrowserStore.getState()).toMatchObject({ view: 'list', query: '' })
+        expect(viewButton('List')).toHaveAttribute('aria-pressed', 'true')
 
-        const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        localStorage.setItem(VIEW_KEY, JSON.stringify({ state: { view: 'bogus' }, version: 0 }))
+        await act(() => useBrowserStore.persist.rehydrate())
+        expect(useBrowserStore.getState().view).toBe('list')
+
+        const blocked = () => {
             throw new Error('blocked')
-        })
-        const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-            throw new Error('blocked')
-        })
+        }
+        const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(blocked)
+        const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(blocked)
         try {
-            expect(reloaded.readStoredView()).toBe('tree')
             await user.click(viewButton('Tree'))
             expect(viewButton('Tree')).toHaveAttribute('aria-pressed', 'true')
+            await act(() => useBrowserStore.persist.rehydrate())
+            expect(useBrowserStore.getState().view).toBe('tree')
         } finally {
             getItem.mockRestore()
             setItem.mockRestore()
@@ -142,28 +159,24 @@ describe('browser views', () => {
     })
 
     it('caps a long list and says how many there are', () => {
+        const [demo] = importTwinCatFile('DemoMachine.tmc', demoTmc)
         const total = RESULT_LIMIT + 5
-        const entries: SearchEntry[] = Array.from({ length: total }, (_, i) => {
-            const path = `GVL.n${String(i).padStart(5, '0')}`
-            return {
-                key: `s|${path}`,
-                sourceId: 's',
-                path,
-                name: path.slice(4),
-                kind: 'scalar',
-                typeName: 'INT',
-                scopeType: 'INT16',
-                area: 'internal',
-                port: 851,
-                ranges: [],
-                haystack: path.toLowerCase(),
-            }
-        })
-        const index: SearchIndex = { entries: [...entries].reverse(), truncated: false }
-        render(<SearchResults index={index} mode="list" />)
+        // Declared in reverse, so the list has to come out sorted.
+        const roots = Array.from({ length: total }, (_, i) => ({
+            name: `GVL.n${String(total - 1 - i).padStart(5, '0')}`,
+            type: 'INT',
+            area: 'internal' as const,
+            areaName: 'Internal',
+        }))
+        render(<EntryList index={buildIndex([{ ...demo, roots }])} mode="list" />)
         expect(
             screen.getByText(`Showing ${RESULT_LIMIT.toLocaleString()} of ${total.toLocaleString()} symbols — refine the search to see more`),
         ).toBeInTheDocument()
-        expect(within(symbolList()).getAllByRole('option')[0]).toHaveAttribute('title', 'GVL.n00000')
+        expect(renderedPaths().slice(0, 3)).toEqual(['GVL.n00000', 'GVL.n00001', 'GVL.n00002'])
+    })
+
+    it('says when there are no symbols at all', () => {
+        render(<EntryList index={buildIndex([])} mode="list" />)
+        expect(screen.getByText('No symbols')).toBeInTheDocument()
     })
 })
