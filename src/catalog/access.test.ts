@@ -183,6 +183,7 @@ describe('POINTER TO', () => {
         dataType(
             'FB_Path',
             '<SubItem><Name>pPoint</Name><Type PointerTo="1">ST_Point</Type><BitOffs>0</BitOffs></SubItem>' +
+                '<SubItem><Name>pOther</Name><Type PointerTo="1">ST_Point</Type><BitOffs>0</BitOffs></SubItem>' +
                 '<SubItem><Name>ppPoint</Name><Type PointerTo="2">ST_Point</Type><BitOffs>64</BitOffs></SubItem>' +
                 '<SubItem><Name>pBuffer</Name><Type>ST_Point</Type><ArrayInfo PointerTo="1"><LBound>0</LBound><Elements>65536</Elements></ArrayInfo><BitOffs>128</BitOffs></SubItem>' +
                 '<SubItem><Name>pNext</Name><Type PointerTo="1">FB_Path</Type><BitOffs>192</BitOffs></SubItem>' +
@@ -202,9 +203,7 @@ describe('POINTER TO', () => {
     })
     it('dereferences pointers to pointers twice', () => {
         expect(treeNode(s, 'MAIN', 'fbPath', 'ppPoint', '^')).toMatchObject({ kind: 'pointer', typeName: 'POINTER TO ST_Point' })
-        expect(resolvePath(s, 'MAIN.fbPath.ppPoint^^.x')?.resolved).toMatchObject({ kind: 'scalar', scopeType: 'REAL32' })
-        // ST_Point was already expanded through pPoint^ in this walk: listed, not expanded again.
-        expect(entry(s, 'MAIN.fbPath.ppPoint^^')).toMatchObject({ kind: 'struct' })
+        expect(entry(s, 'MAIN.fbPath.ppPoint^^.x')).toMatchObject({ kind: 'scalar', scopeType: 'REAL32' })
     })
     it('reads pointers to arrays (<ArrayInfo PointerTo>) and POINTER TO type names as pointers, not arrays', () => {
         expect(treeNode(s, 'MAIN', 'fbPath', 'pBuffer')).toMatchObject({ kind: 'pointer', typeName: 'POINTER TO ARRAY[0..65535] OF ST_Point' })
@@ -215,9 +214,11 @@ describe('POINTER TO', () => {
     })
     it('lists ^ paths in search, without running around pointer cycles', () => {
         const all = paths(s)
-        expect(all).toEqual(expect.arrayContaining(['MAIN.fbPath.pPoint', 'MAIN.fbPath.pPoint^', 'MAIN.fbPath.pPoint^.x', 'MAIN.fbPath.pNext^']))
-        // pNext points back to the root's own type: listed, not walked again (the tree still expands it).
-        expect(all).not.toContain('MAIN.fbPath.pNext^.n')
+        // Sibling pointers to the same type are both followed.
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbPath.pPoint', 'MAIN.fbPath.pPoint^', 'MAIN.fbPath.pPoint^.x', 'MAIN.fbPath.pOther^.x']))
+        // A linked list is followed one hop: the same declaration is then listed, not walked again.
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbPath.pNext^.n', 'MAIN.fbPath.pNext^.pNext^']))
+        expect(all).not.toContain('MAIN.fbPath.pNext^.pNext^.n')
         expect(resolvePath(s, 'MAIN.fbPath.pNext^.pNext^.n')).not.toBeNull()
     })
     it('resolves ^ segments and records the target, but "Add" on the owner does not follow pointers', () => {
@@ -246,7 +247,7 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
         expect(treeLabels(s, 'MAIN', 'fbUse', 'refPoint')).toEqual(['x', 'y'])
         const x = treeNode(s, 'MAIN', 'fbUse', 'refPoint', 'x')
         expect(x).toMatchObject({ kind: 'scalar', warning: NOTE.viaReference })
-        expect(resolvePath(s, 'MAIN.fbUse.refPoint.x')).toMatchObject({ viaReference: true, resolved: { kind: 'scalar' } })
+        expect(resolvePath(s, 'MAIN.fbUse.refPoint.x')).toMatchObject({ throughReference: true, resolved: { kind: 'scalar' } })
     })
     it('lists the reference member in search but not what it points to', () => {
         expect(entry(s, 'MAIN.fbUse.refPoint')).toMatchObject({ kind: 'struct', warning: 'Valid only while the reference is bound' })
@@ -257,7 +258,7 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
     })
     it('treats VAR_IN_OUT (ItemType InOut) as a reference', () => {
         expect(entry(s, 'MAIN.fbUse.Target')).toMatchObject({ kind: 'struct', warning: NOTE.viaReference })
-        expect(resolvePath(s, 'MAIN.fbUse.Target.y')).toMatchObject({ viaReference: true })
+        expect(resolvePath(s, 'MAIN.fbUse.Target.y')).toMatchObject({ throughReference: true })
     })
     it('stays recordable when added directly; "Add" on the owner does not follow references', () => {
         expect(adds(s, 'MAIN.fbUse.refPoint')).toEqual(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refPoint.y'])
@@ -267,8 +268,8 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
     })
     it('walks through references when asked to, without running around cycles', () => {
         const all = [...walk(s, rootNode(s, s.roots[0]))].map((n) => n.path)
-        expect(all).toEqual(expect.arrayContaining(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refSelf']))
-        expect(all).not.toContain('MAIN.fbUse.refSelf.n')
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refSelf.n', 'MAIN.fbUse.refSelf.refSelf']))
+        expect(all).not.toContain('MAIN.fbUse.refSelf.refSelf.n')
     })
 })
 
@@ -336,5 +337,42 @@ describe('real file (Beckhoff TE2000 UserGuidance sample)', () => {
     })
     it('resolves every index entry', () => {
         expect(index.entries.filter((e) => !resolvePath(s, e.path))).toEqual([])
+    })
+})
+
+describe('empty arrays in inline types (TcCOM parameters)', () => {
+    const module = (name: string) =>
+        `<Module><Name>${name}</Name><CLSID>{x}</CLSID><Parameters><Parameter><Name>P</Name>` +
+        `<SubItem><Name>none</Name><Type>INT</Type><ArrayInfo><LBound>0</LBound><Elements>0</Elements></ArrayInfo></SubItem>` +
+        `<SubItem><Name>k</Name><Type>INT</Type></SubItem></Parameter></Parameters></Module>`
+
+    it('hides them in every module of a .tmc, not only in the first one', () => {
+        const sources = importTwinCatFile('c.tmc', `<TcModuleClass><DataTypes/><Modules>${module('M1')}${module('M2')}</Modules></TcModuleClass>`)
+        for (const src of sources) {
+            const prefix = src.pathPrefix
+            expect(resolvePath(src, `${prefix}.P.k`)).not.toBeNull()
+            expect(resolvePath(src, `${prefix}.P.none`)).toBeNull()
+        }
+    })
+    it('hides them in a TcCOM object that follows a PLC project in a .tsproj', () => {
+        const xml = `<TcSmProject><Project><Plc><Project Name="PLC1"><Instance><Vars VarGrpType="1"><Name>In</Name><Var><Name>MAIN.x</Name><Type>INT</Type></Var></Vars></Instance></Project></Plc>
+          <TcCom><Module><Name>Obj</Name><TmcDesc><Parameters><Parameter CreateSymbol="true"><Name>P</Name>
+          <SubItem><Name>none</Name><Type>INT</Type><ArrayInfo><LBound>0</LBound><Elements>0</Elements></ArrayInfo></SubItem>
+          <SubItem><Name>k</Name><Type>INT</Type></SubItem></Parameter></Parameters></TmcDesc></Module></TcCom></Project></TcSmProject>`
+        const tcom = importTwinCatFile('p.tsproj', xml).find((x) => x.kind === 'TcCOM')!
+        expect(buildIndex([tcom]).entries.map((e) => e.path)).toEqual(['Obj.P', 'Obj.P.k'])
+    })
+})
+
+describe('VAR_IN_OUT arrays', () => {
+    const s = plc(
+        ST_POINT + dataType('FB_Sum', sub('aIn', 'ST_Point', props(prop('ItemType', 'InOut')) + '<ArrayInfo><LBound>1</LBound><Elements>3</Elements></ArrayInfo>') + sub('n', 'INT')),
+        symbol('MAIN.fb', 'FB_Sum'),
+    )
+
+    it('are a reference to the whole array, recordable when added', () => {
+        expect(entry(s, 'MAIN.fb.aIn')).toMatchObject({ kind: 'array', typeName: 'ARRAY[1..3] OF ST_Point', warning: NOTE.viaReference })
+        expect(adds(s, 'MAIN.fb.aIn')).toEqual(['MAIN.fb.aIn[{i:1:3}].x', 'MAIN.fb.aIn[{i:1:3}].y'])
+        expect(resolvePath(s, 'MAIN.fb.aIn[2].y')).toMatchObject({ throughReference: true })
     })
 })

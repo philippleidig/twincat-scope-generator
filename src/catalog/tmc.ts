@@ -13,8 +13,8 @@
  *   name and can be changed per source in the browser.
  */
 import type { AreaKind, MemberDef, SymbolRoot, SymbolSource, TypeTable } from './model'
-import { readAccess } from './access'
-import { finalizeSource, readMember, readTypeRef, readTypeTable } from './typeTable'
+import { symbolAccess } from './access'
+import { finalizeSource, readMember, readTypeRef, readTypeTable, withSymbols } from './typeTable'
 import { child, children, properties, text } from './xml'
 
 export const DEFAULT_PLC_PORT = 851
@@ -57,7 +57,7 @@ function inlineType(types: TypeTable, ownerKey: string, el: Element): string | n
     // The anonymous type declares its fields; it has no properties of its own.
     const owner = { name, props: new Map<string, string>() }
     const members = subItems.map((m) => readMember(m, owner)).filter((m): m is MemberDef => m !== null)
-    types[name.toUpperCase()] = { kind: 'struct', name, members }
+    types[name.toUpperCase()] = { kind: 'struct', name, members: withSymbols(types, members) }
     return name
 }
 
@@ -68,7 +68,7 @@ function inlineType(types: TypeTable, ownerKey: string, el: Element): string | n
 function readRoot(el: Element, types: TypeTable, owner: string, path: string, area: AreaKind, areaName: string): SymbolRoot | null {
     const ref = readTypeRef(el, child(el, 'BaseType') ?? child(el, 'Type'))
     const type = inlineType(types, `${owner}/${path}`, el) ?? ref.type
-    const access = readAccess(properties(el))
+    const access = symbolAccess(properties(el))
     if (!type || !access) return null
     return {
         name: path,

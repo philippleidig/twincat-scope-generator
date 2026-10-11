@@ -5,7 +5,7 @@
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { NOTE } from './access'
-import type { ArrayDim, AreaKind, ResolvedType, SymbolRoot, SymbolSource } from './model'
+import type { Access, ArrayDim, AreaKind, ResolvedType, SymbolRoot, SymbolSource } from './model'
 import type { TypeRef } from './typeTable'
 import { arrayLabel, resolveDecl } from './typeTable'
 
@@ -27,7 +27,7 @@ export function describe(node: PathNode): SymbolInfo {
     const info: SymbolInfo = { kind: r.kind, typeName: r.kind === 'array' ? arrayLabel(r.dims, r.element) : r.typeName }
     if (r.kind === 'scalar') info.scopeType = r.scopeType
     if (r.kind === 'pointer' || r.kind === 'unsupported') info.reason = r.reason
-    const warnings = [node.viaReference && NOTE.viaReference, node.note].filter(Boolean)
+    const warnings = [node.throughReference && NOTE.viaReference, node.note].filter(Boolean)
     if (warnings.length > 0) info.warning = warnings.join(' · ')
     return info
 }
@@ -48,35 +48,34 @@ export interface PathNode {
     comment?: string
     /** Ranges of the `*` wildcards in `path`, in order (empty for concrete paths). */
     ranges: ArrayDim[]
-    /** The path passes through a reference (no `^`; valid only while the reference is bound). */
-    viaReference?: boolean
+    /** The path passes through a reference, here or above (no `^`; valid only while it is bound). */
+    throughReference?: boolean
     /** Caveat from the declaration of this node or a parent (`TcNoSymbol 'unused'`). */
     note?: string
 }
 
-export function rootNode(source: SymbolSource, root: SymbolRoot): PathNode {
-    const path = fullPath(source, root.name)
-    const resolved = resolveDecl(source.types, root)
-    const node: PathNode = { path, name: lastSegment(path), resolved, area: root.area, port: root.port ?? source.port, comment: root.comment, ranges: [] }
-    if (resolved.viaReference) node.viaReference = true
-    if (root.note) node.note = root.note
-    return node
-}
-
-interface ChildDecl extends TypeRef {
-    note?: string
+interface Decl extends TypeRef, Access {
     comment?: string
-    disabled?: string
 }
 
-/** A node below `parent`, inheriting area, port, ranges, the reference flag and the note. */
-function childNode(source: SymbolSource, parent: PathNode, path: string, name: string, decl: ChildDecl, ranges = parent.ranges): PathNode {
+/** A node for `decl` at `path`, inheriting area, port, ranges, the reference flag and the note from `parent`. */
+function declNode(source: SymbolSource, decl: Decl, path: string, name: string, base: Pick<PathNode, 'area' | 'port' | 'ranges'> & Partial<PathNode>): PathNode {
     const resolved = resolveDecl(source.types, decl)
-    const node: PathNode = { path, name, resolved, area: parent.area, port: parent.port, comment: decl.comment, ranges }
-    if (parent.viaReference || resolved.viaReference) node.viaReference = true
-    const note = decl.note ?? parent.note
+    const node: PathNode = { path, name, resolved, area: base.area, port: base.port, comment: decl.comment, ranges: base.ranges }
+    if (base.throughReference || resolved.viaReference) node.throughReference = true
+    const note = decl.note ?? base.note
     if (note) node.note = note
     return node
+}
+
+export function rootNode(source: SymbolSource, root: SymbolRoot): PathNode {
+    const path = fullPath(source, root.name)
+    return declNode(source, root, path, lastSegment(path), { area: root.area, port: root.port ?? source.port, ranges: [] })
+}
+
+/** A node below `parent`. */
+function childNode(source: SymbolSource, parent: PathNode, path: string, name: string, decl: Decl, ranges = parent.ranges): PathNode {
+    return declNode(source, decl, path, name, { ...parent, ranges })
 }
 
 /** Struct members of a node (none for other kinds). */
@@ -116,47 +115,67 @@ export interface WalkOptions {
     references?: Indirection
 }
 
+/** Where a node comes from: the declaration (member or start) plus the `[]`/`^` hops below it. */
+interface Origin {
+    decl: object
+    hops: string
+    /** Reached through a followed pointer or reference. */
+    indirect: boolean
+}
+
 /**
  * Depth-first walk over a node and everything below it. Arrays are not enumerated:
  * they continue as one wildcard element (`a[*]`), so the walk stays proportional to the
  * number of distinct member paths. Struct elements are skipped in favour of their
  * members (they add nothing searchable). Pointers continue as their `^` child.
  *
- * Indirections follow `options`; in addition each type is expanded through an indirection at
- * most once per walk — later pointers/references to it are listed, not expanded — so linked
- * lists and FBs pointing at each other stay linear instead of combinatorial.
- * `stats.depthLimited` reports pruning.
+ * Indirections follow `options`; in addition each pointer or reference *declaration* (a member,
+ * plus the `[]`/`^` hops below it) is followed at most once per walk, later encounters are
+ * listed but not expanded. A linked list stops after one hop and FBs pointing at each other stay
+ * linear (bounded by declarations × target size), while sibling pointers to the same type are
+ * all followed. `stats.depthLimited` reports pruning by MAX_DEPTH — except below a followed
+ * indirection, where cutting a chain of back pointers (a state machine's states pointing at the
+ * machine) is expected and the tree goes further by hand.
  */
 export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimited: false }, options: WalkOptions = {}): Generator<PathNode> {
-    // The start's own type counts as expanded: a pointer back to it is listed, not walked again.
-    const expanded = new Set<string>([start.resolved.typeName.toUpperCase()])
-    const visit = function* (node: PathNode, depth: number, emitSelf: boolean, via?: 'pointers' | 'references'): Generator<PathNode> {
+    const followed = new Map<object, Set<string>>()
+    const firstTime = ({ decl, hops }: Origin) => {
+        let seen = followed.get(decl)
+        if (!seen) followed.set(decl, (seen = new Set()))
+        if (seen.has(hops)) return false
+        seen.add(hops)
+        return true
+    }
+    const visit = function* (node: PathNode, depth: number, emitSelf: boolean, origin: Origin, via?: 'pointers' | 'references'): Generator<PathNode> {
         if (depth > MAX_DEPTH) {
-            stats.depthLimited = true
+            if (!origin.indirect) stats.depthLimited = true
             return
         }
         if (via) {
             const policy = options[via] ?? 'expand'
             if (policy === 'skip') return
-            const key = node.resolved.typeName.toUpperCase()
-            if (policy === 'list' || expanded.has(key)) {
+            if (policy === 'list' || !firstTime(origin)) {
                 yield node
                 return
             }
-            expanded.add(key)
         }
         if (emitSelf) yield node
         const r = node.resolved
         if (r.kind === 'struct') {
-            for (const m of memberNodes(source, node)) yield* visit(m, depth + 1, true, m.resolved.viaReference ? 'references' : undefined)
+            const members = memberNodes(source, node)
+            for (const [i, m] of members.entries()) {
+                const via = m.resolved.viaReference ? 'references' : undefined
+                yield* visit(m, depth + 1, true, { decl: r.members[i], hops: '', indirect: origin.indirect || !!via }, via)
+            }
         } else if (r.kind === 'array') {
             const element = elementNode(source, node, '*')!
-            yield* visit(element, depth + 1, element.resolved.kind !== 'struct', element.resolved.viaReference ? 'references' : undefined)
+            const hop = { ...origin, hops: `${origin.hops}[]` }
+            yield* visit(element, depth + 1, element.resolved.kind !== 'struct', hop, element.resolved.viaReference ? 'references' : undefined)
         } else if (r.kind === 'pointer') {
-            yield* visit(derefNode(source, node)!, depth + 1, true, 'pointers')
+            yield* visit(derefNode(source, node)!, depth + 1, true, { decl: origin.decl, hops: `${origin.hops}^`, indirect: true }, 'pointers')
         }
     }
-    yield* visit(start, 0, true)
+    yield* visit(start, 0, true, { decl: start, hops: '', indirect: false })
 }
 
 // ---------------------------------------------------------------------------
@@ -171,12 +190,8 @@ const rootIndex = new WeakMap<SymbolSource, Map<string, SymbolRoot>>()
 function rootsByPath(source: SymbolSource): Map<string, SymbolRoot> {
     let map = rootIndex.get(source)
     if (!map) {
-        map = new Map()
-        // First declaration wins, like the tree and the search index.
-        for (const root of source.roots) {
-            const key = fullPath(source, root.name).toLowerCase()
-            if (!map.has(key)) map.set(key, root)
-        }
+        // Root names are unique per source (finalizeSource).
+        map = new Map(source.roots.map((root) => [fullPath(source, root.name).toLowerCase(), root]))
         rootIndex.set(source, map)
     }
     return map

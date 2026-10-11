@@ -55,48 +55,63 @@ export function buildIndex(sources: SymbolSource[]): SearchIndex {
     return { entries: entries.sort(byPath), truncated }
 }
 
-function collectEntries(sources: SymbolSource[]): SearchIndex {
-    const entries: SearchEntry[] = []
-    const seen = new Set<string>()
-    const stats = { depthLimited: false }
-    let truncated = false
-    sources.forEach((source, i) => {
-        // Every source gets its share of what is left, so one huge source cannot starve the others.
-        const limit = entries.length + Math.floor((MAX_ENTRIES - entries.length) / (sources.length - i))
-        for (const root of source.roots) {
-            for (const node of walk(source, rootNode(source, root), stats, SEARCH_WALK)) {
-                if (entries.length >= limit) {
-                    truncated = true
-                    return
-                }
-                // The same path can be reachable twice (a struct root and its separately declared member).
-                const key = `${source.id}|${node.path}`
-                if (seen.has(key)) continue
-                seen.add(key)
-                entries.push({
-                    key,
-                    sourceId: source.id,
-                    path: node.path,
-                    name: node.name,
-                    ...describe(node),
-                    area: node.area,
-                    port: node.port,
-                    comment: node.comment,
-                    ranges: node.ranges,
-                    haystack: node.path.toLowerCase(),
-                })
-            }
-        }
-    })
-    return { entries, truncated: truncated || stats.depthLimited }
-}
-
 /**
  * Pointer targets are indexed (that is how `p^` paths are found); a reference member is listed but
  * not expanded — its target is found under its real symbol, and an MC function block's `Axis`
  * would otherwise repeat the whole AXIS_REF.
  */
 const SEARCH_WALK: WalkOptions = { pointers: 'expand', references: 'list' }
+
+/** A source's entries, at most `limit` of them; `full` is false when it has more. */
+function sourceEntries(source: SymbolSource, limit: number, stats: { depthLimited: boolean }): { entries: SearchEntry[]; full: boolean } {
+    const entries: SearchEntry[] = []
+    const seen = new Set<string>()
+    for (const root of source.roots) {
+        for (const node of walk(source, rootNode(source, root), stats, SEARCH_WALK)) {
+            // The same path can be reachable twice (a struct root and its separately declared member).
+            const key = `${source.id}|${node.path}`
+            if (seen.has(key)) continue
+            if (entries.length === limit) return { entries, full: false }
+            seen.add(key)
+            entries.push({
+                key,
+                sourceId: source.id,
+                path: node.path,
+                name: node.name,
+                ...describe(node),
+                area: node.area,
+                port: node.port,
+                comment: node.comment,
+                ranges: node.ranges,
+                haystack: node.path.toLowerCase(),
+            })
+        }
+    }
+    return { entries, full: true }
+}
+
+/**
+ * Every source's entries, within MAX_ENTRIES in total. Water-filling: sources are cut only when
+ * the total exceeds the cap, smallest first get what they need, and the rest is shared evenly —
+ * so one huge source cannot starve the others and small ones never cost a big one its entries.
+ */
+function collectEntries(sources: SymbolSource[]): SearchIndex {
+    const stats = { depthLimited: false }
+    const perSource = sources.map((source) => sourceEntries(source, MAX_ENTRIES, stats))
+    let truncated = perSource.some((p) => !p.full)
+    let remaining = MAX_ENTRIES
+    const order = perSource.map((_, i) => i).sort((a, b) => perSource[a].entries.length - perSource[b].entries.length)
+    const entries: SearchEntry[] = []
+    order.forEach((i, n) => {
+        const share = Math.floor(remaining / (order.length - n))
+        const own = perSource[i].entries
+        if (own.length > share) truncated = true
+        const taken = own.length > share ? own.slice(0, share) : own
+        remaining -= taken.length
+        for (const e of taken) entries.push(e)
+    })
+    return { entries, truncated: truncated || stats.depthLimited }
+}
 
 /** The channel template for a wildcard path: `*` become counters. */
 export function templateOf(entry: Pick<SearchEntry, 'path' | 'ranges'>): string {

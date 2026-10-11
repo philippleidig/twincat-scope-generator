@@ -22,14 +22,14 @@
 - **Pointers** expand to their target `^` (`MAIN.pData^.fValue`, `^^` for pointers to pointers), in the
   tree, in search and in path lookup. Pointers to arrays (`<ArrayInfo PointerTo>`) were read as arrays
   of up to 65,536 elements before.
-- **References and `VAR_IN_OUT`** expand like the referenced type in the tree and are recordable, with a
+- **References and `VAR_IN_OUT`** (arrays included) expand like the referenced type in the tree and are recordable, with a
   warning icon "Valid only while the reference is bound". Search lists the reference member itself but
   not its target (an MC function block's `Axis` would repeat the whole `AXIS_REF`); adding the member
   adds its target. `TcNoSymbol 'unused'` symbols carry a note.
 - Adding a struct or FB does not follow the pointers and references inside it (add `p^` or the
-  reference itself). Search expands each pointer target type once per symbol, so pointer cycles and
-  FBs pointing at each other stay small, and one huge source no longer starves the others of
-  search entries.
+  reference itself). Search follows each pointer declaration once per symbol, so linked lists and FBs
+  pointing at each other stay small; one huge source no longer starves the others of search
+  entries, and nothing is cut while all sources fit.
 - A root name declared twice in one file (two versions of a library GVL) is listed once; the tree
   used the last declaration, path lookup the first.
 - Path lookup finds the root by path instead of scanning all roots (faster "Add" on large PLCs).

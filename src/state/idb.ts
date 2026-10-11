@@ -34,17 +34,25 @@ export async function idbGet<T>(key: string): Promise<T | undefined> {
     })
 }
 
-export async function idbSet(key: string, value: unknown): Promise<void> {
+async function write(change: (store: IDBObjectStore) => void): Promise<void> {
     const db = await open()
     if (!db) return
     await new Promise<void>((resolve) => {
         try {
             const tx = db.transaction(STORE, 'readwrite')
-            tx.objectStore(STORE).put(value, key)
+            change(tx.objectStore(STORE))
             tx.oncomplete = () => resolve()
             tx.onerror = () => resolve()
         } catch {
             resolve()
         }
     })
+}
+
+export function idbSet(key: string, value: unknown): Promise<void> {
+    return write((store) => store.put(value, key))
+}
+
+export function idbDelete(key: string): Promise<void> {
+    return write((store) => store.delete(key))
 }
