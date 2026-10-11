@@ -94,6 +94,7 @@ function sourceEntries(source: SymbolSource, limit: number, stats: { depthLimite
  * Every source's entries, within MAX_ENTRIES in total. Water-filling: sources are cut only when
  * the total exceeds the cap, smallest first get what they need, and the rest is shared evenly —
  * so one huge source cannot starve the others and small ones never cost a big one its entries.
+ * Peak memory: Σ min(entries, MAX_ENTRIES) over the sources, held until the cut.
  */
 function collectEntries(sources: SymbolSource[]): SearchIndex {
     const stats = { depthLimited: false }
@@ -106,7 +107,7 @@ function collectEntries(sources: SymbolSource[]): SearchIndex {
         const share = Math.floor(remaining / (order.length - n))
         const own = perSource[i].entries
         if (own.length > share) truncated = true
-        const taken = own.length > share ? own.slice(0, share) : own
+        const taken = own.slice(0, share)
         remaining -= taken.length
         for (const e of taken) entries.push(e)
     })

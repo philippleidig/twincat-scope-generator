@@ -221,6 +221,15 @@ describe('POINTER TO', () => {
         expect(all).not.toContain('MAIN.fbPath.pNext^.pNext^.n')
         expect(resolvePath(s, 'MAIN.fbPath.pNext^.pNext^.n')).not.toBeNull()
     })
+    it('follows a pointer declaration in every instance and every FB that inherits it', () => {
+        const t =
+            ST_POINT +
+            dataType('FB_Ax', '<SubItem><Name>pCfg</Name><Type PointerTo="1">ST_Point</Type><BitOffs>0</BitOffs></SubItem>') +
+            dataType('FB_Ax2', '<ExtendsType>FB_Ax</ExtendsType>' + sub('k', 'INT')) +
+            dataType('FB_M', sub('ax1', 'FB_Ax') + sub('ax2', 'FB_Ax') + sub('ax3', 'FB_Ax2'))
+        const m = plc(t, symbol('MAIN.m', 'FB_M'))
+        expect(paths(m)).toEqual(expect.arrayContaining(['MAIN.m.ax1.pCfg^.x', 'MAIN.m.ax2.pCfg^.x', 'MAIN.m.ax3.pCfg^.x']))
+    })
     it('resolves ^ segments and records the target, but "Add" on the owner does not follow pointers', () => {
         expect(resolvePath(s, 'main.fbpath.ppoint^.Y')).toMatchObject({ path: 'MAIN.fbPath.pPoint^.y', resolved: { kind: 'scalar' } })
         expect(resolvePath(s, 'MAIN.fbPath.n^')).toBeNull()

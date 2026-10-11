@@ -5,7 +5,7 @@
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { NOTE } from './access'
-import type { Access, ArrayDim, AreaKind, ResolvedType, SymbolRoot, SymbolSource } from './model'
+import type { Access, ArrayDim, AreaKind, MemberDef, ResolvedType, SymbolRoot, SymbolSource } from './model'
 import type { TypeRef } from './typeTable'
 import { arrayLabel, resolveDecl } from './typeTable'
 
@@ -78,10 +78,15 @@ function childNode(source: SymbolSource, parent: PathNode, path: string, name: s
     return declNode(source, decl, path, name, { ...parent, ranges })
 }
 
+/** Struct members of a node with their declarations (none for other kinds). */
+function memberEntries(source: SymbolSource, node: PathNode): Array<[MemberDef, PathNode]> {
+    if (node.resolved.kind !== 'struct') return []
+    return node.resolved.members.map((m) => [m, childNode(source, node, `${node.path}.${m.name}`, m.name, m)])
+}
+
 /** Struct members of a node (none for other kinds). */
 export function memberNodes(source: SymbolSource, node: PathNode): PathNode[] {
-    if (node.resolved.kind !== 'struct') return []
-    return node.resolved.members.map((m) => childNode(source, node, `${node.path}.${m.name}`, m.name, m))
+    return memberEntries(source, node).map(([, n]) => n)
 }
 
 /** The pointed-to value of a pointer node: `p` → `p^` (null for other kinds). */
@@ -117,10 +122,10 @@ export interface WalkOptions {
 
 /** Where a node comes from: the declaration (member or start) plus the `[]`/`^` hops below it. */
 interface Origin {
-    decl: object
+    decl: MemberDef | PathNode
     hops: string
-    /** Reached through a followed pointer or reference. */
-    indirect: boolean
+    /** Some node above this one was reached through a followed pointer or reference. */
+    below: boolean
 }
 
 /**
@@ -129,16 +134,18 @@ interface Origin {
  * number of distinct member paths. Struct elements are skipped in favour of their
  * members (they add nothing searchable). Pointers continue as their `^` child.
  *
- * Indirections follow `options`; in addition each pointer or reference *declaration* (a member,
- * plus the `[]`/`^` hops below it) is followed at most once per walk, later encounters are
- * listed but not expanded. A linked list stops after one hop and FBs pointing at each other stay
- * linear (bounded by declarations × target size), while sibling pointers to the same type are
- * all followed. `stats.depthLimited` reports pruning by MAX_DEPTH — except below a followed
- * indirection, where cutting a chain of back pointers (a state machine's states pointing at the
- * machine) is expected and the tree goes further by hand.
+ * Indirections follow `options`. Pointers and references reached without passing another followed
+ * indirection are always followed (`MAIN.m.ax1.pCfg^` and `MAIN.m.ax2.pCfg^` share a declaration
+ * and both count). *Below* a followed indirection, each pointer or reference declaration (a
+ * member plus the `[]`/`^` hops below it) already followed in this walk is listed, not expanded
+ * again: a linked list stops after one hop and FBs pointing at each other stay linear (bounded by
+ * declarations × target size). `stats.depthLimited` reports pruning by MAX_DEPTH — except below a
+ * followed indirection, where cutting a chain of back pointers (a state machine's states pointing
+ * at the machine) is expected and the tree goes further by hand.
  */
 export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimited: false }, options: WalkOptions = {}): Generator<PathNode> {
-    const followed = new Map<object, Set<string>>()
+    const followed = new Map<MemberDef | PathNode, Set<string>>()
+    /** Marks the declaration as followed; true if it was not before. */
     const firstTime = ({ decl, hops }: Origin) => {
         let seen = followed.get(decl)
         if (!seen) followed.set(decl, (seen = new Set()))
@@ -147,14 +154,17 @@ export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimi
         return true
     }
     const visit = function* (node: PathNode, depth: number, emitSelf: boolean, origin: Origin, via?: 'pointers' | 'references'): Generator<PathNode> {
+        // Children of a node entered through an indirection are below one.
+        const inside = origin.below || via !== undefined
         if (depth > MAX_DEPTH) {
-            if (!origin.indirect) stats.depthLimited = true
+            if (!inside) stats.depthLimited = true
             return
         }
         if (via) {
             const policy = options[via] ?? 'expand'
             if (policy === 'skip') return
-            if (policy === 'list' || !firstTime(origin)) {
+            const first = firstTime(origin)
+            if (policy === 'list' || (origin.below && !first)) {
                 yield node
                 return
             }
@@ -162,20 +172,18 @@ export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimi
         if (emitSelf) yield node
         const r = node.resolved
         if (r.kind === 'struct') {
-            const members = memberNodes(source, node)
-            for (const [i, m] of members.entries()) {
-                const via = m.resolved.viaReference ? 'references' : undefined
-                yield* visit(m, depth + 1, true, { decl: r.members[i], hops: '', indirect: origin.indirect || !!via }, via)
+            for (const [decl, m] of memberEntries(source, node)) {
+                yield* visit(m, depth + 1, true, { decl, hops: '', below: inside }, m.resolved.viaReference ? 'references' : undefined)
             }
         } else if (r.kind === 'array') {
             const element = elementNode(source, node, '*')!
-            const hop = { ...origin, hops: `${origin.hops}[]` }
+            const hop = { decl: origin.decl, hops: `${origin.hops}[]`, below: inside }
             yield* visit(element, depth + 1, element.resolved.kind !== 'struct', hop, element.resolved.viaReference ? 'references' : undefined)
         } else if (r.kind === 'pointer') {
-            yield* visit(derefNode(source, node)!, depth + 1, true, { decl: origin.decl, hops: `${origin.hops}^`, indirect: true }, 'pointers')
+            yield* visit(derefNode(source, node)!, depth + 1, true, { decl: origin.decl, hops: `${origin.hops}^`, below: inside }, 'pointers')
         }
     }
-    yield* visit(start, 0, true, { decl: start, hops: '', indirect: false })
+    yield* visit(start, 0, true, { decl: start, hops: '', below: false })
 }
 
 // ---------------------------------------------------------------------------

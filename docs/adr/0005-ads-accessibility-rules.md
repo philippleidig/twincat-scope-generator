@@ -40,10 +40,11 @@ or `skip` per pointers and references):
   the referenced values are found under their real symbols.
 - **"Add"** skips both below the added symbol; the user adds `p^` or the reference member itself
   (the start is always expanded). Adding a pointer adds its target.
-- Each pointer or reference *declaration* (a member, plus the `[]`/`^` hops below it) is followed at
-  most once per walk; later encounters are listed, not expanded. A linked list stops after one hop,
-  FBs that point at each other stay linear (declarations × target size) instead of combinatorial,
-  and sibling pointers to the same type are all followed. The walk's depth limit (16) cuts long
+- Pointers and references reached without passing another followed indirection are always
+  followed (every FB instance's `pCfg^`, sibling pointers to the same type). *Below* a followed
+  indirection, a pointer or reference *declaration* (a member, plus the `[]`/`^` hops below it)
+  already followed in this walk is listed, not expanded again: a linked list stops after one hop
+  and FBs that point at each other stay linear (declarations × target size) instead of combinatorial. The walk's depth limit (16) cuts long
   chains of back pointers (a state machine's states pointing at the machine) without flagging the
   index as incomplete. The tree expands any of them by hand.
 - The 250k search entries are shared by water-filling: nothing is cut while all sources fit, and
@@ -56,8 +57,10 @@ Search and "Add" no longer offer symbols that do not exist on the target. Pointe
 recordable (Scope saves `Master.McToPlc.Set^.Position` itself). Expanding references in search was
 tried and dropped: every MC function block repeated its whole `AXIS_REF` (corpus: 933k entries, one
 project over the 250k cap); the referenced values are found under their real symbols instead. With
-the rules the corpus index shrinks from 642k to 504k entries (hidden `VAR_INST`, `conditionalshow`
-internals no longer expanded), including the `^` paths; no source is truncated. A file that declares
+the rules the corpus index (352 files) shrinks from 642k to 505k entries (hidden `VAR_INST`,
+`conditionalshow` internals no longer expanded), 405k of them recordable values and 10.8k `^`
+paths; no source is truncated, every sampled path resolves, and the 2,015 templates over the
+5,000 expansion limit are reported by "Add" (the 38 empty-array templates of V2.0 are gone). A file that declares
 a root name twice (two versions of a library GVL) keeps the first declaration everywhere. Sources
 persisted by V2.0 are dropped on load with a hint to import the files again.
 

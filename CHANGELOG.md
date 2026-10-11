@@ -27,8 +27,8 @@
   not its target (an MC function block's `Axis` would repeat the whole `AXIS_REF`); adding the member
   adds its target. `TcNoSymbol 'unused'` symbols carry a note.
 - Adding a struct or FB does not follow the pointers and references inside it (add `p^` or the
-  reference itself). Search follows each pointer declaration once per symbol, so linked lists and FBs
-  pointing at each other stay small; one huge source no longer starves the others of search
+  reference itself). Below a pointer, search follows each pointer declaration only once, so linked
+  lists and FBs pointing at each other stay small; one huge source no longer starves the others of search
   entries, and nothing is cut while all sources fit.
 - A root name declared twice in one file (two versions of a library GVL) is listed once; the tree
   used the last declaration, path lookup the first.
@@ -70,6 +70,8 @@
 
 - `npm run test:corpus` downloads 352 real TwinCAT files (`scripts/corpus/manifest.json`, commit-pinned,
   size-checked, git-ignored `.corpus/`) and checks import, search and path invariants over all of them.
+  Result: 0 import errors, 505k search entries (V2.0: 642k), no truncated index, every sampled path
+  resolves, no hidden symbol listed.
 - Unit tests for every accessibility rule with a minimal XML snippet, plus one more real fixture
   (Beckhoff TE2000 sample, 0BSD).
 

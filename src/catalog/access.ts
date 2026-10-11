@@ -19,7 +19,7 @@ import type { Access, ResolvedType } from './model'
 export const REASON = {
     property: 'Property (called on access) — Scope cannot sample it',
     staticVar: (owner: string, name: string) => `Static variable — record ${owner}.${name}`,
-    /** Only for a declaration that slipped past `finalizeSource`; imported sources never show it. */
+    /** Fallback of `resolveDecl`: imported members and roots without symbols are dropped (`withSymbols`, `finalizeSource`). */
     emptyArray: 'Empty array',
     conditionalShow: 'Hidden in compiled libraries',
     pointer: 'Pointer — expand ^ to record the target',
