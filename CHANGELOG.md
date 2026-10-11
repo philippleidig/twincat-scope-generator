@@ -1,5 +1,33 @@
 # Changelog
 
+## V2.1 (unreleased)
+
+### ADS-accurate symbol browser
+
+- The browser now offers exactly what can be recorded by ADS symbol name
+  ([ADR 0005](docs/adr/0005-ads-accessibility-rules.md)):
+  - **hidden**: symbols, members and whole types marked `hide` or `TcNoSymbol`, implicit `VAR_INST`
+    members, locals of `hide_all_locals` POUs and empty arrays (which produced invalid templates);
+  - **disabled with a reason**: properties with `monitoring := 'call'` (new: they were not listed),
+    static variables below FB instances ("record `<FB type>.<var>`"), `conditionalshow` members and
+    types ("Hidden in compiled libraries"); strings now say "Strings can only be shown in table charts".
+- **Pointers** expand to their target `^` (`MAIN.pData^.fValue`, `^^` for pointers to pointers), in the
+  tree, in search and in path lookup. Pointers to arrays (`<ArrayInfo PointerTo>`) were read as arrays
+  of up to 65,536 elements before.
+- **References and `VAR_IN_OUT`** expand like the referenced type and are recordable, with a warning
+  icon "Valid only while the reference is bound". `TcNoSymbol 'unused'` symbols carry a note.
+- Adding a struct or FB does not follow the pointers and references inside it (add `p^` or the
+  reference itself); pointer/reference cycles are listed once, not expanded endlessly.
+- Path lookup finds the root by path instead of scanning all roots (faster "Add" on large PLCs).
+- Re-import files saved with V2.0 to apply the new rules to them.
+
+### Tests
+
+- `npm run test:corpus` downloads 352 real TwinCAT files (`scripts/corpus/manifest.json`, commit-pinned,
+  size-checked, git-ignored `.corpus/`) and checks import, search and path invariants over all of them.
+- Unit tests for every accessibility rule with a minimal XML snippet, plus one more real fixture
+  (Beckhoff TE2000 sample, 0BSD).
+
 ## V2.0 (2026-10-10)
 
 Scope projects can now be built completely offline from TwinCAT project files.

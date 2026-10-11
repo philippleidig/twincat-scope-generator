@@ -24,8 +24,23 @@ name + members + indices.
 **Area** — Where a root symbol lives: `input`, `output`, `internal`, `parameter`
 (from `AreaType`/`VarGrpType`). Members inherit the area of their root.
 
-**Recordable** — A symbol whose resolved type maps to a **scope data type** (numeric or BOOL).
-Strings, pointers, references and interfaces are not recordable.
+**Recordable** — A symbol whose resolved type maps to a **scope data type** (numeric or BOOL) and
+that has an ADS symbol. Strings, interfaces, pointers themselves and **disabled symbols** are not
+recordable; values reached **via reference** or through a pointer's `^` are.
+
+**Hidden symbol** — Something the file lists that has no ADS symbol on the target (`hide`,
+`TcNoSymbol`, `VAR_INST`, methods, empty arrays, …). Not shown anywhere. See ADR 0005.
+
+**Disabled symbol** — Shown muted with the reason as tooltip, never selectable or added: properties
+with `monitoring := 'call'`, static variables below FB instances, `conditionalshow`, strings,
+interfaces, pointers themselves.
+
+**Pointer target (`^`)** — The one child of a pointer, path `<pointer path>^` (`^^` for a pointer to a
+pointer); recordable like any symbol of the pointed-to type.
+
+**Via reference** — A symbol reached through a `REFERENCE TO` or `VAR_IN_OUT` member. Same path as
+without the reference (no `^`), recordable, but valid only while the reference is bound; shown with a
+warning icon.
 
 **Pick** — A symbol selected in the browser, as plain data: source and path (concrete like
 `GVL.aAxis[3]` from the tree, or with wildcards like `GVL.aAxis[*]` from search). Resolved against the
@@ -36,6 +51,10 @@ current catalog only when added, into **channel specs**.
 
 **Search entry** — One node of the search index. Array indices are written as `*`
 (`GVL.aAxis[*].fActPos`) together with their **ranges**, so an array contributes one entry, not one per element.
+Disabled symbols and pointers are entries too (with their reason), pointer targets as `p^` paths.
+
+**Corpus** — The 352 public TwinCAT files in `scripts/corpus/manifest.json`, downloaded into `.corpus/`
+by `npm run test:corpus` and used to check importer invariants. Never committed.
 
 ## Scope project (what is exported)
 

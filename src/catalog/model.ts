@@ -15,7 +15,7 @@ export interface ArrayDim {
 
 /**
  * What the walker needs to know about whether a member, root or type can be recorded by its
- * ADS symbol name (see ADR 0004). Things without an ADS symbol at all are dropped (or, for
+ * ADS symbol name (see ADR 0005). Things without an ADS symbol at all are dropped (or, for
  * types, resolve to `hidden`); these are the cases that stay visible.
  */
 export interface Access {

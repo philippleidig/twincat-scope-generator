@@ -2,7 +2,7 @@
  * Type table built from `<DataTypes>` and resolution of type names into scalars, structs
  * (with inherited members), arrays and pointers.
  *
- * This is also where the ADS accessibility rules are decided (ADR 0004): what has no ADS
+ * This is also where the ADS accessibility rules are decided (ADR 0005): what has no ADS
  * symbol is dropped or resolves to `hidden`, what cannot be sampled resolves to `unsupported`
  * with a reason. The walker applies the result, so tree, search and "Add" agree.
  */

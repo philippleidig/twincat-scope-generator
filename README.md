@@ -36,8 +36,22 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 - **Filters**: BOOL / Integer / Real, Input / Output / Internal / Parameter, *Recordable only*.
 - **Arrays become patterns**: a search hit `GVL.aAxis[*].fActPos` is added as
   `GVL.aAxis[{i:1:4}].fActPos` — one channel, four acquisitions.
-- **Structs and FBs**: adding one adds every recordable member below it.
-- Strings, pointers, references and interfaces are shown but cannot be selected.
+- **Structs and FBs**: adding one adds every recordable member below it (without following the
+  pointers and references inside it — add `p^` or the reference itself for that).
+- **Only what has an ADS symbol is offered.** A `.tmc` also lists things TwinCAT creates no ADS
+  symbol for, so the browser filters them like the target would
+  ([ADR 0005](docs/adr/0005-ads-accessibility-rules.md)):
+  - **hidden**: `{attribute 'hide'}` (on a symbol, member or type), `TcNoSymbol`, methods with their
+    parameters and locals, properties without a monitoring pragma, `VAR_INST`, empty arrays;
+  - **shown but disabled, with the reason as tooltip**: properties with `monitoring := 'call'` (the
+    getter runs on access, there is nothing to sample), `VAR_STAT` below FB instances (record the
+    global `<FB type>.<var>` symbol instead), `conditionalshow` (hidden in compiled libraries),
+    interfaces, strings (only table charts show them), platform-sized types;
+  - **pointers** are disabled themselves but expand to one child `^`: `MAIN.pData^.fValue` is
+    recorded through the pointer, `PointerTo="2"` gives `^^`. Search lists the `^` paths too;
+  - **references and `VAR_IN_OUT`** expand like the referenced type (no `^`) and are recordable, with a
+    warning icon: the value is valid only while the reference is bound;
+  - `TcNoSymbol 'unused'` symbols stay recordable with a note (no symbol if the code never uses them).
 - Each source's **port**, **path prefix** (object name for TcCOM) and **target Net ID** can be edited.
 - How paths and ports are derived per source, and how sure we are: [ADR 0003](docs/adr/0003-symbol-paths-per-source-kind.md).
 
@@ -67,6 +81,8 @@ npm run lint
 npm test               # unit + component tests (Vitest)
 npm run test:coverage  # with coverage thresholds
 npm run test:e2e       # Playwright; set PW_CHROMIUM_PATH to use a preinstalled Chromium
+npm run test:corpus    # downloads 352 real TwinCAT files (scripts/corpus/manifest.json) into .corpus/
+                       # and checks import/search/path invariants over all of them (~2 min)
 ```
 
 ### Architecture

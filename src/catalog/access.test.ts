@@ -1,5 +1,5 @@
 /**
- * ADS accessibility rules (spec V2.1 A1, ADR 0004): one minimal `.tmc` snippet per construct,
+ * ADS accessibility rules (spec V2.1 A1, ADR 0005): one minimal `.tmc` snippet per construct,
  * checked through everything built on the walker — tree, search index, "Add" candidates and
  * path lookup — so they cannot disagree.
  */
