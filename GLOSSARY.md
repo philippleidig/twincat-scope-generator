@@ -56,6 +56,10 @@ Disabled symbols and pointers are entries too (with their reason), pointer targe
 **Corpus** — The 352 public TwinCAT files in `scripts/corpus/manifest.json`, downloaded into `.corpus/`
 by `npm run test:corpus` and used to check importer invariants. Never committed.
 
+**Browser view** — How the symbol browser shows the catalog: the **tree** (sources → folders → symbols →
+members → elements; a query switches it to search results) or the **list** (every search entry, sorted
+by path, narrowed by query and filters). Both produce the same picks.
+
 ## Scope project (what is exported)
 
 **Project** — Everything in one `.tcmproj`: settings, targets and scope files.

@@ -40,6 +40,7 @@ export interface SearchEntry {
 }
 
 export interface SearchIndex {
+    /** Sorted by path: case-insensitively, then exactly, then by source. */
     entries: SearchEntry[]
     /** True when the index stopped at MAX_ENTRIES or the walk's depth limit and is incomplete. */
     truncated: boolean
@@ -47,7 +48,16 @@ export interface SearchIndex {
 
 export const MAX_ENTRIES = 250_000
 
+const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+const byPath = (a: SearchEntry, b: SearchEntry) => compare(a.haystack, b.haystack) || compare(a.path, b.path) || compare(a.sourceId, b.sourceId)
+
 export function buildIndex(sources: SymbolSource[]): SearchIndex {
+    const { entries, truncated } = collectEntries(sources)
+    // Sorted once here, so a path-ordered list is a plain filter and relevance ties fall back to path order.
+    return { entries: entries.sort(byPath), truncated }
+}
+
+function collectEntries(sources: SymbolSource[]): SearchIndex {
     const entries: SearchEntry[] = []
     const seen = new Set<string>()
     const stats = { depthLimited: false }
@@ -94,6 +104,8 @@ export interface SearchQuery {
     sourceIds?: ReadonlySet<string>
     /** Only entries that can become channels directly (scalars). */
     recordableOnly?: boolean
+    /** `relevance` (default) ranks name matches of the first word first; `path` keeps the index's path order. */
+    order?: 'relevance' | 'path'
 }
 
 export interface SearchResult {
@@ -161,7 +173,7 @@ export function search(index: SearchIndex, query: SearchQuery, limit = 500): Sea
             (!query.sourceIds?.size || query.sourceIds.has(e.sourceId)) &&
             terms.every((t) => t.test(e)),
     )
-    if (firstWord) {
+    if (firstWord && query.order !== 'path') {
         matches.sort((a, b) => rank(a, firstWord) - rank(b, firstWord) || a.path.length - b.path.length)
     }
     return { entries: matches.slice(0, limit), total: matches.length }

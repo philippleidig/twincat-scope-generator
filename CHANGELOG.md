@@ -2,6 +2,14 @@
 
 ## V2.1 (unreleased)
 
+### Symbol browser
+
+- **Tree | List** toggle next to the search box. *List* shows every symbol path as one flat,
+  virtualised list sorted by path (arrays as patterns, ×N badge), narrowed by search text and filter
+  chips without switching modes; long lists are capped with a "Showing n of m" hint.
+- Selection, inspector focus, drag to axis groups and *Add to scope* work the same in both views.
+- The chosen view is remembered in the browser (falls back to the tree when storage is blocked).
+
 ### ADS-accurate symbol browser
 
 - The browser now offers exactly what can be recorded by ADS symbol name
@@ -24,6 +32,18 @@
   used the last declaration, path lookup the first.
 - Path lookup finds the root by path instead of scanning all roots (faster "Add" on large PLCs).
 - Re-import files saved with V2.0 to apply the new rules to them.
+
+### Project editing
+
+- **Drag & drop in the scope project**: drag a channel by its handle to reorder it (an indicator line
+  shows where it lands), into another axis group, or onto a scope file tab (appended to that file's
+  first axis group). Axis groups are dragged by their header handle to reorder them or onto a file tab.
+- Hold **Ctrl** (Windows/Linux) or **Option** (macOS) while dropping to **copy** instead of move; the
+  indicator shows a "+".
+- Symbols from the browser or the TwinCAT Target Browser can be dropped at a precise position between
+  channels.
+- **"Move to…" menu** on every channel and axis group (move up/down, to another axis group or file) as
+  a keyboard-friendly alternative to dragging.
 
 ### Tests
 

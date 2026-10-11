@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AlertTriangle, Settings2, Trash2 } from 'lucide-react'
 import type { SymbolSource } from '@/catalog/model'
-import { amsNetIdError } from '@/domain/project'
+import { amsNetIdError } from '@/domain/projectValidation'
 import { useCatalogStore } from '@/state/catalogStore'
 import { IconButton } from '@/ui/components/Button'
 import { TextField } from '@/ui/components/Field'

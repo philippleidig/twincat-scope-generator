@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { v4 as uuid } from 'uuid'
 import { Copy, Library, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
-import { fileAcquisitionCount, fileNameError } from '@/domain/project'
+import { fileNameError } from '@/domain/projectValidation'
 import { PORT_PRESETS } from '@/domain/ports'
 import { useProjectStore } from '@/state/projectStore'
 import { Button } from '@/ui/components/Button'
 import { Menu } from '@/ui/components/Menu'
 import { AxisGroupCard } from './AxisGroupCard'
+import { FileTab } from './FileTab'
 import { PatternLibraryDialog } from './PatternLibraryDialog'
 import './project.css'
 
@@ -50,22 +51,9 @@ export function ProjectPanel() {
             </header>
 
             <div className="file-tabs" role="tablist" aria-label="Scope files">
-                {files.map((f) => {
-                    const count = fileAcquisitionCount(f)
-                    return (
-                        <button
-                            key={f.id}
-                            type="button"
-                            role="tab"
-                            aria-selected={f.id === shownFile?.id}
-                            className="file-tab"
-                            onClick={() => selectFile(f.id)}
-                        >
-                            <span className="file-tab__name">{f.name || 'Untitled'}</span>
-                            <span className="file-tab__count">{count}</span>
-                        </button>
-                    )
-                })}
+                {files.map((f) => (
+                    <FileTab key={f.id} file={f} selected={f.id === shownFile?.id} />
+                ))}
                 <button type="button" className="file-tab file-tab--add" aria-label="Add scope file" onClick={addAndSelectFile}>
                     <Plus size={15} />
                 </button>
@@ -110,10 +98,12 @@ export function ProjectPanel() {
                             {nameError}
                         </p>
                     )}
-                    {shownFile.axisGroups.map((g) => (
+                    {shownFile.axisGroups.map((g, i) => (
                         <AxisGroupCard
                             key={g.id}
                             group={g}
+                            fileId={shownFile.id}
+                            index={i}
                             targets={project.targets}
                             active={g.id === activeAxisGroupId}
                             canRemove={shownFile.axisGroups.length > 1}

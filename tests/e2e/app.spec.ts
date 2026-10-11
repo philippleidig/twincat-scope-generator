@@ -54,3 +54,38 @@ test('switches panes on small screens', async ({ page }) => {
     await page.getByRole('button', { name: 'Project', exact: true }).click()
     await expect(page.getByRole('region', { name: 'Scope project' })).toBeVisible()
 })
+
+test('reorders channels by dragging and moves one to another file', async ({ page }) => {
+    const symbols = page.getByLabel('Symbol path')
+    const values = () => symbols.evaluateAll((inputs) => inputs.map((i) => (i as HTMLInputElement).value))
+    for (const symbol of ['MAIN.a', 'MAIN.b']) {
+        await page.getByRole('button', { name: 'Add channel' }).click()
+        await symbols.last().fill(symbol)
+    }
+    const rows = page.getByRole('region', { name: 'Axis group Axis Group 1' }).getByRole('listitem')
+    await rows.nth(1).locator('.drag-handle').dragTo(rows.nth(0), { targetPosition: { x: 40, y: 2 } })
+    await expect.poll(values).toEqual(['MAIN.b', 'MAIN.a'])
+
+    await page.getByRole('button', { name: 'Add scope file' }).click()
+    await page.getByRole('tab', { name: /Scope_1/ }).click()
+    await rows.nth(0).locator('.drag-handle').dragTo(page.getByRole('tab', { name: /Scope_2/ }))
+    await expect.poll(values).toEqual(['MAIN.a'])
+    await page.getByRole('tab', { name: /Scope_2/ }).click()
+    await expect.poll(values).toEqual(['MAIN.b'])
+})
+
+test('adds symbols picked in the flat list view', async ({ page }) => {
+    await page.getByRole('button', { name: 'Try the demo machine' }).click()
+    await page.getByRole('group', { name: 'Browser view' }).getByRole('button', { name: 'List' }).click()
+    const list = page.getByRole('listbox', { name: 'Symbol list' })
+    await list.getByRole('checkbox', { name: 'Select GVL.aAxis[{i:1:4}].fActPos', exact: true }).check()
+    await list.getByRole('checkbox', { name: 'Select GVL.fCycleLoad', exact: true }).check()
+    await page.getByRole('button', { name: /Add to scope/ }).click()
+
+    await expect(page.getByLabel('Symbol path')).toHaveCount(2)
+    await expect(page.getByLabel('Symbol path').first()).toHaveValue('GVL.aAxis[{i:1:4}].fActPos')
+
+    // The choice survives a reload.
+    await page.reload()
+    await expect(page.getByRole('listbox', { name: 'Symbol list' })).toBeVisible()
+})

@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 export interface MenuItem {
+    /** React key; defaults to the label (set it when labels can repeat). */
+    key?: string
     label: string
     icon?: ReactNode
     onSelect: () => void
@@ -12,18 +14,33 @@ export interface MenuItem {
 interface MenuProps {
     /** Renders the trigger; spread the props onto a button. */
     trigger: (props: { onClick: () => void; 'aria-expanded': boolean; 'aria-haspopup': 'menu' }) => ReactNode
-    items: MenuItem[]
+    /** Items, or a function evaluated only while the menu is open (for lists derived from changing state). */
+    items: MenuItem[] | (() => MenuItem[])
     align?: 'start' | 'end'
 }
 
 export function Menu({ trigger, items, align = 'end' }: MenuProps) {
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
+    /** Set when the menu closes by keyboard or selection: focus goes back to the trigger, not to <body>. */
+    const refocus = useRef(false)
+
+    useEffect(() => {
+        if (open || !refocus.current) return
+        refocus.current = false
+        ref.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.focus()
+    }, [open])
 
     useEffect(() => {
         if (!open) return
         const close = (e: Event) => {
-            if (e instanceof KeyboardEvent ? e.key === 'Escape' : !ref.current?.contains(e.target as Node)) setOpen(false)
+            if (e instanceof KeyboardEvent) {
+                if (e.key !== 'Escape') return
+                refocus.current = true
+                setOpen(false)
+            } else if (!ref.current?.contains(e.target as Node)) {
+                setOpen(false)
+            }
         }
         document.addEventListener('mousedown', close)
         document.addEventListener('keydown', close)
@@ -38,14 +55,15 @@ export function Menu({ trigger, items, align = 'end' }: MenuProps) {
             {trigger({ onClick: () => setOpen((o) => !o), 'aria-expanded': open, 'aria-haspopup': 'menu' })}
             {open && (
                 <div className={`menu__list menu__list--${align}`} role="menu">
-                    {items.map((item) => (
+                    {(typeof items === 'function' ? items() : items).map((item) => (
                         <button
-                            key={item.label}
+                            key={item.key ?? item.label}
                             type="button"
                             role="menuitem"
                             disabled={item.disabled}
                             className={`menu__item ${item.danger ? 'menu__item--danger' : ''}`}
                             onClick={() => {
+                                refocus.current = true
                                 setOpen(false)
                                 item.onSelect()
                             }}

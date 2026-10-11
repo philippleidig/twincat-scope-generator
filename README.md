@@ -31,6 +31,8 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 
 - **Tree** like the Target Browser: sources → `MAIN`/`GVL`/`Axes › Axis 1`… → symbols → members →
   array elements, expanded lazily so huge projects stay fast (16 MB `.tmc`: ~1 s to import).
+- **List** view (toggle *Tree | List* next to the search box): every symbol path as one flat list sorted
+  by path, arrays as patterns; search text and filters narrow it. The choice is remembered.
 - **Search**: all words must match anywhere in the path (`axis actpos`); `*`/`?` globs match the whole
   path (`*.fActPos`, `MAIN.*Axis*`); `type:LREAL`, `area:input`, `port:852` filter by field.
 - **Filters**: BOOL / Integer / Real, Input / Output / Internal / Parameter, *Recordable only*.
@@ -67,6 +69,9 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 - **Targets** (AMS Net IDs) are managed in *Project settings*, together with project name, scope server,
   base sample time and record time.
 - **Drag & drop** from the TwinCAT Target Browser onto an axis group still works.
+- **Reorganise by dragging**: channels (by their handle) to another position, axis group or file tab;
+  axis groups to another position or file tab. Hold Ctrl (Option on macOS) to copy instead of move.
+  Every channel and axis group also has a **Move to…** menu for keyboard use.
 - **Pattern library** with reusable templates (import/export as JSON).
 - Problems (invalid paths, duplicate file names, bad Net IDs) are flagged before export; invalid channels are skipped.
 

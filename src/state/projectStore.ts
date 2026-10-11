@@ -1,7 +1,9 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import type { AxisGroup, Project, ScopeFile } from '@/domain/project'
-import { createProject, ops, parseProject } from '@/domain/project'
+import { createProject, ops } from '@/domain/project'
+import { parseProject } from '@/domain/projectValidation'
+import { safeLocalStorage } from './safeStorage'
 
 type Ops = typeof ops
 /** Every pure project operation, bound to the store: `(project, ...args) => project` becomes `(...args) => void`. */
@@ -64,6 +66,8 @@ export const useProjectStore = create<ProjectState>()(
         {
             name: 'twincat-scope-project',
             version: 2,
+            // A blocked or full localStorage must not make every edit throw.
+            storage: createJSONStorage(() => safeLocalStorage),
             partialize: (s) => ({ project: s.project, activeFileId: s.activeFileId, activeAxisGroupId: s.activeAxisGroupId }),
             // Persisted state is untrusted input (other versions, manual edits): re-validate it.
             merge: (persisted, current) => {

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, Download } from 'lucide-react'
-import { exportBlocker, fileAcquisitionCount, projectAcquisitionCount, projectIssues } from '@/domain/project'
+import { fileAcquisitionCount, projectAcquisitionCount } from '@/domain/project'
+import { exportBlocker, projectIssues } from '@/domain/projectValidation'
 import { generateProject } from '@/export/tcscopex'
 import { createZipArchive, downloadBlob } from '@/export/bundle'
 import { useProjectStore } from '@/state/projectStore'
