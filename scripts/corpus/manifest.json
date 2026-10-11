@@ -1,0 +1,2831 @@
+[
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__Command__Command_Pattern__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/Command/Command_Pattern/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 212975,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__Visitor__Visitor__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/Visitor/Visitor/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 122997,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__State__State_Pattern__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/State/State_Pattern/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 79463,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__Command__Command_Pattern___Config__NC__Axes__FlyingHoist_Rot.xti",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/Command/Command_Pattern/_Config/NC/Axes/FlyingHoist_Rot.xti",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 46519,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__Strategy__Strategy_Pattern___Config__PLC__PLC1.xti",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/Strategy/Strategy_Pattern/_Config/PLC/PLC1.xti",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 1502,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "0w8States__PLC-Design-Patterns__Behavioral_Patterns__Command__Command_Pattern__Command_Pattern.tsproj",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-Design-Patterns/75e40a9787751d08224393bcefc8e50dab11feca/Behavioral_Patterns/Command/Command_Pattern/Command_Pattern.tsproj",
+  "repo": "0w8States/PLC-Design-Patterns",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 29929,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "0w8States__PLC-OOP-Basics__Extended__LightingController__LightingController__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-OOP-Basics/fe25592e399383e6eb6cf4eeeb430787b3161091/Extended/LightingController/LightingController/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-OOP-Basics",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 36150,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-OOP-Basics__Tutorials__FlashGen_Overriding__FlashGen_Overriding__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-OOP-Basics/fe25592e399383e6eb6cf4eeeb430787b3161091/Tutorials/FlashGen_Overriding/FlashGen_Overriding/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-OOP-Basics",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 27288,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-OOP-Basics__Tutorials__LightControl_Interfaces__LightControl_Interfaces__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-OOP-Basics/fe25592e399383e6eb6cf4eeeb430787b3161091/Tutorials/LightControl_Interfaces/LightControl_Interfaces/PLC1/PLC1.tmc",
+  "repo": "0w8States/PLC-OOP-Basics",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 25087,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "0w8States__PLC-OOP-Basics__Extended__LightingController__LightingController___Config__PLC__PLC1.xti",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-OOP-Basics/fe25592e399383e6eb6cf4eeeb430787b3161091/Extended/LightingController/LightingController/_Config/PLC/PLC1.xti",
+  "repo": "0w8States/PLC-OOP-Basics",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 4792,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "0w8States__PLC-OOP-Basics__Extended__LightingController__LightingController__LightingController.tsproj",
+  "url": "https://raw.githubusercontent.com/0w8States/PLC-OOP-Basics/fe25592e399383e6eb6cf4eeeb430787b3161091/Extended/LightingController/LightingController/LightingController.tsproj",
+  "repo": "0w8States/PLC-OOP-Basics",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 677,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "BABE-KimR__TC1200-PLC.sample.OOP_Design_Patterns.plc__DesignPatterns___Config__NC__Axes__FacadeAxis.xti",
+  "url": "https://raw.githubusercontent.com/BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc/da80987148c4767d3ea5ad32e31c3edb52944699/DesignPatterns/_Config/NC/Axes/FacadeAxis.xti",
+  "repo": "BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 47868,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "BABE-KimR__TC1200-PLC.sample.OOP_Design_Patterns.plc__DesignPatterns___Config__PLC__14_Facade.xti",
+  "url": "https://raw.githubusercontent.com/BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc/da80987148c4767d3ea5ad32e31c3edb52944699/DesignPatterns/_Config/PLC/14_Facade.xti",
+  "repo": "BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 32077,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "BABE-KimR__TC1200-PLC.sample.OOP_Design_Patterns.plc__DesignPatterns__DesignPatterns.tsproj",
+  "url": "https://raw.githubusercontent.com/BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc/da80987148c4767d3ea5ad32e31c3edb52944699/DesignPatterns/DesignPatterns.tsproj",
+  "repo": "BABE-KimR/TC1200-PLC.sample.OOP_Design_Patterns.plc",
+  "license": "BSD-2-Clause",
+  "sizeBytes": 1631,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-JP__PLC_JobManagementFramework__JobManagementFramework__JobManagementFramework.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-JP/PLC_JobManagementFramework/d6230013fa670a8493980070d57d97a2b16b4367/JobManagementFramework/JobManagementFramework.tsproj",
+  "repo": "Beckhoff-JP/PLC_JobManagementFramework",
+  "license": "MIT",
+  "sizeBytes": 82365,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-Switzerland__CHALET_XPlanar_Example__Realtime___Config__TcCOM Objects__XPlanar__Part1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-Switzerland/CHALET_XPlanar_Example/e44284faaf465a2afd9d682d46f8a420857b9426/Realtime/_Config/TcCOM%20Objects/XPlanar/Part1.xti",
+  "repo": "Beckhoff-Switzerland/CHALET_XPlanar_Example",
+  "license": "0BSD",
+  "sizeBytes": 507809,
+  "kind": "XTI CTComObjDef"
+ },
+ {
+  "file": "Beckhoff-Switzerland__CHALET_XPlanar_Example__Realtime___Config__IO__LAN3.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-Switzerland/CHALET_XPlanar_Example/e44284faaf465a2afd9d682d46f8a420857b9426/Realtime/_Config/IO/LAN3.xti",
+  "repo": "Beckhoff-Switzerland/CHALET_XPlanar_Example",
+  "license": "0BSD",
+  "sizeBytes": 364802,
+  "kind": "XTI CDevEtherCATDef"
+ },
+ {
+  "file": "Beckhoff-Switzerland__CHALET_XPlanar_Example__Realtime__Realtime.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-Switzerland/CHALET_XPlanar_Example/e44284faaf465a2afd9d682d46f8a420857b9426/Realtime/Realtime.tsproj",
+  "repo": "Beckhoff-Switzerland/CHALET_XPlanar_Example",
+  "license": "0BSD",
+  "sizeBytes": 236185,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AAG_TcVision_CPP__CPP__FirstSteps__TF7xxx_FirstSteps_CPP__TF7xxx_FirstSteps_CPP__FirstSteps__FirstSteps.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AAG_TcVision_CPP/a4d66fd5332e00b30f16fc17c7f7b29f058eb025/CPP/FirstSteps/TF7xxx_FirstSteps_CPP/TF7xxx_FirstSteps_CPP/FirstSteps/FirstSteps.tmc",
+  "repo": "Beckhoff-USA-Community/AAG_TcVision_CPP",
+  "license": "0BSD",
+  "sizeBytes": 5674,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AAG_TcVision_CPP__CPP__FirstSteps__TF7xxx_FirstSteps_CPP__TF7xxx_FirstSteps_CPP__TF7xxx_FirstSteps_CPP.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AAG_TcVision_CPP/a4d66fd5332e00b30f16fc17c7f7b29f058eb025/CPP/FirstSteps/TF7xxx_FirstSteps_CPP/TF7xxx_FirstSteps_CPP/TF7xxx_FirstSteps_CPP.tsproj",
+  "repo": "Beckhoff-USA-Community/AAG_TcVision_CPP",
+  "license": "0BSD",
+  "sizeBytes": 72289,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB__TwinCAT_Projects__TwinCAT-CiA402-CPP__TwinCAT-CANopen-CPP-Copley__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB/68978af04ea475cf89e39ae872cdccb5ddc95e4c/TwinCAT_Projects/TwinCAT-CiA402-CPP/TwinCAT-CANopen-CPP-Copley/PLC1/PLC1.tmc",
+  "repo": "Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB",
+  "license": "0BSD",
+  "sizeBytes": 29739,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB__TwinCAT_Projects__TwinCAT-CiA402-CPP__TwinCAT-CANopen-CPP-Copley__Copley_ACJ_Project__Copley_ACJ_Project.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB/68978af04ea475cf89e39ae872cdccb5ddc95e4c/TwinCAT_Projects/TwinCAT-CiA402-CPP/TwinCAT-CANopen-CPP-Copley/Copley_ACJ_Project/Copley_ACJ_Project.tmc",
+  "repo": "Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB",
+  "license": "0BSD",
+  "sizeBytes": 9131,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB__TwinCAT_Projects__TwinCAT-CiA402-CPP__TwinCAT-CANopen-CPP-Copley__TwinCAT-CANopen-CPP-Copley.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB/68978af04ea475cf89e39ae872cdccb5ddc95e4c/TwinCAT_Projects/TwinCAT-CiA402-CPP/TwinCAT-CANopen-CPP-Copley/TwinCAT-CANopen-CPP-Copley.tsproj",
+  "repo": "Beckhoff-USA-Community/AAG_TwinCAT_CiA402_CANopen_CPP_FMU_MATLAB",
+  "license": "0BSD",
+  "sizeBytes": 72123,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ADS-Gamepad-Service__plc__LibraryTestProject__LibraryTestProject__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ADS-Gamepad-Service/91979271bcc9b165dbea7f1b40cb63ac453b93e9/plc/LibraryTestProject/LibraryTestProject/PLC1/PLC1.tmc",
+  "repo": "Beckhoff-USA-Community/ADS-Gamepad-Service",
+  "license": "0BSD",
+  "sizeBytes": 111553,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ADS-Gamepad-Service__packaging__AdsGamepad.TcCom__repository__Beckhoff Community__ADS_Gamepad__0.0.0.12__ADS_Gamepad.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ADS-Gamepad-Service/91979271bcc9b165dbea7f1b40cb63ac453b93e9/packaging/AdsGamepad.TcCom/repository/Beckhoff%20Community/ADS_Gamepad/0.0.0.12/ADS_Gamepad.tmc",
+  "repo": "Beckhoff-USA-Community/ADS-Gamepad-Service",
+  "license": "0BSD",
+  "sizeBytes": 34142,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ADS-Gamepad-Service__plc__AdsGamepad-Dev__AdsGamepad-Dev__AdsGamepad__AdsGamepad.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ADS-Gamepad-Service/91979271bcc9b165dbea7f1b40cb63ac453b93e9/plc/AdsGamepad-Dev/AdsGamepad-Dev/AdsGamepad/AdsGamepad.tmc",
+  "repo": "Beckhoff-USA-Community/ADS-Gamepad-Service",
+  "license": "0BSD",
+  "sizeBytes": 9064,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ADS-Gamepad-Service__plc__LibraryTestProject__LibraryTestProject___Config__PLC__PLC1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ADS-Gamepad-Service/91979271bcc9b165dbea7f1b40cb63ac453b93e9/plc/LibraryTestProject/LibraryTestProject/_Config/PLC/PLC1.xti",
+  "repo": "Beckhoff-USA-Community/ADS-Gamepad-Service",
+  "license": "0BSD",
+  "sizeBytes": 1135,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ADS-Gamepad-Service__tccom__Gamepad_TcCOM__Gamepad_TcCOM.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ADS-Gamepad-Service/91979271bcc9b165dbea7f1b40cb63ac453b93e9/tccom/Gamepad_TcCOM/Gamepad_TcCOM.tsproj",
+  "repo": "Beckhoff-USA-Community/ADS-Gamepad-Service",
+  "license": "0BSD",
+  "sizeBytes": 98121,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment__UnitTests__UnitTests.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/UnitTests/UnitTests.tmc",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 1371882,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment__VFFS__VFFS.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/VFFS/VFFS.tmc",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 767452,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment__Template__Template.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/Template/Template.tmc",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 523053,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationBase__ApplicationBase__ExternalTypes.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationBase/ApplicationBase/ExternalTypes.tmc",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 26793,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationBase__ApplicationBase__ApplicationBase.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationBase/ApplicationBase/ApplicationBase.tmc",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 21706,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment___Config__Motion__MC Project1__Axes__Pull Wheel Right.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/_Config/Motion/MC%20Project1/Axes/Pull%20Wheel%20Right.xti",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 62552,
+  "kind": "XTI CTComMcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment___Config__NC__Axes__Pull Wheel Left.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/_Config/NC/Axes/Pull%20Wheel%20Left.xti",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 47902,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__ApplicationDevelopment_Sample__ApplicationDevelopment__ApplicationDevelopment.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/ApplicationDevelopment_Sample/0ddc23f80e67384157d87ef60bd5aaa2b8358fdd/ApplicationDevelopment/ApplicationDevelopment.tsproj",
+  "repo": "Beckhoff-USA-Community/ApplicationDevelopment_Sample",
+  "license": "0BSD",
+  "sizeBytes": 2184,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__LargeTileStarter__StarterkitApplicationPLC__StarterkitApplicationPLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/LargeTileStarter/StarterkitApplicationPLC/StarterkitApplicationPLC.tmc",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 2673106,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__2-Tile-Xplanar_ATL__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/2-Tile-Xplanar_ATL/PLC1/PLC1.tmc",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 2621627,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__XPlanar__6Tile__XPlanarApplicationDemos-main__XPlanarApplication_6Tile__XPlanarApplication_6Tile__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/XPlanar/6Tile/XPlanarApplicationDemos-main/XPlanarApplication_6Tile/XPlanarApplication_6Tile/PLC1/PLC1.tmc",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 2490728,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__ServoTuner__AutoTune_PLC__AutoTune_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/ServoTuner/AutoTune_PLC/AutoTune_PLC.tmc",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 254982,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__IoTDemo__20_Tc3_Sample_Demo_Rack__Tc3_Sample_Demo_Rack__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/IoTDemo/20_Tc3_Sample_Demo_Rack/Tc3_Sample_Demo_Rack/PLC/PLC.tmc",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 155676,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__XTS__StandardBaseCode__XTS_Base-master__Base Project___Config__IO__Device 1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/XTS/StandardBaseCode/XTS_Base-master/Base%20Project/_Config/IO/Device%201.xti",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 182529,
+  "kind": "XTI CDevEtherCATDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__XTS__StandardBaseCode__XTS_Base-master__Base Project___Config__NC__Axes__Mover Axis 1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/XTS/StandardBaseCode/XTS_Base-master/Base%20Project/_Config/NC/Axes/Mover%20Axis%201.xti",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 103735,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__2-Tile-Xplanar_ATL___Config__NC__NC.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/2-Tile-Xplanar_ATL/_Config/NC/NC.xti",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 93689,
+  "kind": "XTI CNcSafTaskDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__2-Tile-Xplanar_ATL___Config__Motion__XPlanar MC Project__Axes__Mover4220_2.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/2-Tile-Xplanar_ATL/_Config/Motion/XPlanar%20MC%20Project/Axes/Mover4220_2.xti",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 61505,
+  "kind": "XTI CTComMcMoverDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__LargeTileStarter__ExampleProject.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/LargeTileStarter/ExampleProject.tsproj",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 5102754,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__AtlantaOfficeDemos__XTS__StandardBaseCode__XTS_Base-master__Base Project__Base Project.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/AtlantaOfficeDemos/95c8cbf13449110114e2071b57460d21cd3806c8/XTS/StandardBaseCode/XTS_Base-master/Base%20Project/Base%20Project.tsproj",
+  "repo": "Beckhoff-USA-Community/AtlantaOfficeDemos",
+  "license": "0BSD",
+  "sizeBytes": 2505442,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PLC-to-PLC-ADS-RPC__PLC_to_PLC_RPC__PLC_to_PLC_RPC__Caller__Caller.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC/edcba6d84ae14632a6ead86a32c4b25f223648d8/PLC_to_PLC_RPC/PLC_to_PLC_RPC/Caller/Caller.tmc",
+  "repo": "Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC",
+  "license": "0BSD",
+  "sizeBytes": 62814,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PLC-to-PLC-ADS-RPC__PLC_to_PLC_RPC__PLC_to_PLC_RPC__Provider__Provider.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC/edcba6d84ae14632a6ead86a32c4b25f223648d8/PLC_to_PLC_RPC/PLC_to_PLC_RPC/Provider/Provider.tmc",
+  "repo": "Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC",
+  "license": "0BSD",
+  "sizeBytes": 20953,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PLC-to-PLC-ADS-RPC__PLC_to_PLC_RPC__PLC_to_PLC_RPC___Config__PLC__Provider.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC/edcba6d84ae14632a6ead86a32c4b25f223648d8/PLC_to_PLC_RPC/PLC_to_PLC_RPC/_Config/PLC/Provider.xti",
+  "repo": "Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC",
+  "license": "0BSD",
+  "sizeBytes": 1093,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PLC-to-PLC-ADS-RPC__PLC_to_PLC_RPC__PLC_to_PLC_RPC__PLC_to_PLC_RPC.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC/edcba6d84ae14632a6ead86a32c4b25f223648d8/PLC_to_PLC_RPC/PLC_to_PLC_RPC/PLC_to_PLC_RPC.tsproj",
+  "repo": "Beckhoff-USA-Community/PLC-to-PLC-ADS-RPC",
+  "license": "0BSD",
+  "sizeBytes": 1329,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PackML_PLC_Example__VFFS Demo PLC__PLC1__Machine__Events__VFFSDemo.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PackML_PLC_Example/5bec45bb19fffaf880606318bc3bf48136680eb2/VFFS%20Demo%20PLC/PLC1/Machine/Events/VFFSDemo.tmc",
+  "repo": "Beckhoff-USA-Community/PackML_PLC_Example",
+  "license": "MIT",
+  "sizeBytes": 7518,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PackML_PLC_Example__VFFS Demo PLC___Config__NC__Axes__Seal.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PackML_PLC_Example/5bec45bb19fffaf880606318bc3bf48136680eb2/VFFS%20Demo%20PLC/_Config/NC/Axes/Seal.xti",
+  "repo": "Beckhoff-USA-Community/PackML_PLC_Example",
+  "license": "MIT",
+  "sizeBytes": 47687,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__PackML_PLC_Example__VFFS Demo PLC__VFFS Demo PLC.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/PackML_PLC_Example/5bec45bb19fffaf880606318bc3bf48136680eb2/VFFS%20Demo%20PLC/VFFS%20Demo%20PLC.tsproj",
+  "repo": "Beckhoff-USA-Community/PackML_PLC_Example",
+  "license": "MIT",
+  "sizeBytes": 39859,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_Alarms__tmc__ComponentEvents.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_Alarms/tmc/ComponentEvents.tmc",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 2088,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_ControlledStop__tmc__ComponentEvents.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_ControlledStop/tmc/ComponentEvents.tmc",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 1564,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_Alarms__tmc__EquipmentEvents.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_Alarms/tmc/EquipmentEvents.tmc",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 1396,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_MultiMaster___Config__NC__NC.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_MultiMaster/_Config/NC/NC.xti",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 49383,
+  "kind": "XTI CNcSafTaskDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_ExternalSequence___Config__NC__Axes__Axis 1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_ExternalSequence/_Config/NC/Axes/Axis%201.xti",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 47971,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_Samples__TwinCAT PLC Projects__SPT_ExternalSetpointGenerator__SPT_ExternalSetpointGenerator.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_Samples/f35a009ab15c4b5503aff757a9bd6dc75969ebd3/TwinCAT%20PLC%20Projects/SPT_ExternalSetpointGenerator/SPT_ExternalSetpointGenerator.tsproj",
+  "repo": "Beckhoff-USA-Community/SPT_Samples",
+  "license": "MIT",
+  "sizeBytes": 94342,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_V4_Samples__SPT_MultiMaster___Config__NC__NC.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_V4_Samples/470ce0f0acc28ac16e5237a60fb8259e9c456722/SPT_MultiMaster/_Config/NC/NC.xti",
+  "repo": "Beckhoff-USA-Community/SPT_V4_Samples",
+  "license": "0BSD",
+  "sizeBytes": 49381,
+  "kind": "XTI CNcSafTaskDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_V4_Samples__SPT EtherCAT Diagnostics__SPT EtherCAT Diagnostics___Config__EtherCatDiagnosticsSample__EtherCatDiagnosticsSample Instance.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_V4_Samples/470ce0f0acc28ac16e5237a60fb8259e9c456722/SPT%20EtherCAT%20Diagnostics/SPT%20EtherCAT%20Diagnostics/_Config/EtherCatDiagnosticsSample/EtherCatDiagnosticsSample%20Instance.xti",
+  "repo": "Beckhoff-USA-Community/SPT_V4_Samples",
+  "license": "0BSD",
+  "sizeBytes": 2532,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SPT_V4_Samples__SPT  Dynamic Axis Assignment__SPT  Dynamic Axis Assignment__SPT  Dynamic Axis Assignment.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SPT_V4_Samples/470ce0f0acc28ac16e5237a60fb8259e9c456722/SPT%20%20Dynamic%20Axis%20Assignment/SPT%20%20Dynamic%20Axis%20Assignment/SPT%20%20Dynamic%20Axis%20Assignment.tsproj",
+  "repo": "Beckhoff-USA-Community/SPT_V4_Samples",
+  "license": "0BSD",
+  "sizeBytes": 103368,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SystemOverviewCX9240__CX9020_PLC__CX9020_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SystemOverviewCX9240/08c29db01ea91a124cff7519af2d7d6e1d259abd/CX9020_PLC/CX9020_PLC.tmc",
+  "repo": "Beckhoff-USA-Community/SystemOverviewCX9240",
+  "license": null,
+  "sizeBytes": 340647,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SystemOverviewCX9240___Config__IO__Device 3 (EtherCAT)__Term 49 (EK1200).xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SystemOverviewCX9240/08c29db01ea91a124cff7519af2d7d6e1d259abd/_Config/IO/Device%203%20%28EtherCAT%29/Term%2049%20%28EK1200%29.xti",
+  "repo": "Beckhoff-USA-Community/SystemOverviewCX9240",
+  "license": null,
+  "sizeBytes": 165170,
+  "kind": "XTI CFlbTermDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SystemOverviewCX9240___Config__NC__NC.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SystemOverviewCX9240/08c29db01ea91a124cff7519af2d7d6e1d259abd/_Config/NC/NC.xti",
+  "repo": "Beckhoff-USA-Community/SystemOverviewCX9240",
+  "license": null,
+  "sizeBytes": 90991,
+  "kind": "XTI CNcSafTaskDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__SystemOverviewCX9240__CX9020.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/SystemOverviewCX9240/08c29db01ea91a124cff7519af2d7d6e1d259abd/CX9020.tsproj",
+  "repo": "Beckhoff-USA-Community/SystemOverviewCX9240",
+  "license": null,
+  "sizeBytes": 270497,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__TE1400-Exception-handling-example__ExceptionGenerator__TwinCAT Project__TwinCAT Project__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/TE1400-Exception-handling-example/513d35a0e395b0a60ae00157193ebd11179fa978/ExceptionGenerator/TwinCAT%20Project/TwinCAT%20Project/PLC/PLC.tmc",
+  "repo": "Beckhoff-USA-Community/TE1400-Exception-handling-example",
+  "license": "0BSD",
+  "sizeBytes": 146881,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__TE1400-Exception-handling-example__ExceptionGenerator__Simulink__2023b__ExceptionGenerator_tcgrt__ExceptionGenerator.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/TE1400-Exception-handling-example/513d35a0e395b0a60ae00157193ebd11179fa978/ExceptionGenerator/Simulink/2023b/ExceptionGenerator_tcgrt/ExceptionGenerator.tmc",
+  "repo": "Beckhoff-USA-Community/TE1400-Exception-handling-example",
+  "license": "0BSD",
+  "sizeBytes": 32848,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff-USA-Community__TE1400-Exception-handling-example__ExceptionGenerator__TwinCAT Project__TwinCAT Project__TwinCAT Project.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/TE1400-Exception-handling-example/513d35a0e395b0a60ae00157193ebd11179fa978/ExceptionGenerator/TwinCAT%20Project/TwinCAT%20Project/TwinCAT%20Project.tsproj",
+  "repo": "Beckhoff-USA-Community/TE1400-Exception-handling-example",
+  "license": "0BSD",
+  "sizeBytes": 40577,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff-USA-Community__XTS_Base__Base Project__XTS_Base_Messages.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/XTS_Base/a1a574ab1f70bf0d0413018c5b2b022510f94563/Base%20Project/XTS_Base_Messages.tmc",
+  "repo": "Beckhoff-USA-Community/XTS_Base",
+  "license": "0BSD",
+  "sizeBytes": 7067,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff-USA-Community__XTS_Base__Base Project___Config__IO__Device 1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/XTS_Base/a1a574ab1f70bf0d0413018c5b2b022510f94563/Base%20Project/_Config/IO/Device%201.xti",
+  "repo": "Beckhoff-USA-Community/XTS_Base",
+  "license": "0BSD",
+  "sizeBytes": 182529,
+  "kind": "XTI CDevEtherCATDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__XTS_Base__Base Project___Config__NC__Axes__Mover Axis 1.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/XTS_Base/a1a574ab1f70bf0d0413018c5b2b022510f94563/Base%20Project/_Config/NC/Axes/Mover%20Axis%201.xti",
+  "repo": "Beckhoff-USA-Community/XTS_Base",
+  "license": "0BSD",
+  "sizeBytes": 112103,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__XTS_Base__Base Project___Config__PLC__Main.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/XTS_Base/a1a574ab1f70bf0d0413018c5b2b022510f94563/Base%20Project/_Config/PLC/Main.xti",
+  "repo": "Beckhoff-USA-Community/XTS_Base",
+  "license": "0BSD",
+  "sizeBytes": 49486,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Beckhoff-USA-Community__XTS_Base__Base Project__Base Project.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff-USA-Community/XTS_Base/a1a574ab1f70bf0d0413018c5b2b022510f94563/Base%20Project/Base%20Project.tsproj",
+  "repo": "Beckhoff-USA-Community/XTS_Base",
+  "license": "0BSD",
+  "sizeBytes": 2012221,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__ADS__PLC-TestProject__Untitled1__ExternalTypes.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/ADS/24e598a113edfdc0d34414bfefb847930d94cb87/PLC-TestProject/Untitled1/ExternalTypes.tmc",
+  "repo": "Beckhoff/ADS",
+  "license": "MIT",
+  "sizeBytes": 13850,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff__ADS__PLC-TestProject__NotificationTest.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/ADS/24e598a113edfdc0d34414bfefb847930d94cb87/PLC-TestProject/NotificationTest.tsproj",
+  "repo": "Beckhoff/ADS",
+  "license": "MIT",
+  "sizeBytes": 2014,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__AdsToJava__plc__SamplesPlc__Samples__Samples.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/AdsToJava/f11ab77ca28dd17048406277a3f3a066ae0d80e6/plc/SamplesPlc/Samples/Samples.tmc",
+  "repo": "Beckhoff/AdsToJava",
+  "license": "MIT",
+  "sizeBytes": 28446,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__AdsToJava__plc__TestPlc__Test__Test.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/AdsToJava/f11ab77ca28dd17048406277a3f3a066ae0d80e6/plc/TestPlc/Test/Test.tmc",
+  "repo": "Beckhoff/AdsToJava",
+  "license": "MIT",
+  "sizeBytes": 20460,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__AdsToJava__plc__SamplesPlc__SamplesPlc.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/AdsToJava/f11ab77ca28dd17048406277a3f3a066ae0d80e6/plc/SamplesPlc/SamplesPlc.tsproj",
+  "repo": "Beckhoff/AdsToJava",
+  "license": "MIT",
+  "sizeBytes": 1692,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__EL34xx_Sample___Config__PLC__PLC Instance.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/EL34xx_Sample/e02abeb629909a97f6022e8c9223066e03bf8579/_Config/PLC/PLC%20Instance.xti",
+  "repo": "Beckhoff/EL34xx_Sample",
+  "license": null,
+  "sizeBytes": 198151,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "Beckhoff__EL34xx_Sample___Config__TcCOM Objects__Object1 (TcPowerMeasureEL3783).xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/EL34xx_Sample/e02abeb629909a97f6022e8c9223066e03bf8579/_Config/TcCOM%20Objects/Object1%20%28TcPowerMeasureEL3783%29.xti",
+  "repo": "Beckhoff/EL34xx_Sample",
+  "license": null,
+  "sizeBytes": 96850,
+  "kind": "XTI CTComObjDef"
+ },
+ {
+  "file": "Beckhoff__EL34xx_Sample___Config__IO__Device 1 (EtherCAT)__EK1100__EL3453_DPM.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/EL34xx_Sample/e02abeb629909a97f6022e8c9223066e03bf8579/_Config/IO/Device%201%20%28EtherCAT%29/EK1100/EL3453_DPM.xti",
+  "repo": "Beckhoff/EL34xx_Sample",
+  "license": null,
+  "sizeBytes": 64554,
+  "kind": "XTI CFlbTermDef"
+ },
+ {
+  "file": "Beckhoff__EL34xx_Sample__EL34xx_Sample.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/EL34xx_Sample/e02abeb629909a97f6022e8c9223066e03bf8579/EL34xx_Sample.tsproj",
+  "repo": "Beckhoff/EL34xx_Sample",
+  "license": null,
+  "sizeBytes": 634,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__PlcLibrary_Tc3_IoLink_Sample__Tc3_IoLink_Samples__Tc3_IoLink_Samples__Tc3_IoLink_Samples__Tc3_IoLink_Samples.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/PlcLibrary_Tc3_IoLink_Sample/023b8301b2e15c645d7df19b51c01411e30be92d/Tc3_IoLink_Samples/Tc3_IoLink_Samples/Tc3_IoLink_Samples/Tc3_IoLink_Samples.tmc",
+  "repo": "Beckhoff/PlcLibrary_Tc3_IoLink_Sample",
+  "license": "0BSD",
+  "sizeBytes": 159086,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__PlcLibrary_Tc3_IoLink_Sample__Tc3_IoLink_Samples__Tc3_IoLink_Samples__Tc3_IoLink_Samples.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/PlcLibrary_Tc3_IoLink_Sample/023b8301b2e15c645d7df19b51c01411e30be92d/Tc3_IoLink_Samples/Tc3_IoLink_Samples/Tc3_IoLink_Samples.tsproj",
+  "repo": "Beckhoff/PlcLibrary_Tc3_IoLink_Sample",
+  "license": "0BSD",
+  "sizeBytes": 218029,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S35-AccessEthernet__TwinCAT Project with Ethernet__TcEthernetSample__TcEthernetSample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S35-AccessEthernet/TwinCAT%20Project%20with%20Ethernet/TcEthernetSample/TcEthernetSample.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 16166,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S10-Mod2ModDataPointer__TwinCAT Project with DataPointer__TcDataPointerSampleDrv__TcDataPointerSampleDrv.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S10-Mod2ModDataPointer/TwinCAT%20Project%20with%20DataPointer/TcDataPointerSampleDrv/TcDataPointerSampleDrv.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 13363,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S11-Mod2ModMethod__TwinCAT Project PLC calling C-Method__PLC-calling-statemachine__ExternalTypes.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S11-Mod2ModMethod/TwinCAT%20Project%20PLC%20calling%20C-Method/PLC-calling-statemachine/ExternalTypes.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 12848,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S07-AdsNotifications__TwinCAT Project AdsNotifications__VarProvider__ExternalTypes.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S07-AdsNotifications/TwinCAT%20Project%20AdsNotifications/VarProvider/ExternalTypes.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 10851,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S11a-Mod2ModCS__TwinCAT Project Concurrent DA__TcConcurrentDADrv__TcConcurrentDADrv.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S11a-Mod2ModCS/TwinCAT%20Project%20Concurrent%20DA/TcConcurrentDADrv/TcConcurrentDADrv.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 9993,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S20a-FileIO-CyclicReadWrite__TwinCAT Project with Async File IO__TcAsyncBufferReadingDrv__TcAsyncBufferReadingDrv.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S20a-FileIO-CyclicReadWrite/TwinCAT%20Project%20with%20Async%20File%20IO/TcAsyncBufferReadingDrv/TcAsyncBufferReadingDrv.tmc",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 8334,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC1300_Samples__S05-CoEAccess__TwinCAT Project with CoE Access__TwinCAT-Project-with-SdoAccess-via-Ads.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC1300_Samples/aa5e0cb090c22d43fed3c4da542d21c7df843d71/S05-CoEAccess/TwinCAT%20Project%20with%20CoE%20Access/TwinCAT-Project-with-SdoAccess-via-Ads.tsproj",
+  "repo": "Beckhoff/TC1300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 199287,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TC_AI_DOTNET_Samples__src__ScriptingContainer__ScriptingTestContainer__TComModules__TempContr__TempContr.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC_AI_DOTNET_Samples/48fd388784b1b58d89e5f786ae5f3cd9ff4227ca/src/ScriptingContainer/ScriptingTestContainer/TComModules/TempContr/TempContr.tmc",
+  "repo": "Beckhoff/TC_AI_DOTNET_Samples",
+  "license": "0BSD",
+  "sizeBytes": 69328,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC_AI_DOTNET_Samples__src__ScriptingContainer__ScriptingTestContainer__TComModules__ContrSysPT2__ContrSysPT2.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC_AI_DOTNET_Samples/48fd388784b1b58d89e5f786ae5f3cd9ff4227ca/src/ScriptingContainer/ScriptingTestContainer/TComModules/ContrSysPT2/ContrSysPT2.tmc",
+  "repo": "Beckhoff/TC_AI_DOTNET_Samples",
+  "license": "0BSD",
+  "sizeBytes": 45773,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "Beckhoff__TC_AI_DOTNET_Samples__src__ScriptingContainer__CodeGenerationDemo__Templates__TC3-AU08-IEC-IC__MachineTypeA__Drive.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TC_AI_DOTNET_Samples/48fd388784b1b58d89e5f786ae5f3cd9ff4227ca/src/ScriptingContainer/CodeGenerationDemo/Templates/TC3-AU08-IEC-IC/MachineTypeA/Drive.xti",
+  "repo": "Beckhoff/TC_AI_DOTNET_Samples",
+  "license": "0BSD",
+  "sizeBytes": 21551,
+  "kind": "XTI <Box>",
+  "note": "no ClassName attribute anywhere; root TcSmItem wraps a bare <Box>"
+ },
+ {
+  "file": "Beckhoff__TE142x---FMU-Samples__PneumaticCylinderController__Controller__Controller.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE142x---FMU-Samples/b828403e31793ccd88d10dea4c8e8148a940e071/PneumaticCylinderController/Controller/Controller.tmc",
+  "repo": "Beckhoff/TE142x---FMU-Samples",
+  "license": null,
+  "sizeBytes": 30335,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TE142x---FMU-Samples__PneumaticCylinderController__PneumaticCylinderController.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE142x---FMU-Samples/b828403e31793ccd88d10dea4c8e8148a940e071/PneumaticCylinderController/PneumaticCylinderController.tsproj",
+  "repo": "Beckhoff/TE142x---FMU-Samples",
+  "license": null,
+  "sizeBytes": 67216,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TE2000_Client_Samples__SystemEngineering__SystemEngineering_XAE__SystemEngineering_PLC__SystemEngineering_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE2000_Client_Samples/a1605eaf95d0611e6725e24a70e0a862f387114b/SystemEngineering/SystemEngineering_XAE/SystemEngineering_PLC/SystemEngineering_PLC.tmc",
+  "repo": "Beckhoff/TE2000_Client_Samples",
+  "license": "0BSD",
+  "sizeBytes": 293032,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TE2000_Client_Samples__UserGuidance__UserGuidance_XAE__UserGuidance_PLC__UserGuidance_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE2000_Client_Samples/a1605eaf95d0611e6725e24a70e0a862f387114b/UserGuidance/UserGuidance_XAE/UserGuidance_PLC/UserGuidance_PLC.tmc",
+  "repo": "Beckhoff/TE2000_Client_Samples",
+  "license": "0BSD",
+  "sizeBytes": 241887,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TE2000_Client_Samples__PagingInControl__SampleSymbols__SampleSymbols__SampleSymbols.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE2000_Client_Samples/a1605eaf95d0611e6725e24a70e0a862f387114b/PagingInControl/SampleSymbols/SampleSymbols/SampleSymbols.tmc",
+  "repo": "Beckhoff/TE2000_Client_Samples",
+  "license": "0BSD",
+  "sizeBytes": 28455,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TE2000_Client_Samples__UserGuidance__UserGuidance_XAE__UserGuidance_XAE.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TE2000_Client_Samples/a1605eaf95d0611e6725e24a70e0a862f387114b/UserGuidance/UserGuidance_XAE/UserGuidance_XAE.tsproj",
+  "repo": "Beckhoff/TE2000_Client_Samples",
+  "license": "0BSD",
+  "sizeBytes": 4375,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF1140_Sample__PlcSample__PlcSample.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF1140_Sample/61f0eb9f68d8e0f006751d23cecdbe8b70b6a6b4/PlcSample/PlcSample.tsproj",
+  "repo": "Beckhoff/TF1140_Sample",
+  "license": null,
+  "sizeBytes": 2190,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF5500_Samples__Gearing__Gearing___Config__Motion__MC Project1__Axes__Master.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5500_Samples/4a30d2666f49b06134f4c733f2bbc049c7d7469f/Gearing/Gearing/_Config/Motion/MC%20Project1/Axes/Master.xti",
+  "repo": "Beckhoff/TF5500_Samples",
+  "license": "0BSD",
+  "sizeBytes": 75144,
+  "kind": "XTI CTComMcAxisDef"
+ },
+ {
+  "file": "Beckhoff__TF5500_Samples__Gearing__Gearing___Config__PLC__PLC Instance.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5500_Samples/4a30d2666f49b06134f4c733f2bbc049c7d7469f/Gearing/Gearing/_Config/PLC/PLC%20Instance.xti",
+  "repo": "Beckhoff/TF5500_Samples",
+  "license": "0BSD",
+  "sizeBytes": 4078,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "Beckhoff__TF5500_Samples__PTP__AsyncAccessHwParameter__AsyncAccessHwParameter.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5500_Samples/4a30d2666f49b06134f4c733f2bbc049c7d7469f/PTP/AsyncAccessHwParameter/AsyncAccessHwParameter.tsproj",
+  "repo": "Beckhoff/TF5500_Samples",
+  "license": "0BSD",
+  "sizeBytes": 215293,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF5550_Samples__CammingExtended___Config__Motion__MC Project1__Axes__Master.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5550_Samples/4773e152fbde11300dfb2ccefd45a5e3823c9a99/CammingExtended/_Config/Motion/MC%20Project1/Axes/Master.xti",
+  "repo": "Beckhoff/TF5550_Samples",
+  "license": "0BSD",
+  "sizeBytes": 74983,
+  "kind": "XTI CTComMcAxisDef"
+ },
+ {
+  "file": "Beckhoff__TF5550_Samples__CammingExtended___Config__PLC_CammingExtended__PLC_CammingExtended Instance.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5550_Samples/4773e152fbde11300dfb2ccefd45a5e3823c9a99/CammingExtended/_Config/PLC_CammingExtended/PLC_CammingExtended%20Instance.xti",
+  "repo": "Beckhoff/TF5550_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1947,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "Beckhoff__TF5550_Samples__CammingExtended___Config__PLC__PLC_CammingExtended.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5550_Samples/4773e152fbde11300dfb2ccefd45a5e3823c9a99/CammingExtended/_Config/PLC/PLC_CammingExtended.xti",
+  "repo": "Beckhoff/TF5550_Samples",
+  "license": "0BSD",
+  "sizeBytes": 626,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Beckhoff__TF5550_Samples__CammingBasic__CammingBasic__CammingBasic.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF5550_Samples/4773e152fbde11300dfb2ccefd45a5e3823c9a99/CammingBasic/CammingBasic/CammingBasic.tsproj",
+  "repo": "Beckhoff/TF5550_Samples",
+  "license": "0BSD",
+  "sizeBytes": 109393,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6000_ADS_DOTNET_V4_Samples__Sources__BaseSamples__TwinCAT_Demo_PLC__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6000_ADS_DOTNET_V4_Samples/dd409ef2bdc50add08e24d1627c5a23b91698fb6/Sources/BaseSamples/TwinCAT_Demo_PLC/PLC/PLC.tmc",
+  "repo": "Beckhoff/TF6000_ADS_DOTNET_V4_Samples",
+  "license": "0BSD",
+  "sizeBytes": 28581,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6000_ADS_DOTNET_V4_Samples__Sources__BaseSamples__TwinCAT_Demo_PLC__TwinCAT_Demo_PLC.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6000_ADS_DOTNET_V4_Samples/dd409ef2bdc50add08e24d1627c5a23b91698fb6/Sources/BaseSamples/TwinCAT_Demo_PLC/TwinCAT_Demo_PLC.tsproj",
+  "repo": "Beckhoff/TF6000_ADS_DOTNET_V4_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1022,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6000_ADS_DOTNET_V5_Samples__Sources__BaseSamples__TwinCAT_Demo_PLC__TwinCAT_Demo_PLC.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6000_ADS_DOTNET_V5_Samples/89e2de2d2df82514b91ca8d84705810cebda3515/Sources/BaseSamples/TwinCAT_Demo_PLC/TwinCAT_Demo_PLC.tsproj",
+  "repo": "Beckhoff/TF6000_ADS_DOTNET_V5_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1450,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6100_Samples__TF6100_OpcUa_Server_Sample__ServerSampleProject__ServerSampleProject.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6100_Samples/aa337ec850f82c2e14681fe8afcc4de240e2aee0/TF6100_OpcUa_Server_Sample/ServerSampleProject/ServerSampleProject.tmc",
+  "repo": "Beckhoff/TF6100_Samples",
+  "license": "0BSD",
+  "sizeBytes": 534900,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6100_Samples__TF6100_OpcUa_Client_Sample__ClientSampleProject__ClientSampleProject.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6100_Samples/aa337ec850f82c2e14681fe8afcc4de240e2aee0/TF6100_OpcUa_Client_Sample/ClientSampleProject/ClientSampleProject.tmc",
+  "repo": "Beckhoff/TF6100_Samples",
+  "license": "0BSD",
+  "sizeBytes": 229667,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6100_Samples__TF6100_OpcUa_Client_Sample_IO__TF6100_OpcUa_Client_Sample_IO__Sample__Sample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6100_Samples/aa337ec850f82c2e14681fe8afcc4de240e2aee0/TF6100_OpcUa_Client_Sample_IO/TF6100_OpcUa_Client_Sample_IO/Sample/Sample.tmc",
+  "repo": "Beckhoff/TF6100_Samples",
+  "license": "0BSD",
+  "sizeBytes": 56665,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6100_Samples__TF6100_OpcUa_Client_Sample__TF6100_OpcUa_Client_Sample.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6100_Samples/aa337ec850f82c2e14681fe8afcc4de240e2aee0/TF6100_OpcUa_Client_Sample/TF6100_OpcUa_Client_Sample.tsproj",
+  "repo": "Beckhoff/TF6100_Samples",
+  "license": "0BSD",
+  "sizeBytes": 186887,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6300_Samples__Tc3_FTP__TF6300_FTP_Samples__TF6300_FTP_Samples__TF6300_FTP_Samples.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6300_Samples/4f3fe91f3acea7ad4379fc7f0a9b73ed1748e42a/Tc3_FTP/TF6300_FTP_Samples/TF6300_FTP_Samples/TF6300_FTP_Samples.tmc",
+  "repo": "Beckhoff/TF6300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 337499,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6300_Samples__Tc2_FTP__TF6300_FTP_Samples__FileUpload__FileUpload.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6300_Samples/4f3fe91f3acea7ad4379fc7f0a9b73ed1748e42a/Tc2_FTP/TF6300_FTP_Samples/FileUpload/FileUpload.tmc",
+  "repo": "Beckhoff/TF6300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 76104,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6300_Samples__Tc2_FTP__TF6300_FTP_Samples__FileDownload__FileDownload.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6300_Samples/4f3fe91f3acea7ad4379fc7f0a9b73ed1748e42a/Tc2_FTP/TF6300_FTP_Samples/FileDownload/FileDownload.tmc",
+  "repo": "Beckhoff/TF6300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 73222,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6300_Samples__Tc2_FTP__TF6300_FTP_Samples__TF6300_FTP_Samples.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6300_Samples/4f3fe91f3acea7ad4379fc7f0a9b73ed1748e42a/Tc2_FTP/TF6300_FTP_Samples/TF6300_FTP_Samples.tsproj",
+  "repo": "Beckhoff/TF6300_Samples",
+  "license": "0BSD",
+  "sizeBytes": 3446,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6310-TCP-IP.lib_samples.sACN.plc__src__sACN_Samples.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6310-TCP-IP.lib_samples.sACN.plc/49d023fa35b17cd112b794e70e6ed35490dcc9e4/src/sACN_Samples.tsproj",
+  "repo": "Beckhoff/TF6310-TCP-IP.lib_samples.sACN.plc",
+  "license": "LicenseRef-Beckhoff-SLA",
+  "sizeBytes": 195381,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6310_Samples__PLC__TCP__Sample01__TcpIp_SERVER__TcpIp_SERVER__TcpIp_SERVER__TcpIp_SERVER.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6310_Samples/e8af54c79f62c5b3eb1447525f743e72bace5dc0/PLC/TCP/Sample01/TcpIp_SERVER/TcpIp_SERVER/TcpIp_SERVER/TcpIp_SERVER.tmc",
+  "repo": "Beckhoff/TF6310_Samples",
+  "license": "0BSD",
+  "sizeBytes": 163292,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6310_Samples__PLC__TCP__Sample01__TcpIp_CLIENT__TcpIp_CLIENT__TcpIp_CLIENT__TcpIp_CLIENT.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6310_Samples/e8af54c79f62c5b3eb1447525f743e72bace5dc0/PLC/TCP/Sample01/TcpIp_CLIENT/TcpIp_CLIENT/TcpIp_CLIENT/TcpIp_CLIENT.tmc",
+  "repo": "Beckhoff/TF6310_Samples",
+  "license": "0BSD",
+  "sizeBytes": 159735,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6310_Samples__PLC__GettingStarted__TF6310_GettingStarted__GettingStarted__GettingStarted.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6310_Samples/e8af54c79f62c5b3eb1447525f743e72bace5dc0/PLC/GettingStarted/TF6310_GettingStarted/GettingStarted/GettingStarted.tmc",
+  "repo": "Beckhoff/TF6310_Samples",
+  "license": "0BSD",
+  "sizeBytes": 141654,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6310_Samples__PLC__TCP__Sample07__TcpIp_CLIENT_with_TLS_PSK__TcpIp_CLIENT_with_TLS_PSK__TcpIp_CLIENT_with_TLS_PSK.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6310_Samples/e8af54c79f62c5b3eb1447525f743e72bace5dc0/PLC/TCP/Sample07/TcpIp_CLIENT_with_TLS_PSK/TcpIp_CLIENT_with_TLS_PSK/TcpIp_CLIENT_with_TLS_PSK.tsproj",
+  "repo": "Beckhoff/TF6310_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1801,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6311_Samples__S01-IpStackTcpClientPlc__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6311_Samples/ba714b4fda72f67b8b7d85c2142cd07466333be5/S01-IpStackTcpClientPlc/Untitled1/Untitled1.tmc",
+  "repo": "Beckhoff/TF6311_Samples",
+  "license": "0BSD",
+  "sizeBytes": 70297,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6311_Samples__S04-TCPServerPlc__TwinCAT TcpServerPlc__TcpServerPlc__TcpServerPlc.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6311_Samples/ba714b4fda72f67b8b7d85c2142cd07466333be5/S04-TCPServerPlc/TwinCAT%20TcpServerPlc/TcpServerPlc/TcpServerPlc.tmc",
+  "repo": "Beckhoff/TF6311_Samples",
+  "license": "0BSD",
+  "sizeBytes": 32033,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6311_Samples__S02-UdpDemoPlc__S02-UdpDemoPlc__UdpDemoPlc__UdpDemoPlc.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6311_Samples/ba714b4fda72f67b8b7d85c2142cd07466333be5/S02-UdpDemoPlc/S02-UdpDemoPlc/UdpDemoPlc/UdpDemoPlc.tmc",
+  "repo": "Beckhoff/TF6311_Samples",
+  "license": "0BSD",
+  "sizeBytes": 28022,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6311_Samples__S01-IpStackTcpClientPlc__TwinCAT TcpClientPlc.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6311_Samples/ba714b4fda72f67b8b7d85c2142cd07466333be5/S01-IpStackTcpClientPlc/TwinCAT%20TcpClientPlc.tsproj",
+  "repo": "Beckhoff/TF6311_Samples",
+  "license": "0BSD",
+  "sizeBytes": 216948,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6620_Samples__TF6620_S7CommunicationSample_PLC__TF6620_S7CommunicationSample_PLC__TF6620_S7CommunicationSample_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6620_Samples/bf9049b4a7dccbd6fbeb14f4fc8f6856def5ab09/TF6620_S7CommunicationSample_PLC/TF6620_S7CommunicationSample_PLC/TF6620_S7CommunicationSample_PLC.tmc",
+  "repo": "Beckhoff/TF6620_Samples",
+  "license": "0BSD",
+  "sizeBytes": 139444,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6620_Samples__TF6620_S7CommunicationSample_SysMan__TF6620_S7CommunicationSample_SysMan__TF6620_S7CommunicationSample_SysMan__TF6620_S7CommunicationSample_SysMan.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6620_Samples/bf9049b4a7dccbd6fbeb14f4fc8f6856def5ab09/TF6620_S7CommunicationSample_SysMan/TF6620_S7CommunicationSample_SysMan/TF6620_S7CommunicationSample_SysMan/TF6620_S7CommunicationSample_SysMan.tmc",
+  "repo": "Beckhoff/TF6620_Samples",
+  "license": "0BSD",
+  "sizeBytes": 30930,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6620_Samples__TF6620_S7CommunicationSample_SymbolServer__Server__TF6620_S7CommunicationSample_Server__TF6620_S7CommunicationSample_Server.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6620_Samples/bf9049b4a7dccbd6fbeb14f4fc8f6856def5ab09/TF6620_S7CommunicationSample_SymbolServer/Server/TF6620_S7CommunicationSample_Server/TF6620_S7CommunicationSample_Server.tsproj",
+  "repo": "Beckhoff/TF6620_Samples",
+  "license": "0BSD",
+  "sizeBytes": 112322,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6701_Samples__TF6701_IotMqttv5ReqResSample__IotMqttv5ReqResSample__PlcIotMqttv5ReqSample__PlcIotMqttv5ReqSample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6701_Samples/5e172b9ba191753a56f6df4997b7ae6a1b959c95/TF6701_IotMqttv5ReqResSample/IotMqttv5ReqResSample/PlcIotMqttv5ReqSample/PlcIotMqttv5ReqSample.tmc",
+  "repo": "Beckhoff/TF6701_Samples",
+  "license": "0BSD",
+  "sizeBytes": 234573,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6701_Samples__TF6701_IotMqttv5ReqResSample__IotMqttv5ReqResSample__PlcIotMqttv5ResSample__PlcIotMqttv5ResSample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6701_Samples/5e172b9ba191753a56f6df4997b7ae6a1b959c95/TF6701_IotMqttv5ReqResSample/IotMqttv5ReqResSample/PlcIotMqttv5ResSample/PlcIotMqttv5ResSample.tmc",
+  "repo": "Beckhoff/TF6701_Samples",
+  "license": "0BSD",
+  "sizeBytes": 222987,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6701_Samples__TF6701_IotMqttSampleAzureIotHubDeviceTwin__IotMqttSampleAzureIotHubDeviceTwin__IotMqttSampleAzureIotHubDeviceTwin.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6701_Samples/5e172b9ba191753a56f6df4997b7ae6a1b959c95/TF6701_IotMqttSampleAzureIotHubDeviceTwin/IotMqttSampleAzureIotHubDeviceTwin/IotMqttSampleAzureIotHubDeviceTwin.tmc",
+  "repo": "Beckhoff/TF6701_Samples",
+  "license": "0BSD",
+  "sizeBytes": 184451,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6701_Samples__TF6701_IotMqttSampleUsingQueue__IotMqttSample01__IotMqttSampleUsingQueue.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6701_Samples/5e172b9ba191753a56f6df4997b7ae6a1b959c95/TF6701_IotMqttSampleUsingQueue/IotMqttSample01/IotMqttSampleUsingQueue.tsproj",
+  "repo": "Beckhoff/TF6701_Samples",
+  "license": "0BSD",
+  "sizeBytes": 3750,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6730_Samples__TF6730_WidgetSample__TF6730_WidgetSample__TF6730_WidgetSample.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6730_Samples/e8099b868969652cc670069a7ac90afdc62853a4/TF6730_WidgetSample/TF6730_WidgetSample/TF6730_WidgetSample.tsproj",
+  "repo": "Beckhoff/TF6730_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1498,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6760_Samples__TF6760_IotHttpSampleAwsIotCore__IotHttpSampleAwsIotCore__PlcIotHttpSamplesAwsIotCore__PlcIotHttpSamplesAwsIotCore.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6760_Samples/74fa0d0a8fdd44067dad6f03c0063e48e4098b38/TF6760_IotHttpSampleAwsIotCore/IotHttpSampleAwsIotCore/PlcIotHttpSamplesAwsIotCore/PlcIotHttpSamplesAwsIotCore.tmc",
+  "repo": "Beckhoff/TF6760_Samples",
+  "license": "0BSD",
+  "sizeBytes": 330213,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6760_Samples__TF6760_IotHttpSamplePhilipsHue__IotHttpSamplePhilipsHue__PlcIotHttpSamplesPhilipsHue__PlcIotHttpSamplesPhilipsHue.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6760_Samples/74fa0d0a8fdd44067dad6f03c0063e48e4098b38/TF6760_IotHttpSamplePhilipsHue/IotHttpSamplePhilipsHue/PlcIotHttpSamplesPhilipsHue/PlcIotHttpSamplesPhilipsHue.tmc",
+  "repo": "Beckhoff/TF6760_Samples",
+  "license": "0BSD",
+  "sizeBytes": 329250,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6760_Samples__TF6760_IotHttpSampleTelegram__IotHttpSampleTelegram__PlcIotHttpSamplesTelegram__PlcIotHttpSamplesTelegram.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6760_Samples/74fa0d0a8fdd44067dad6f03c0063e48e4098b38/TF6760_IotHttpSampleTelegram/IotHttpSampleTelegram/PlcIotHttpSamplesTelegram/PlcIotHttpSamplesTelegram.tmc",
+  "repo": "Beckhoff/TF6760_Samples",
+  "license": "0BSD",
+  "sizeBytes": 326166,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6760_Samples__TF6760_IotHttpSampleOpenWeatherMap__IotHttpSampleOpenWeatherMap__IotHttpSampleOpenWeatherMap.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6760_Samples/74fa0d0a8fdd44067dad6f03c0063e48e4098b38/TF6760_IotHttpSampleOpenWeatherMap/IotHttpSampleOpenWeatherMap/IotHttpSampleOpenWeatherMap.tsproj",
+  "repo": "Beckhoff/TF6760_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1700,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6770_Samples__TF6770_IotWebSocketsSamplePostman__IotWebSocketsSamplePostman__IotWebSocketsSamplePostman__IotWebSocketsSamplePostman.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6770_Samples/36b899a963146cbd277be20e2f0c9cc53a0508b6/TF6770_IotWebSocketsSamplePostman/IotWebSocketsSamplePostman/IotWebSocketsSamplePostman/IotWebSocketsSamplePostman.tmc",
+  "repo": "Beckhoff/TF6770_Samples",
+  "license": "0BSD",
+  "sizeBytes": 202052,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6770_Samples__TF6770_IotWebSocketsSamplePostman__IotWebSocketsSamplePostman__IotWebSocketsSamplePostman.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6770_Samples/36b899a963146cbd277be20e2f0c9cc53a0508b6/TF6770_IotWebSocketsSamplePostman/IotWebSocketsSamplePostman/IotWebSocketsSamplePostman.tsproj",
+  "repo": "Beckhoff/TF6770_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1738,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF6771_Samples__TF6771_IotOcppProxy__TcIotOcppProxy__TcIotOcppProxyExample__TcIotOcppProxyExample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6771_Samples/3220380ebb7bbd24528ac0c7a3ce4c0eefcf0425/TF6771_IotOcppProxy/TcIotOcppProxy/TcIotOcppProxyExample/TcIotOcppProxyExample.tmc",
+  "repo": "Beckhoff/TF6771_Samples",
+  "license": "0BSD",
+  "sizeBytes": 621732,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6771_Samples__TF6771_IotOcppGettingStarted__TF6771_GettingStarted__OCPPServer__OCPPServer.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6771_Samples/3220380ebb7bbd24528ac0c7a3ce4c0eefcf0425/TF6771_IotOcppGettingStarted/TF6771_GettingStarted/OCPPServer/OCPPServer.tmc",
+  "repo": "Beckhoff/TF6771_Samples",
+  "license": "0BSD",
+  "sizeBytes": 312473,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6771_Samples__TF6771_IotOcppGettingStarted__TF6771_GettingStarted__OCPPClient__OCPPClient.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6771_Samples/3220380ebb7bbd24528ac0c7a3ce4c0eefcf0425/TF6771_IotOcppGettingStarted/TF6771_GettingStarted/OCPPClient/OCPPClient.tmc",
+  "repo": "Beckhoff/TF6771_Samples",
+  "license": "0BSD",
+  "sizeBytes": 304439,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF6771_Samples__TF6771_IotOcppProxy__TcIotOcppProxy___Config__PLC__TcIotOcppProxyExample.xti",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6771_Samples/3220380ebb7bbd24528ac0c7a3ce4c0eefcf0425/TF6771_IotOcppProxy/TcIotOcppProxy/_Config/PLC/TcIotOcppProxyExample.xti",
+  "repo": "Beckhoff/TF6771_Samples",
+  "license": "0BSD",
+  "sizeBytes": 1277,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Beckhoff__TF6771_Samples__TF6771_IotOcppGettingStarted__TF6771_GettingStarted__TF6771_GettingStarted.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF6771_Samples/3220380ebb7bbd24528ac0c7a3ce4c0eefcf0425/TF6771_IotOcppGettingStarted/TF6771_GettingStarted/TF6771_GettingStarted.tsproj",
+  "repo": "Beckhoff/TF6771_Samples",
+  "license": "0BSD",
+  "sizeBytes": 2615,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__TF7xxx_Samples__PLC__Functions__CodeQuality__TF7xxx_CodeQuality__Sample_CodeQuality__PLC_CodeQuality__PLC_CodeQuality.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF7xxx_Samples/be2d0432858658de0b1ca4ebe5d27e0559e9c525/PLC/Functions/CodeQuality/TF7xxx_CodeQuality/Sample_CodeQuality/PLC_CodeQuality/PLC_CodeQuality.tmc",
+  "repo": "Beckhoff/TF7xxx_Samples",
+  "license": "0BSD",
+  "sizeBytes": 247844,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF7xxx_Samples__PLC__Functions__CodeReading__TF7xxx_CodeDetection__Sample_CodeDetection__PLC_CodeDetection__PLC_CodeDetection.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF7xxx_Samples/be2d0432858658de0b1ca4ebe5d27e0559e9c525/PLC/Functions/CodeReading/TF7xxx_CodeDetection/Sample_CodeDetection/PLC_CodeDetection/PLC_CodeDetection.tmc",
+  "repo": "Beckhoff/TF7xxx_Samples",
+  "license": "0BSD",
+  "sizeBytes": 244365,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF7xxx_Samples__PLC__Functions__ImageAnalysis__ObjectDetection__TF7xxx_FindTemplateWalsh__Sample_FindTemplateWalsh__PLC_FindTemplateWalsh__PLC_FindTemplateWalsh.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF7xxx_Samples/be2d0432858658de0b1ca4ebe5d27e0559e9c525/PLC/Functions/ImageAnalysis/ObjectDetection/TF7xxx_FindTemplateWalsh/Sample_FindTemplateWalsh/PLC_FindTemplateWalsh/PLC_FindTemplateWalsh.tmc",
+  "repo": "Beckhoff/TF7xxx_Samples",
+  "license": "0BSD",
+  "sizeBytes": 238090,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__TF7xxx_Samples__PLC__Assistants__Calibration__TF7xxx_CalibrationAsymCircle__Sample_CalibrationAsymCircle__Sample_CalibrationAsymCircle.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/TF7xxx_Samples/be2d0432858658de0b1ca4ebe5d27e0559e9c525/PLC/Assistants/Calibration/TF7xxx_CalibrationAsymCircle/Sample_CalibrationAsymCircle/Sample_CalibrationAsymCircle.tsproj",
+  "repo": "Beckhoff/TF7xxx_Samples",
+  "license": "0BSD",
+  "sizeBytes": 239517,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__Tc3Eventlogger_Samples__PLC__Tc3EventLogger_FilterSample__PLC_FilterSample__PLC_FilterSample.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/Tc3Eventlogger_Samples/c07c62f367f2bc4ef9b673cb00101dc1822e5630/PLC/Tc3EventLogger_FilterSample/PLC_FilterSample/PLC_FilterSample.tmc",
+  "repo": "Beckhoff/Tc3Eventlogger_Samples",
+  "license": "0BSD",
+  "sizeBytes": 331487,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__Tc3Eventlogger_Samples__PLC__Tc3EventLogger_ListenerSample__Publisher__Publisher.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/Tc3Eventlogger_Samples/c07c62f367f2bc4ef9b673cb00101dc1822e5630/PLC/Tc3EventLogger_ListenerSample/Publisher/Publisher.tmc",
+  "repo": "Beckhoff/Tc3Eventlogger_Samples",
+  "license": "0BSD",
+  "sizeBytes": 304201,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__Tc3Eventlogger_Samples__PLC__Tc3EventLogger_ListenerSample__Listener__Listener.tmc",
+  "url": "https://raw.githubusercontent.com/Beckhoff/Tc3Eventlogger_Samples/c07c62f367f2bc4ef9b673cb00101dc1822e5630/PLC/Tc3EventLogger_ListenerSample/Listener/Listener.tmc",
+  "repo": "Beckhoff/Tc3Eventlogger_Samples",
+  "license": "0BSD",
+  "sizeBytes": 290723,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Beckhoff__Tc3Eventlogger_Samples__C++(RT)__Tc3EventLogger_CppListener_Sample__Tc3EventLogger_ListenerCppSample.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/Tc3Eventlogger_Samples/c07c62f367f2bc4ef9b673cb00101dc1822e5630/C%2B%2B%28RT%29/Tc3EventLogger_CppListener_Sample/Tc3EventLogger_ListenerCppSample.tsproj",
+  "repo": "Beckhoff/Tc3Eventlogger_Samples",
+  "license": "0BSD",
+  "sizeBytes": 12270,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Beckhoff__Tc3JsonXml_Samples__Tc3JsonXmlSampleJsonSaxReader__Tc3JsonXmlSampleJsonSaxReader.tsproj",
+  "url": "https://raw.githubusercontent.com/Beckhoff/Tc3JsonXml_Samples/35895e489f4c851a0cc292942310a9c8b0aac5f9/Tc3JsonXmlSampleJsonSaxReader/Tc3JsonXmlSampleJsonSaxReader.tsproj",
+  "repo": "Beckhoff/Tc3JsonXml_Samples",
+  "license": "0BSD",
+  "sizeBytes": 3322,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "BurksEngineering__TcMatrix__TcMatrixTest__TcMatrixTest.tsproj",
+  "url": "https://raw.githubusercontent.com/BurksEngineering/TcMatrix/b2d71a3cb664a625fd7f8853bc7c2f4354b90362/TcMatrixTest/TcMatrixTest.tsproj",
+  "repo": "BurksEngineering/TcMatrix",
+  "license": "MIT",
+  "sizeBytes": 1516,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "BurksEngineering__TcTransform__TcTransformTest__TcTransformTest.tsproj",
+  "url": "https://raw.githubusercontent.com/BurksEngineering/TcTransform/9ae8dbf16c8bf8c858c61322d29264d0dc217254/TcTransformTest/TcTransformTest.tsproj",
+  "repo": "BurksEngineering/TcTransform",
+  "license": "MIT",
+  "sizeBytes": 1540,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "ETAChalmers__Kallebol-PLC__Kallebol_PLC___kallebol_PLC_proj__kallebol_PLC_proj.tmc",
+  "url": "https://raw.githubusercontent.com/ETAChalmers/Kallebol-PLC/e11b2b0a629ce09a0bd72e1f8be0d06c10b1035b/Kallebol_PLC_/kallebol_PLC_proj/kallebol_PLC_proj.tmc",
+  "repo": "ETAChalmers/Kallebol-PLC",
+  "license": null,
+  "sizeBytes": 214354,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ETAChalmers__Kallebol-PLC__Kallebol_PLC___Kallebol_PLC_.tsproj",
+  "url": "https://raw.githubusercontent.com/ETAChalmers/Kallebol-PLC/e11b2b0a629ce09a0bd72e1f8be0d06c10b1035b/Kallebol_PLC_/Kallebol_PLC_.tsproj",
+  "repo": "ETAChalmers/Kallebol-PLC",
+  "license": null,
+  "sizeBytes": 179551,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "EliasLand__stewart-crane-autonomy__stewart-crane-autonomy__Crane_PLC__SFICranePLC__SFICranePLC.tmc",
+  "url": "https://raw.githubusercontent.com/EliasLand/stewart-crane-autonomy/73ee9fbae16c097983ee64fc4d1fc11db20a1328/stewart-crane-autonomy/Crane_PLC/SFICranePLC/SFICranePLC.tmc",
+  "repo": "EliasLand/stewart-crane-autonomy",
+  "license": null,
+  "sizeBytes": 278127,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "EliasLand__stewart-crane-autonomy__stewart-crane-autonomy__Crane_PLC__SFICrane.tsproj",
+  "url": "https://raw.githubusercontent.com/EliasLand/stewart-crane-autonomy/73ee9fbae16c097983ee64fc4d1fc11db20a1328/stewart-crane-autonomy/Crane_PLC/SFICrane.tsproj",
+  "repo": "EliasLand/stewart-crane-autonomy",
+  "license": null,
+  "sizeBytes": 262353,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "FellowWithLaptop__FB_CaseStateMachine__SystemManager__SystemManager.tsproj",
+  "url": "https://raw.githubusercontent.com/FellowWithLaptop/FB_CaseStateMachine/c2bfc61c5ada0e380debe90bf2e6fedcbf4c72d1/SystemManager/SystemManager.tsproj",
+  "repo": "FellowWithLaptop/FB_CaseStateMachine",
+  "license": "CC0-1.0",
+  "sizeBytes": 1084,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "HarriMeskanen__PLC_PackagingMachine__StaubliPackagingMachine__PackML_V2__PackML_V2.tmc",
+  "url": "https://raw.githubusercontent.com/HarriMeskanen/PLC_PackagingMachine/9ee936ca9579b90a9a4f7ef3d402904e6b6fb14b/StaubliPackagingMachine/PackML_V2/PackML_V2.tmc",
+  "repo": "HarriMeskanen/PLC_PackagingMachine",
+  "license": null,
+  "sizeBytes": 68333,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "HarriMeskanen__PLC_PackagingMachine__StaubliPackagingMachine__StaubliPackagingMachine.tsproj",
+  "url": "https://raw.githubusercontent.com/HarriMeskanen/PLC_PackagingMachine/9ee936ca9579b90a9a4f7ef3d402904e6b6fb14b/StaubliPackagingMachine/StaubliPackagingMachine.tsproj",
+  "repo": "HarriMeskanen/PLC_PackagingMachine",
+  "license": null,
+  "sizeBytes": 1980,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "IndustrialBrains__IBF_Devices__PLC__IBF_Devices___Config__NC__Axes__Axis 1.xti",
+  "url": "https://raw.githubusercontent.com/IndustrialBrains/IBF_Devices/a6109b484195960c059e3b99489820162945610f/PLC/IBF_Devices/_Config/NC/Axes/Axis%201.xti",
+  "repo": "IndustrialBrains/IBF_Devices",
+  "license": "MPL-2.0",
+  "sizeBytes": 47469,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "IndustrialBrains__IBF_Devices__PLC__IBF_Devices___Config__PLC__IBF_Devices.xti",
+  "url": "https://raw.githubusercontent.com/IndustrialBrains/IBF_Devices/a6109b484195960c059e3b99489820162945610f/PLC/IBF_Devices/_Config/PLC/IBF_Devices.xti",
+  "repo": "IndustrialBrains/IBF_Devices",
+  "license": "MPL-2.0",
+  "sizeBytes": 32768,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "IndustrialBrains__IBF_Devices__PLC__IBF_Devices__IBF_Devices.tsproj",
+  "url": "https://raw.githubusercontent.com/IndustrialBrains/IBF_Devices/a6109b484195960c059e3b99489820162945610f/PLC/IBF_Devices/IBF_Devices.tsproj",
+  "repo": "IndustrialBrains/IBF_Devices",
+  "license": "MPL-2.0",
+  "sizeBytes": 1019,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Intecre__twincat-utils__IntecreUtilities__IntecreUtilities__IntecreUtilities__IntecreUtilities.tmc",
+  "url": "https://raw.githubusercontent.com/Intecre/twincat-utils/585f495fc482b08bb10ab1c742c5aa025f01f191/IntecreUtilities/IntecreUtilities/IntecreUtilities/IntecreUtilities.tmc",
+  "repo": "Intecre/twincat-utils",
+  "license": "MIT",
+  "sizeBytes": 9570,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Intecre__twincat-utils__IntecreUtilities__IntecreUtilities___Config__PLC__Intecre_File.xti",
+  "url": "https://raw.githubusercontent.com/Intecre/twincat-utils/585f495fc482b08bb10ab1c742c5aa025f01f191/IntecreUtilities/IntecreUtilities/_Config/PLC/Intecre_File.xti",
+  "repo": "Intecre/twincat-utils",
+  "license": "MIT",
+  "sizeBytes": 990,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Intecre__twincat-utils__IntecreUtilities__IntecreUtilities__IntecreUtilities.tsproj",
+  "url": "https://raw.githubusercontent.com/Intecre/twincat-utils/585f495fc482b08bb10ab1c742c5aa025f01f191/IntecreUtilities/IntecreUtilities/IntecreUtilities.tsproj",
+  "repo": "Intecre/twincat-utils",
+  "license": "MIT",
+  "sizeBytes": 2440,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoIo__src__XAE__XAE__TcoIoTests__TcoIoTests.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoIo/src/XAE/XAE/TcoIoTests/TcoIoTests.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 706550,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoDrivesBeckhoff__src__XaeTcoDrivesBeckhoff__TcoDrivesBeckhoffTests__TcoDrivesBeckhoffTests.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoDrivesBeckhoff/src/XaeTcoDrivesBeckhoff/TcoDrivesBeckhoffTests/TcoDrivesBeckhoffTests.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 689334,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__IntegrationProjects__src__XAE__XAE__IntegrationProjects__IntegrationProjects.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/IntegrationProjects/src/XAE/XAE/IntegrationProjects/IntegrationProjects.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 629782,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoCore__src__XaeTcoCore__TcoCoreTests__TcoCoreTests.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoCore/src/XaeTcoCore/TcoCoreTests/TcoCoreTests.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 570432,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoTixonFeeding__src__XaeTcoTixonFeeding__TcoTixonFeedingTests__TcoTixonFeedingTests.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoTixonFeeding/src/XaeTcoTixonFeeding/TcoTixonFeedingTests/TcoTixonFeedingTests.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 512790,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoUrRobotics__src__XaeTcoUrRobotics__TcoUrRoboticsTests__TcoUrRoboticsTests.tmc",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoUrRobotics/src/XaeTcoUrRobotics/TcoUrRoboticsTests/TcoUrRoboticsTests.tmc",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 483073,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoIo__example_resources__Device 4 (EtherCAT).xti",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoIo/example_resources/Device%204%20%28EtherCAT%29.xti",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 2626726,
+  "kind": "XTI CDevEtherCATDef"
+ },
+ {
+  "file": "Inxton__TcOpen-4026__src__TcoAimTtiPowerSupply__src__XaeTcoAimTtiPowerSupply__XaeTcoAimTtiPowerSupply.tsproj",
+  "url": "https://raw.githubusercontent.com/Inxton/TcOpen-4026/ee5ff988528c1e42127664f8873380f465de71a5/src/TcoAimTtiPowerSupply/src/XaeTcoAimTtiPowerSupply/XaeTcoAimTtiPowerSupply.tsproj",
+  "repo": "Inxton/TcOpen-4026",
+  "license": "MIT",
+  "sizeBytes": 366348,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Krystian-L-Lis__Stage__Stage__Stage__Stage.tsproj",
+  "url": "https://raw.githubusercontent.com/Krystian-L-Lis/Stage/f373e9bc0af033bff579fce9808a60d721213788/Stage/Stage/Stage.tsproj",
+  "repo": "Krystian-L-Lis/Stage",
+  "license": "MIT",
+  "sizeBytes": 2677,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "MagnusPerotinus__PLC-OOP__OOP__Projects__DesignPattern_Command4__DesignPattern_Command4.tmc",
+  "url": "https://raw.githubusercontent.com/MagnusPerotinus/PLC-OOP/2bb356ebb0fddbc42cb5c8847b6ea96ed09cbfb0/OOP/Projects/DesignPattern_Command4/DesignPattern_Command4.tmc",
+  "repo": "MagnusPerotinus/PLC-OOP",
+  "license": null,
+  "sizeBytes": 254853,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "MagnusPerotinus__PLC-OOP__OOP__Projects__DesignPattern_AbstractFactory2__DesignPattern_AbstractFactory2.tmc",
+  "url": "https://raw.githubusercontent.com/MagnusPerotinus/PLC-OOP/2bb356ebb0fddbc42cb5c8847b6ea96ed09cbfb0/OOP/Projects/DesignPattern_AbstractFactory2/DesignPattern_AbstractFactory2.tmc",
+  "repo": "MagnusPerotinus/PLC-OOP",
+  "license": null,
+  "sizeBytes": 155964,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "MagnusPerotinus__PLC-OOP__OOP__OOP.tsproj",
+  "url": "https://raw.githubusercontent.com/MagnusPerotinus/PLC-OOP/2bb356ebb0fddbc42cb5c8847b6ea96ed09cbfb0/OOP/OOP.tsproj",
+  "repo": "MagnusPerotinus/PLC-OOP",
+  "license": null,
+  "sizeBytes": 83358,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "PatrickKuijer__xSTunit__tests__Fixtures__LayoutChecklistFixture__LayoutChecklist.x64.tmc",
+  "url": "https://raw.githubusercontent.com/PatrickKuijer/xSTunit/688f26e17909aff849c12929261cc0d172f75248/tests/Fixtures/LayoutChecklistFixture/LayoutChecklist.x64.tmc",
+  "repo": "PatrickKuijer/xSTunit",
+  "license": "Apache-2.0",
+  "sizeBytes": 318870,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PatrickKuijer__xSTunit__tests__Fixtures__LayoutChecklistFixture__LayoutChecklist.x86.tmc",
+  "url": "https://raw.githubusercontent.com/PatrickKuijer/xSTunit/688f26e17909aff849c12929261cc0d172f75248/tests/Fixtures/LayoutChecklistFixture/LayoutChecklist.x86.tmc",
+  "repo": "PatrickKuijer/xSTunit",
+  "license": "Apache-2.0",
+  "sizeBytes": 318823,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PatrickKuijer__xSTunit__tests__Fixtures__LayoutOracleFixture__PLC1Tests.tmc",
+  "url": "https://raw.githubusercontent.com/PatrickKuijer/xSTunit/688f26e17909aff849c12929261cc0d172f75248/tests/Fixtures/LayoutOracleFixture/PLC1Tests.tmc",
+  "repo": "PatrickKuijer/xSTunit",
+  "license": "Apache-2.0",
+  "sizeBytes": 269153,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PatrickKuijer__xSTunit__tests__Fixtures__LayoutOracleFixture__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/PatrickKuijer/xSTunit/688f26e17909aff849c12929261cc0d172f75248/tests/Fixtures/LayoutOracleFixture/PLC1.tmc",
+  "repo": "PatrickKuijer/xSTunit",
+  "license": "Apache-2.0",
+  "sizeBytes": 19193,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PeterZerlauth__Tc3_UnitTest__Tc3_UnitTest__Testing__Testing.tmc",
+  "url": "https://raw.githubusercontent.com/PeterZerlauth/Tc3_UnitTest/425e5b70a816277f21edf00e07dcc0d62ec46080/Tc3_UnitTest/Testing/Testing.tmc",
+  "repo": "PeterZerlauth/Tc3_UnitTest",
+  "license": "GPL-3.0",
+  "sizeBytes": 254643,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PeterZerlauth__Tc3_UnitTest__Tc3_UnitTest__Examples__Examples.tmc",
+  "url": "https://raw.githubusercontent.com/PeterZerlauth/Tc3_UnitTest/425e5b70a816277f21edf00e07dcc0d62ec46080/Tc3_UnitTest/Examples/Examples.tmc",
+  "repo": "PeterZerlauth/Tc3_UnitTest",
+  "license": "GPL-3.0",
+  "sizeBytes": 96332,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PeterZerlauth__Tc3_UnitTest__Tc3_UnitTest__Tc3_UnitTest__Tc3_UnitTest.tmc",
+  "url": "https://raw.githubusercontent.com/PeterZerlauth/Tc3_UnitTest/425e5b70a816277f21edf00e07dcc0d62ec46080/Tc3_UnitTest/Tc3_UnitTest/Tc3_UnitTest.tmc",
+  "repo": "PeterZerlauth/Tc3_UnitTest",
+  "license": "GPL-3.0",
+  "sizeBytes": 7962,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "PeterZerlauth__Tc3_UnitTest__Tc3_UnitTest__UnitTest.tsproj",
+  "url": "https://raw.githubusercontent.com/PeterZerlauth/Tc3_UnitTest/425e5b70a816277f21edf00e07dcc0d62ec46080/Tc3_UnitTest/UnitTest.tsproj",
+  "repo": "PeterZerlauth/Tc3_UnitTest",
+  "license": "GPL-3.0",
+  "sizeBytes": 4211,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "RedRockControls__tcl_TwinCAT_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary.tmc",
+  "url": "https://raw.githubusercontent.com/RedRockControls/tcl_TwinCAT_UnitTestLibrary/880d72008cde24ff096596f50d2f4ff93d594b34/tcl_UnitTestLibrary/tcl_UnitTestLibrary/tcl_UnitTestLibrary/tcl_UnitTestLibrary.tmc",
+  "repo": "RedRockControls/tcl_TwinCAT_UnitTestLibrary",
+  "license": "MIT",
+  "sizeBytes": 285164,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "RedRockControls__tcl_TwinCAT_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary___Config__PLC__tcl_UnitTestLibrary.xti",
+  "url": "https://raw.githubusercontent.com/RedRockControls/tcl_TwinCAT_UnitTestLibrary/880d72008cde24ff096596f50d2f4ff93d594b34/tcl_UnitTestLibrary/tcl_UnitTestLibrary/_Config/PLC/tcl_UnitTestLibrary.xti",
+  "repo": "RedRockControls/tcl_TwinCAT_UnitTestLibrary",
+  "license": "MIT",
+  "sizeBytes": 1253,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "RedRockControls__tcl_TwinCAT_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary__tcl_UnitTestLibrary.tsproj",
+  "url": "https://raw.githubusercontent.com/RedRockControls/tcl_TwinCAT_UnitTestLibrary/880d72008cde24ff096596f50d2f4ff93d594b34/tcl_UnitTestLibrary/tcl_UnitTestLibrary/tcl_UnitTestLibrary.tsproj",
+  "repo": "RedRockControls/tcl_TwinCAT_UnitTestLibrary",
+  "license": "MIT",
+  "sizeBytes": 2361,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Roald87__TcBlack__twincat__ShowcaseProject__ShowcaseProject.tsproj",
+  "url": "https://raw.githubusercontent.com/Roald87/TcBlack/10222591a4605f4cbcc7935a1da73e0b49e6ffc6/twincat/ShowcaseProject/ShowcaseProject.tsproj",
+  "repo": "Roald87/TcBlack",
+  "license": "MIT",
+  "sizeBytes": 1089,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Roald87__TcError__TcError___Config__PLC__TcError.xti",
+  "url": "https://raw.githubusercontent.com/Roald87/TcError/e613b11ee6c5c1731f416342b38de0a7c61a4390/TcError/_Config/PLC/TcError.xti",
+  "repo": "Roald87/TcError",
+  "license": "MIT",
+  "sizeBytes": 1134,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "Roald87__TcError__TcError__TcError.tsproj",
+  "url": "https://raw.githubusercontent.com/Roald87/TcError/e613b11ee6c5c1731f416342b38de0a7c61a4390/TcError/TcError.tsproj",
+  "repo": "Roald87/TcError",
+  "license": "MIT",
+  "sizeBytes": 572,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Roald87__TwinCatEventLoggerExample__HmiPart__TwinCAT Project1__EventLoggerSample.tsproj",
+  "url": "https://raw.githubusercontent.com/Roald87/TwinCatEventLoggerExample/d82ae8cf508beba0749b8868d98535aff4be5835/HmiPart/TwinCAT%20Project1/EventLoggerSample.tsproj",
+  "repo": "Roald87/TwinCatEventLoggerExample",
+  "license": "MIT",
+  "sizeBytes": 2930,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Roald87__TwincatTutorials__DigitalTwin__OvenConfig__OvenConfig__OvenConfig.tsproj",
+  "url": "https://raw.githubusercontent.com/Roald87/TwincatTutorials/5f8fd1e52779d4071ee8065a2ad9063053cac50e/DigitalTwin/OvenConfig/OvenConfig/OvenConfig.tsproj",
+  "repo": "Roald87/TwincatTutorials",
+  "license": "MIT",
+  "sizeBytes": 46339,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "SeanyCash__TwinCAT_CNC__CNC_MACHINE__Main__Main.tmc",
+  "url": "https://raw.githubusercontent.com/SeanyCash/TwinCAT_CNC/0e1020338c10cf77249aeaff34520f9516816167/CNC_MACHINE/Main/Main.tmc",
+  "repo": "SeanyCash/TwinCAT_CNC",
+  "license": null,
+  "sizeBytes": 734129,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "SeanyCash__TwinCAT_CNC__CNC_MACHINE__CNC_MACHINE.tsproj",
+  "url": "https://raw.githubusercontent.com/SeanyCash/TwinCAT_CNC/0e1020338c10cf77249aeaff34520f9516816167/CNC_MACHINE/CNC_MACHINE.tsproj",
+  "repo": "SeanyCash/TwinCAT_CNC",
+  "license": null,
+  "sizeBytes": 195017,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "TcMotion__Component_Motion_OOP_Axis__TC3_Axis__TC3_Axis___Config__PLC__TcMotion_Library.xti",
+  "url": "https://raw.githubusercontent.com/TcMotion/Component_Motion_OOP_Axis/2536df1d475e7def8838ccea4390c32b5918ed6f/TC3_Axis/TC3_Axis/_Config/PLC/TcMotion_Library.xti",
+  "repo": "TcMotion/Component_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 66134,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "TcMotion__Component_Motion_OOP_Axis__TC3_Axis__TC3_Axis___Config__NC__Axes__Axis_X1.xti",
+  "url": "https://raw.githubusercontent.com/TcMotion/Component_Motion_OOP_Axis/2536df1d475e7def8838ccea4390c32b5918ed6f/TC3_Axis/TC3_Axis/_Config/NC/Axes/Axis_X1.xti",
+  "repo": "TcMotion/Component_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 47401,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "TcMotion__Component_Motion_OOP_Axis__TC3_Axis__TC3_Axis__TcMotion_Axis.tsproj",
+  "url": "https://raw.githubusercontent.com/TcMotion/Component_Motion_OOP_Axis/2536df1d475e7def8838ccea4390c32b5918ed6f/TC3_Axis/TC3_Axis/TcMotion_Axis.tsproj",
+  "repo": "TcMotion/Component_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 866,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "TcMotion__Simulation_Motion_OOP_Axis__TC3_Simulation__TC3_Simulation__Simulation__Simulation.tmc",
+  "url": "https://raw.githubusercontent.com/TcMotion/Simulation_Motion_OOP_Axis/d4b288b2b32388954264d7a34c273789230a50f9/TC3_Simulation/TC3_Simulation/Simulation/Simulation.tmc",
+  "repo": "TcMotion/Simulation_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 173097,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "TcMotion__Simulation_Motion_OOP_Axis__TC3_Simulation__TC3_Simulation___Repository__TE140x Module Vendor__Matlab_2019a_puerta_logica_and__0.0.0.2__Matlab_2019a_puerta_logica_and.tmc",
+  "url": "https://raw.githubusercontent.com/TcMotion/Simulation_Motion_OOP_Axis/d4b288b2b32388954264d7a34c273789230a50f9/TC3_Simulation/TC3_Simulation/_Repository/TE140x%20Module%20Vendor/Matlab_2019a_puerta_logica_and/0.0.0.2/Matlab_2019a_puerta_logica_and.tmc",
+  "repo": "TcMotion/Simulation_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 26089,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "TcMotion__Simulation_Motion_OOP_Axis__TC3_Simulation__TC3_Simulation___Repository__TE140x Module Vendor__Matlab_2019a_puerta_logica_and__0.0.0.1__Matlab_2019a_puerta_logica_and.tmc",
+  "url": "https://raw.githubusercontent.com/TcMotion/Simulation_Motion_OOP_Axis/d4b288b2b32388954264d7a34c273789230a50f9/TC3_Simulation/TC3_Simulation/_Repository/TE140x%20Module%20Vendor/Matlab_2019a_puerta_logica_and/0.0.0.1/Matlab_2019a_puerta_logica_and.tmc",
+  "repo": "TcMotion/Simulation_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 25723,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "TcMotion__Simulation_Motion_OOP_Axis__TC3_Simulation__TC3_Simulation___Config__PLC__Simulation.xti",
+  "url": "https://raw.githubusercontent.com/TcMotion/Simulation_Motion_OOP_Axis/d4b288b2b32388954264d7a34c273789230a50f9/TC3_Simulation/TC3_Simulation/_Config/PLC/Simulation.xti",
+  "repo": "TcMotion/Simulation_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 27110,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "TcMotion__Simulation_Motion_OOP_Axis__TC3_Simulation__TC3_Simulation__TC3_Simulation.tsproj",
+  "url": "https://raw.githubusercontent.com/TcMotion/Simulation_Motion_OOP_Axis/d4b288b2b32388954264d7a34c273789230a50f9/TC3_Simulation/TC3_Simulation/TC3_Simulation.tsproj",
+  "repo": "TcMotion/Simulation_Motion_OOP_Axis",
+  "license": null,
+  "sizeBytes": 25685,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "TcOpenGroup__TcOpen__src__TcoIo__src__XAE__XAE__XAETcoIo.tsproj",
+  "url": "https://raw.githubusercontent.com/TcOpenGroup/TcOpen/1756327443e8bb98db6334eb1d72fbfa1f59baaf/src/TcoIo/src/XAE/XAE/XAETcoIo.tsproj",
+  "repo": "TcOpenGroup/TcOpen",
+  "license": "MIT",
+  "sizeBytes": 6698263,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Technical-Software-Solutions__twincat-tools__TwinCAT_Tools_Units__Units__Units.tmc",
+  "url": "https://raw.githubusercontent.com/Technical-Software-Solutions/twincat-tools/4a73b95c28e56ace88fde580dbd71aeeebdb7f26/TwinCAT_Tools_Units/Units/Units.tmc",
+  "repo": "Technical-Software-Solutions/twincat-tools",
+  "license": "MIT",
+  "sizeBytes": 313883,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Technical-Software-Solutions__twincat-tools__TwinCAT Tools Examples__Examples__Examples.tmc",
+  "url": "https://raw.githubusercontent.com/Technical-Software-Solutions/twincat-tools/4a73b95c28e56ace88fde580dbd71aeeebdb7f26/TwinCAT%20Tools%20Examples/Examples/Examples.tmc",
+  "repo": "Technical-Software-Solutions/twincat-tools",
+  "license": "MIT",
+  "sizeBytes": 204262,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Technical-Software-Solutions__twincat-tools__TwinCAT Tools__twincat-tools__twincat-tools.tmc",
+  "url": "https://raw.githubusercontent.com/Technical-Software-Solutions/twincat-tools/4a73b95c28e56ace88fde580dbd71aeeebdb7f26/TwinCAT%20Tools/twincat-tools/twincat-tools.tmc",
+  "repo": "Technical-Software-Solutions/twincat-tools",
+  "license": "MIT",
+  "sizeBytes": 22451,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Technical-Software-Solutions__twincat-tools__TwinCAT Tools Examples__TwinCAT Tools Examples.tsproj",
+  "url": "https://raw.githubusercontent.com/Technical-Software-Solutions/twincat-tools/4a73b95c28e56ace88fde580dbd71aeeebdb7f26/TwinCAT%20Tools%20Examples/TwinCAT%20Tools%20Examples.tsproj",
+  "repo": "Technical-Software-Solutions/twincat-tools",
+  "license": "MIT",
+  "sizeBytes": 50593,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Tegan-Innovations__TE1063---ASRS__TE1063__TE1063.tmc",
+  "url": "https://raw.githubusercontent.com/Tegan-Innovations/TE1063---ASRS/763b21f69fd41ee2160b86ced134592dfbf908d0/TE1063/TE1063.tmc",
+  "repo": "Tegan-Innovations/TE1063---ASRS",
+  "license": null,
+  "sizeBytes": 255048,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "Tegan-Innovations__TE1063---ASRS__TE1063 - ASRS.tsproj",
+  "url": "https://raw.githubusercontent.com/Tegan-Innovations/TE1063---ASRS/763b21f69fd41ee2160b86ced134592dfbf908d0/TE1063%20-%20ASRS.tsproj",
+  "repo": "Tegan-Innovations/TE1063---ASRS",
+  "license": null,
+  "sizeBytes": 1529092,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "TomF777__PLC-programming-etudes__ShapeMonitor__ShapeMonitor__ShapeMonitor.tmc",
+  "url": "https://raw.githubusercontent.com/TomF777/PLC-programming-etudes/d87a4f71310a99ac64884a85427ae064b902b15b/ShapeMonitor/ShapeMonitor/ShapeMonitor.tmc",
+  "repo": "TomF777/PLC-programming-etudes",
+  "license": null,
+  "sizeBytes": 214114,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "TomF777__PLC-programming-etudes__CarPark3D__CarPark3D___Config__PLC__PLC.xti",
+  "url": "https://raw.githubusercontent.com/TomF777/PLC-programming-etudes/d87a4f71310a99ac64884a85427ae064b902b15b/CarPark3D/CarPark3D/_Config/PLC/PLC.xti",
+  "repo": "TomF777/PLC-programming-etudes",
+  "license": null,
+  "sizeBytes": 1972,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "TomF777__PLC-programming-etudes__ShapeMonitor__ShapeMonitor.tsproj",
+  "url": "https://raw.githubusercontent.com/TomF777/PLC-programming-etudes/d87a4f71310a99ac64884a85427ae064b902b15b/ShapeMonitor/ShapeMonitor.tsproj",
+  "repo": "TomF777/PLC-programming-etudes",
+  "license": null,
+  "sizeBytes": 100066,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "ZeroErrControl__Steering_Wheel_Applications__main__ZeroTorque__ZeroTorque__ZeroTorque__ZeroTorque.tmc",
+  "url": "https://raw.githubusercontent.com/ZeroErrControl/Steering_Wheel_Applications/68d2b5432aaf5aa3c19afc8f1a971c8cdfc85575/main/ZeroTorque/ZeroTorque/ZeroTorque/ZeroTorque.tmc",
+  "repo": "ZeroErrControl/Steering_Wheel_Applications",
+  "license": null,
+  "sizeBytes": 136631,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ZeroErrControl__Steering_Wheel_Applications__parameter calibration__GetData__GetData__getData__getData.tmc",
+  "url": "https://raw.githubusercontent.com/ZeroErrControl/Steering_Wheel_Applications/68d2b5432aaf5aa3c19afc8f1a971c8cdfc85575/parameter%20calibration/GetData/GetData/getData/getData.tmc",
+  "repo": "ZeroErrControl/Steering_Wheel_Applications",
+  "license": null,
+  "sizeBytes": 16530,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ZeroErrControl__Steering_Wheel_Applications__main__ZeroTorque__ZeroTorque__ZeroTorque.tsproj",
+  "url": "https://raw.githubusercontent.com/ZeroErrControl/Steering_Wheel_Applications/68d2b5432aaf5aa3c19afc8f1a971c8cdfc85575/main/ZeroTorque/ZeroTorque/ZeroTorque.tsproj",
+  "repo": "ZeroErrControl/Steering_Wheel_Applications",
+  "license": null,
+  "sizeBytes": 79755,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "Zeugwerk__Plaincat__Plaincat__templates__ProjectTemplate__ProjectTemplate__ProjectTemplate.tsproj",
+  "url": "https://raw.githubusercontent.com/Zeugwerk/Plaincat/0682365d6b9d186d80328c9f974407fc7ce25af7/Plaincat/templates/ProjectTemplate/ProjectTemplate/ProjectTemplate.tsproj",
+  "repo": "Zeugwerk/Plaincat",
+  "license": null,
+  "sizeBytes": 965,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "bengeisler__TcLog__src__TcLogProj__TcLogProj.tsproj",
+  "url": "https://raw.githubusercontent.com/bengeisler/TcLog/44a3fe3b6165fbee66fe7b80dac63e65f9bcab56/src/TcLogProj/TcLogProj.tsproj",
+  "repo": "bengeisler/TcLog",
+  "license": "MIT",
+  "sizeBytes": 2150,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "benhar-dev__ads-xbox-controller__src__twincat__ads-xbox-controller__ads-xbox-controller.tsproj",
+  "url": "https://raw.githubusercontent.com/benhar-dev/ads-xbox-controller/dbea99c99318e0b6668c23ec69428d97820f8b2d/src/twincat/ads-xbox-controller/ads-xbox-controller.tsproj",
+  "repo": "benhar-dev/ads-xbox-controller",
+  "license": "MIT",
+  "sizeBytes": 1407,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "berkabay4__TwinCAT3-TwinCAT2-Examples__TC3_FlyingSaw_Sample__TC3_FlyingSaw_Sample__TC3_FlyingSaw_Sample__TwinCAT_NC_Sample_Flying_Saw__TwinCAT_NC_Sample_Flying_Saw.tmc",
+  "url": "https://raw.githubusercontent.com/berkabay4/TwinCAT3-TwinCAT2-Examples/1f7a49a44193da87f8377d73ead2ff8b73a5d487/TC3_FlyingSaw_Sample/TC3_FlyingSaw_Sample/TC3_FlyingSaw_Sample/TwinCAT_NC_Sample_Flying_Saw/TwinCAT_NC_Sample_Flying_Saw.tmc",
+  "repo": "berkabay4/TwinCAT3-TwinCAT2-Examples",
+  "license": null,
+  "sizeBytes": 309743,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "berkabay4__TwinCAT3-TwinCAT2-Examples__TC3_CAM_Table_Create__CAM_Table_Olusturma__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/berkabay4/TwinCAT3-TwinCAT2-Examples/1f7a49a44193da87f8377d73ead2ff8b73a5d487/TC3_CAM_Table_Create/CAM_Table_Olusturma/Untitled1/Untitled1.tmc",
+  "repo": "berkabay4/TwinCAT3-TwinCAT2-Examples",
+  "license": null,
+  "sizeBytes": 248871,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "berkabay4__TwinCAT3-TwinCAT2-Examples__TC3_SMTPServer_Motion__TwinCAT Project2__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/berkabay4/TwinCAT3-TwinCAT2-Examples/1f7a49a44193da87f8377d73ead2ff8b73a5d487/TC3_SMTPServer_Motion/TwinCAT%20Project2/Untitled1/Untitled1.tmc",
+  "repo": "berkabay4/TwinCAT3-TwinCAT2-Examples",
+  "license": null,
+  "sizeBytes": 226219,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "berkabay4__TwinCAT3-TwinCAT2-Examples__TC3_CAM_Table_Create__CAM_Table_Olusturma__CAM_Table_Olusturma.tsproj",
+  "url": "https://raw.githubusercontent.com/berkabay4/TwinCAT3-TwinCAT2-Examples/1f7a49a44193da87f8377d73ead2ff8b73a5d487/TC3_CAM_Table_Create/CAM_Table_Olusturma/CAM_Table_Olusturma.tsproj",
+  "repo": "berkabay4/TwinCAT3-TwinCAT2-Examples",
+  "license": null,
+  "sizeBytes": 140668,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "berkabay4__Twincat3_Csharp_3D_Simulation__TC3_DeltaRobotProject__TC3_DeltaRobotProject__PLC_v01__PLC_v01.tmc",
+  "url": "https://raw.githubusercontent.com/berkabay4/Twincat3_Csharp_3D_Simulation/3db982c0bd4bf180999b64891ae2e3744ffdf97d/TC3_DeltaRobotProject/TC3_DeltaRobotProject/PLC_v01/PLC_v01.tmc",
+  "repo": "berkabay4/Twincat3_Csharp_3D_Simulation",
+  "license": null,
+  "sizeBytes": 541638,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "berkabay4__Twincat3_Csharp_3D_Simulation__TC3_DeltaRobotProject__TC3_DeltaRobotProject__TC3_DeltaRobotProject__PLC_v01__PLC_v01.tmc",
+  "url": "https://raw.githubusercontent.com/berkabay4/Twincat3_Csharp_3D_Simulation/3db982c0bd4bf180999b64891ae2e3744ffdf97d/TC3_DeltaRobotProject/TC3_DeltaRobotProject/TC3_DeltaRobotProject/PLC_v01/PLC_v01.tmc",
+  "repo": "berkabay4/Twincat3_Csharp_3D_Simulation",
+  "license": null,
+  "sizeBytes": 539819,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "berkabay4__Twincat3_Csharp_3D_Simulation__TC3_DeltaRobotProject__TC3_DeltaRobotProject__TC3_DeltaRobotProject__TC3_DeltaRobotProject.tsproj",
+  "url": "https://raw.githubusercontent.com/berkabay4/Twincat3_Csharp_3D_Simulation/3db982c0bd4bf180999b64891ae2e3744ffdf97d/TC3_DeltaRobotProject/TC3_DeltaRobotProject/TC3_DeltaRobotProject/TC3_DeltaRobotProject.tsproj",
+  "repo": "berkabay4/Twincat3_Csharp_3D_Simulation",
+  "license": null,
+  "sizeBytes": 248501,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "bsturdy__TwinCAT-AxisControl__AxisControl__AxisControl__PLC 1__PLC 1.tmc",
+  "url": "https://raw.githubusercontent.com/bsturdy/TwinCAT-AxisControl/1e8a98c02aba9e9bb368278c5fb7b579920a993b/AxisControl/AxisControl/PLC%201/PLC%201.tmc",
+  "repo": "bsturdy/TwinCAT-AxisControl",
+  "license": null,
+  "sizeBytes": 260465,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "bsturdy__TwinCAT-AxisControl__AxisControl__AxisControl__AxisControl.tsproj",
+  "url": "https://raw.githubusercontent.com/bsturdy/TwinCAT-AxisControl/1e8a98c02aba9e9bb368278c5fb7b579920a993b/AxisControl/AxisControl/AxisControl.tsproj",
+  "repo": "bsturdy/TwinCAT-AxisControl",
+  "license": null,
+  "sizeBytes": 65440,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "chris-k84__TcExplore__TDD Zone__Src__Src___Config__PLC__tcl_TwinCAT_UnitTestLibrary_Learning_Space.xti",
+  "url": "https://raw.githubusercontent.com/chris-k84/TcExplore/4ae3ff223dcaa38a1f353a49d9b1e0156cc422d4/TDD%20Zone/Src/Src/_Config/PLC/tcl_TwinCAT_UnitTestLibrary_Learning_Space.xti",
+  "repo": "chris-k84/TcExplore",
+  "license": null,
+  "sizeBytes": 1392,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "chris-k84__TcExplore__Design Pattern Zone__Src__Src__Src.tsproj",
+  "url": "https://raw.githubusercontent.com/chris-k84/TcExplore/4ae3ff223dcaa38a1f353a49d9b1e0156cc422d4/Design%20Pattern%20Zone/Src/Src/Src.tsproj",
+  "repo": "chris-k84/TcExplore",
+  "license": null,
+  "sizeBytes": 3334,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "chris-k84__Xts_Library__Src___Config__IO__Device 1 (EtherCAT)__Term 1 (EK1200)__Term 4 (ELM3102-0000).xti",
+  "url": "https://raw.githubusercontent.com/chris-k84/Xts_Library/bde8f792ce5d6b1efcacdf82a1e0ff248ab71264/Src/_Config/IO/Device%201%20%28EtherCAT%29/Term%201%20%28EK1200%29/Term%204%20%28ELM3102-0000%29.xti",
+  "repo": "chris-k84/Xts_Library",
+  "license": "MIT",
+  "sizeBytes": 259949,
+  "kind": "XTI CFlbTermDef"
+ },
+ {
+  "file": "chris-k84__Xts_Library__Xts_Test_Proj___Config__TcCOM Objects__Object1 (XtsProcessingUnit).xti",
+  "url": "https://raw.githubusercontent.com/chris-k84/Xts_Library/bde8f792ce5d6b1efcacdf82a1e0ff248ab71264/Xts_Test_Proj/_Config/TcCOM%20Objects/Object1%20%28XtsProcessingUnit%29.xti",
+  "repo": "chris-k84/Xts_Library",
+  "license": "MIT",
+  "sizeBytes": 204418,
+  "kind": "XTI CTComObjDef"
+ },
+ {
+  "file": "chris-k84__Xts_Library__Src__XtsOpenProject.tsproj",
+  "url": "https://raw.githubusercontent.com/chris-k84/Xts_Library/bde8f792ce5d6b1efcacdf82a1e0ff248ab71264/Src/XtsOpenProject.tsproj",
+  "repo": "chris-k84/Xts_Library",
+  "license": "MIT",
+  "sizeBytes": 1360919,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "craigmcchesney__GattPlc__GattPLC__GattPLC__GattPLC.tmc",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GattPlc/a637a39ffd7ac51e6230051c8e640e37941b1a73/GattPLC/GattPLC/GattPLC.tmc",
+  "repo": "craigmcchesney/GattPlc",
+  "license": null,
+  "sizeBytes": 292670,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "craigmcchesney__GattPlc__GattPLC__GattSim__GattSim.tmc",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GattPlc/a637a39ffd7ac51e6230051c8e640e37941b1a73/GattPLC/GattSim/GattSim.tmc",
+  "repo": "craigmcchesney/GattPlc",
+  "license": null,
+  "sizeBytes": 145997,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "craigmcchesney__GattPlc__GattPLC__GattPLC.tsproj",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GattPlc/a637a39ffd7ac51e6230051c8e640e37941b1a73/GattPLC/GattPLC.tsproj",
+  "repo": "craigmcchesney/GattPlc",
+  "license": null,
+  "sizeBytes": 1525110,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "craigmcchesney__GmdPlc__GmdPlc__GmdPlc__GmdPlc.tmc",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GmdPlc/f0f8c60189cc9a0896c69e51770fd61dea2622b8/GmdPlc/GmdPlc/GmdPlc.tmc",
+  "repo": "craigmcchesney/GmdPlc",
+  "license": null,
+  "sizeBytes": 223906,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "craigmcchesney__GmdPlc__GmdPlc__GmdSim__GmdSim.tmc",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GmdPlc/f0f8c60189cc9a0896c69e51770fd61dea2622b8/GmdPlc/GmdSim/GmdSim.tmc",
+  "repo": "craigmcchesney/GmdPlc",
+  "license": null,
+  "sizeBytes": 220015,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "craigmcchesney__GmdPlc__GmdPlc__GmdPlc.tsproj",
+  "url": "https://raw.githubusercontent.com/craigmcchesney/GmdPlc/f0f8c60189cc9a0896c69e51770fd61dea2622b8/GmdPlc/GmdPlc.tsproj",
+  "repo": "craigmcchesney/GmdPlc",
+  "license": null,
+  "sizeBytes": 523876,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_Collections__test__CMN_Collection_Test__CollectionTests__CollectionTests.tmc",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_Collections/5196244d920ee699ebdfe09964ea52a36e9d8b8a/test/CMN_Collection_Test/CollectionTests/CollectionTests.tmc",
+  "repo": "ekvipCinnamon/CNM_Collections",
+  "license": null,
+  "sizeBytes": 2494016,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_Collections__src__CMN_Collections__CNM_Collections__CNM_Collections.tmc",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_Collections/5196244d920ee699ebdfe09964ea52a36e9d8b8a/src/CMN_Collections/CNM_Collections/CNM_Collections.tmc",
+  "repo": "ekvipCinnamon/CNM_Collections",
+  "license": null,
+  "sizeBytes": 16122,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_Collections__test__CMN_Collection_Test__CMN_Collection_Test.tsproj",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_Collections/5196244d920ee699ebdfe09964ea52a36e9d8b8a/test/CMN_Collection_Test/CMN_Collection_Test.tsproj",
+  "repo": "ekvipCinnamon/CNM_Collections",
+  "license": null,
+  "sizeBytes": 1700,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_ExampleProjects__CupCake3000__CNM_CupcakeDemo__CupCakeDemo__CupCakeDemo.tmc",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_ExampleProjects/e7628ed02d7d5401d0ce004b0047e2e492e92cb7/CupCake3000/CNM_CupcakeDemo/CupCakeDemo/CupCakeDemo.tmc",
+  "repo": "ekvipCinnamon/CNM_ExampleProjects",
+  "license": "Apache-2.0",
+  "sizeBytes": 2602499,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_ExampleProjects__MeasurementDemo__CNM_HmiDemoProject__CNM_HmiDemoPlcProject__CinnamonHmiTest__CinnamonHmiTest.tmc",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_ExampleProjects/e7628ed02d7d5401d0ce004b0047e2e492e92cb7/MeasurementDemo/CNM_HmiDemoProject/CNM_HmiDemoPlcProject/CinnamonHmiTest/CinnamonHmiTest.tmc",
+  "repo": "ekvipCinnamon/CNM_ExampleProjects",
+  "license": "Apache-2.0",
+  "sizeBytes": 2121766,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_ExampleProjects__CupCake3000__DemoDevices__DemoDevices__DemoDevices.tmc",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_ExampleProjects/e7628ed02d7d5401d0ce004b0047e2e492e92cb7/CupCake3000/DemoDevices/DemoDevices/DemoDevices.tmc",
+  "repo": "ekvipCinnamon/CNM_ExampleProjects",
+  "license": "Apache-2.0",
+  "sizeBytes": 22064,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_ExampleProjects__CupCake3000__CNM_CupcakeDemo___Config__PLC__CupCakeDemo.xti",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_ExampleProjects/e7628ed02d7d5401d0ce004b0047e2e492e92cb7/CupCake3000/CNM_CupcakeDemo/_Config/PLC/CupCakeDemo.xti",
+  "repo": "ekvipCinnamon/CNM_ExampleProjects",
+  "license": "Apache-2.0",
+  "sizeBytes": 51240,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "ekvipCinnamon__CNM_ExampleProjects__CupCake3000__CNM_CupcakeDemo__CNM_CupcakeDemo.tsproj",
+  "url": "https://raw.githubusercontent.com/ekvipCinnamon/CNM_ExampleProjects/e7628ed02d7d5401d0ce004b0047e2e492e92cb7/CupCake3000/CNM_CupcakeDemo/CNM_CupcakeDemo.tsproj",
+  "repo": "ekvipCinnamon/CNM_ExampleProjects",
+  "license": "Apache-2.0",
+  "sizeBytes": 87595,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "evanmj__TcJoy__TcJoy TwinCAT Project__TcJoy TwinCAT Project__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/evanmj/TcJoy/c752cbd1096844e4d36ce2856d545322918e86bc/TcJoy%20TwinCAT%20Project/TcJoy%20TwinCAT%20Project/Untitled1/Untitled1.tmc",
+  "repo": "evanmj/TcJoy",
+  "license": "MIT",
+  "sizeBytes": 26147,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "evanmj__TcJoy__TcJoy TwinCAT Project__TcJoy TwinCAT Project__TcJoy TwinCAT Project.tsproj",
+  "url": "https://raw.githubusercontent.com/evanmj/TcJoy/c752cbd1096844e4d36ce2856d545322918e86bc/TcJoy%20TwinCAT%20Project/TcJoy%20TwinCAT%20Project/TcJoy%20TwinCAT%20Project.tsproj",
+  "repo": "evanmj/TcJoy",
+  "license": "MIT",
+  "sizeBytes": 1122,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "fbarresi__TwinCatAdsTool__Tests__PlcProject__TwinCATDummy__MainPLC__MainPLC.tmc",
+  "url": "https://raw.githubusercontent.com/fbarresi/TwinCatAdsTool/03ab6c71fd3e51e9d2efcd00c162538eaa8f42a1/Tests/PlcProject/TwinCATDummy/MainPLC/MainPLC.tmc",
+  "repo": "fbarresi/TwinCatAdsTool",
+  "license": "MIT",
+  "sizeBytes": 127796,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "fbarresi__TwinCatAdsTool__Tests__PlcProject__TwinCATDummy__TwinCATDummy.tsproj",
+  "url": "https://raw.githubusercontent.com/fbarresi/TwinCatAdsTool/03ab6c71fd3e51e9d2efcd00c162538eaa8f42a1/Tests/PlcProject/TwinCATDummy/TwinCATDummy.tsproj",
+  "repo": "fbarresi/TwinCatAdsTool",
+  "license": "MIT",
+  "sizeBytes": 1458,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "fisothemes__TwinCAT-Retentive-Timers__Retentive Timers__RetentiveTimers__RetentiveTimers.tmc",
+  "url": "https://raw.githubusercontent.com/fisothemes/TwinCAT-Retentive-Timers/8b3d50ce89ba1bb26f17314a8c1bab688dc20770/Retentive%20Timers/RetentiveTimers/RetentiveTimers.tmc",
+  "repo": "fisothemes/TwinCAT-Retentive-Timers",
+  "license": "MIT",
+  "sizeBytes": 43344,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "fisothemes__TwinCAT-Retentive-Timers__Retentive Timers__Retentive Timers.tsproj",
+  "url": "https://raw.githubusercontent.com/fisothemes/TwinCAT-Retentive-Timers/8b3d50ce89ba1bb26f17314a8c1bab688dc20770/Retentive%20Timers/Retentive%20Timers.tsproj",
+  "repo": "fisothemes/TwinCAT-Retentive-Timers",
+  "license": "MIT",
+  "sizeBytes": 3872,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "fisothemes__TwinCat-Dynamic-Collections__src__TwinCat Dynamic Collections__TwinCat Dynamic Collections.tsproj",
+  "url": "https://raw.githubusercontent.com/fisothemes/TwinCat-Dynamic-Collections/b8be8de48bc0d2103a49d506f1e8c94f9ea0ea02/src/TwinCat%20Dynamic%20Collections/TwinCat%20Dynamic%20Collections.tsproj",
+  "repo": "fisothemes/TwinCat-Dynamic-Collections",
+  "license": "MIT",
+  "sizeBytes": 2789,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "haud-ba__PLC_MOTION_LAYER__TC_PLC_MOTION__PLC_MOTION__PLC_MOTION.tmc",
+  "url": "https://raw.githubusercontent.com/haud-ba/PLC_MOTION_LAYER/5913fe4a5181c3c33f74dc9c283cc18f94fa5a5e/TC_PLC_MOTION/PLC_MOTION/PLC_MOTION.tmc",
+  "repo": "haud-ba/PLC_MOTION_LAYER",
+  "license": "MIT",
+  "sizeBytes": 1643072,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "haud-ba__PLC_MOTION_LAYER__DOCUMENTATION__examples__TC_PLC_MOTION_EXTERN_NCI__TC_MOTION_LAYER__PLC_MOTION__PLC_MOTION.tmc",
+  "url": "https://raw.githubusercontent.com/haud-ba/PLC_MOTION_LAYER/5913fe4a5181c3c33f74dc9c283cc18f94fa5a5e/DOCUMENTATION/examples/TC_PLC_MOTION_EXTERN_NCI/TC_MOTION_LAYER/PLC_MOTION/PLC_MOTION.tmc",
+  "repo": "haud-ba/PLC_MOTION_LAYER",
+  "license": "MIT",
+  "sizeBytes": 1596414,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "haud-ba__PLC_MOTION_LAYER__DOCUMENTATION__examples__TC_PLC_MOTION_EXTERN_NCI__TC_MOTION_LAYER__TC_MOTION_LAYER.tsproj",
+  "url": "https://raw.githubusercontent.com/haud-ba/PLC_MOTION_LAYER/5913fe4a5181c3c33f74dc9c283cc18f94fa5a5e/DOCUMENTATION/examples/TC_PLC_MOTION_EXTERN_NCI/TC_MOTION_LAYER/TC_MOTION_LAYER.tsproj",
+  "repo": "haud-ba/PLC_MOTION_LAYER",
+  "license": "MIT",
+  "sizeBytes": 129626,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "jozefchmelar__Beckhoff-Examples__src__PLC__TwinCAT__TwinCAT.tsproj",
+  "url": "https://raw.githubusercontent.com/jozefchmelar/Beckhoff-Examples/6e197590c41c7cbeb19ae3878a428a82acc5d88f/src/PLC/TwinCAT/TwinCAT.tsproj",
+  "repo": "jozefchmelar/Beckhoff-Examples",
+  "license": "MIT",
+  "sizeBytes": 1481,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "louis2800__hearc-automates-programmables__14 Solutions TC3__tc3nc_isample__Ex4__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/louis2800/hearc-automates-programmables/855dbf17b66b6d45396798fbe0b6145efbb5dadf/14%20Solutions%20TC3/tc3nc_isample/Ex4/PLC/PLC.tmc",
+  "repo": "louis2800/hearc-automates-programmables",
+  "license": null,
+  "sizeBytes": 559720,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "louis2800__hearc-automates-programmables__14 Solutions TC3__tc3apisamplecognex__Ex4__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/louis2800/hearc-automates-programmables/855dbf17b66b6d45396798fbe0b6145efbb5dadf/14%20Solutions%20TC3/tc3apisamplecognex/Ex4/PLC/PLC.tmc",
+  "repo": "louis2800/hearc-automates-programmables",
+  "license": null,
+  "sizeBytes": 503749,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "louis2800__hearc-automates-programmables__14 Solutions TC3__tc3apisample__Ex4__PLC__PLC.tmc",
+  "url": "https://raw.githubusercontent.com/louis2800/hearc-automates-programmables/855dbf17b66b6d45396798fbe0b6145efbb5dadf/14%20Solutions%20TC3/tc3apisample/Ex4/PLC/PLC.tmc",
+  "repo": "louis2800/hearc-automates-programmables",
+  "license": null,
+  "sizeBytes": 413122,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "louis2800__hearc-automates-programmables__12 Tutos pour Twincat__Safety__Projet__SafetyMotion__SafetyMotion__SafetyMotion.tsproj",
+  "url": "https://raw.githubusercontent.com/louis2800/hearc-automates-programmables/855dbf17b66b6d45396798fbe0b6145efbb5dadf/12%20Tutos%20pour%20Twincat/Safety/Projet/SafetyMotion/SafetyMotion/SafetyMotion.tsproj",
+  "repo": "louis2800/hearc-automates-programmables",
+  "license": null,
+  "sizeBytes": 248993,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "mbc-engineering__log4TC__source__Log4Tc__Mbc.Log4Tc.Setup.Wix__Fragments__Log4TcTwinCatLibFeature__mbc_engineering_log4tc.tmc",
+  "url": "https://raw.githubusercontent.com/mbc-engineering/log4TC/36ce7b4fa5e00c623615423b5f7a77ff58d892d4/source/Log4Tc/Mbc.Log4Tc.Setup.Wix/Fragments/Log4TcTwinCatLibFeature/mbc_engineering_log4tc.tmc",
+  "repo": "mbc-engineering/log4TC",
+  "license": "Apache-2.0",
+  "sizeBytes": 659,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "mbc-engineering__log4TC__source__TwinCat_Lib__log4tc__log4tc___Config__PLC__log4Tc_SmokeTest.xti",
+  "url": "https://raw.githubusercontent.com/mbc-engineering/log4TC/36ce7b4fa5e00c623615423b5f7a77ff58d892d4/source/TwinCat_Lib/log4tc/log4tc/_Config/PLC/log4Tc_SmokeTest.xti",
+  "repo": "mbc-engineering/log4TC",
+  "license": "Apache-2.0",
+  "sizeBytes": 1184,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "mbc-engineering__log4TC__source__TwinCat_Lib__log4tc__log4tc__log4tc.tsproj",
+  "url": "https://raw.githubusercontent.com/mbc-engineering/log4TC/36ce7b4fa5e00c623615423b5f7a77ff58d892d4/source/TwinCat_Lib/log4tc/log4tc/log4tc.tsproj",
+  "repo": "mbc-engineering/log4TC",
+  "license": "Apache-2.0",
+  "sizeBytes": 980,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "milanlazov__twincat-dual-axis-coordinator__src__ComissioningExample__ComissioningPlc__ComissioningPlc.tmc",
+  "url": "https://raw.githubusercontent.com/milanlazov/twincat-dual-axis-coordinator/f58f35600584d09b5341581370af5198d89b3ae4/src/ComissioningExample/ComissioningPlc/ComissioningPlc.tmc",
+  "repo": "milanlazov/twincat-dual-axis-coordinator",
+  "license": "MIT",
+  "sizeBytes": 243679,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "milanlazov__twincat-dual-axis-coordinator__src__Tc3_LmDualAxisCoordinator__Tc3_LmDualAxisCoordinator__Tc3_LmDualAxisCoordinator.tmc",
+  "url": "https://raw.githubusercontent.com/milanlazov/twincat-dual-axis-coordinator/f58f35600584d09b5341581370af5198d89b3ae4/src/Tc3_LmDualAxisCoordinator/Tc3_LmDualAxisCoordinator/Tc3_LmDualAxisCoordinator.tmc",
+  "repo": "milanlazov/twincat-dual-axis-coordinator",
+  "license": "MIT",
+  "sizeBytes": 9080,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "milanlazov__twincat-dual-axis-coordinator__src__ComissioningExample__ComissioningExample.tsproj",
+  "url": "https://raw.githubusercontent.com/milanlazov/twincat-dual-axis-coordinator/f58f35600584d09b5341581370af5198d89b3ae4/src/ComissioningExample/ComissioningExample.tsproj",
+  "repo": "milanlazov/twincat-dual-axis-coordinator",
+  "license": "MIT",
+  "sizeBytes": 94102,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "nikvoronin__AdsRemote__demo__OperatorPi__TwinCAT Project1__TwinCAT Project1.tsproj",
+  "url": "https://raw.githubusercontent.com/nikvoronin/AdsRemote/bd3ea06adf0440517f2a6ce7b6ac05d0a8e2d093/demo/OperatorPi/TwinCAT%20Project1/TwinCAT%20Project1.tsproj",
+  "repo": "nikvoronin/AdsRemote",
+  "license": "MIT",
+  "sizeBytes": 29189,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-plc-tst-tcads__TestIOC__TestIOC__TestIOC.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-tst-tcads/6e54af57034866ec678276106b49fb375cdf5619/TestIOC/TestIOC/TestIOC.tmc",
+  "repo": "pcdshub/lcls-plc-tst-tcads",
+  "license": null,
+  "sizeBytes": 2212128,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-plc-tst-tcads__TestIOC___Config__NC__Axes__Axis 11.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-tst-tcads/6e54af57034866ec678276106b49fb375cdf5619/TestIOC/_Config/NC/Axes/Axis%2011.xti",
+  "repo": "pcdshub/lcls-plc-tst-tcads",
+  "license": null,
+  "sizeBytes": 49497,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "pcdshub__lcls-plc-tst-tcads__TestIOC___Config__TestIOC__TestIOC Instance.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-tst-tcads/6e54af57034866ec678276106b49fb375cdf5619/TestIOC/_Config/TestIOC/TestIOC%20Instance.xti",
+  "repo": "pcdshub/lcls-plc-tst-tcads",
+  "license": null,
+  "sizeBytes": 14580,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "pcdshub__lcls-plc-tst-tcads__TestIOC__TestIOC.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-tst-tcads/6e54af57034866ec678276106b49fb375cdf5619/TestIOC/TestIOC.tsproj",
+  "repo": "pcdshub/lcls-plc-tst-tcads",
+  "license": null,
+  "sizeBytes": 991,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-plc-xcs-sample-delivery__sample-delivery__sample-delivery.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-xcs-sample-delivery/ac13d7da8942174678d2d4955ff1618a9654e324/sample-delivery/sample-delivery.tmc",
+  "repo": "pcdshub/lcls-plc-xcs-sample-delivery",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 726494,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-plc-xcs-sample-delivery___Config__PLC__sample-delivery.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-xcs-sample-delivery/ac13d7da8942174678d2d4955ff1618a9654e324/_Config/PLC/sample-delivery.xti",
+  "repo": "pcdshub/lcls-plc-xcs-sample-delivery",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 48791,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-plc-xcs-sample-delivery___Config__IO__Device 1 (EtherCAT)__M3 Selector A Serial IO (EP6002-0002).xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-xcs-sample-delivery/ac13d7da8942174678d2d4955ff1618a9654e324/_Config/IO/Device%201%20%28EtherCAT%29/M3%20Selector%20A%20Serial%20IO%20%28EP6002-0002%29.xti",
+  "repo": "pcdshub/lcls-plc-xcs-sample-delivery",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 35328,
+  "kind": "XTI CEL60xxDef"
+ },
+ {
+  "file": "pcdshub__lcls-plc-xcs-sample-delivery__sample-delviery.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-plc-xcs-sample-delivery/ac13d7da8942174678d2d4955ff1618a9654e324/sample-delviery.tsproj",
+  "repo": "pcdshub/lcls-plc-xcs-sample-delivery",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 974,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-common-components__lcls-twincat-common-components___Config__PLC__Library.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-common-components/45954c266f6ed32565a53e975952852286abb178/lcls-twincat-common-components/_Config/PLC/Library.xti",
+  "repo": "pcdshub/lcls-twincat-common-components",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 99766,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-common-components__lcls-twincat-common-components___Config__NC__Axes__SLIT_South.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-common-components/45954c266f6ed32565a53e975952852286abb178/lcls-twincat-common-components/_Config/NC/Axes/SLIT_South.xti",
+  "repo": "pcdshub/lcls-twincat-common-components",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 47916,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-common-components__lcls-twincat-common-components__lcls-twincat-common-components.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-common-components/45954c266f6ed32565a53e975952852286abb178/lcls-twincat-common-components/lcls-twincat-common-components.tsproj",
+  "repo": "pcdshub/lcls-twincat-common-components",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 833,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-general__LCLSGeneral__GlobalEvents.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-general/071073654b7b9118ea7882df0070901093ffb7d0/LCLSGeneral/GlobalEvents.tmc",
+  "repo": "pcdshub/lcls-twincat-general",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 1512,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-general__LCLSGeneral___Config__PLC__LCLSGeneral.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-general/071073654b7b9118ea7882df0070901093ffb7d0/LCLSGeneral/_Config/PLC/LCLSGeneral.xti",
+  "repo": "pcdshub/lcls-twincat-general",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 780,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-general__LCLSGeneral__LCLSGeneral.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-general/071073654b7b9118ea7882df0070901093ffb7d0/LCLSGeneral/LCLSGeneral.tsproj",
+  "repo": "pcdshub/lcls-twincat-general",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 9939,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-math__lcls-twincat-math___Config__lcls_twincat_math__lcls_twincat_math Instance.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-math/775a509266550ba880aba23d0c8e20e83240f12b/lcls-twincat-math/_Config/lcls_twincat_math/lcls_twincat_math%20Instance.xti",
+  "repo": "pcdshub/lcls-twincat-math",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 865,
+  "kind": "XTI CTComPlcObjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-math__lcls-twincat-math___Config__PLC__lcls_twincat_math.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-math/775a509266550ba880aba23d0c8e20e83240f12b/lcls-twincat-math/_Config/PLC/lcls_twincat_math.xti",
+  "repo": "pcdshub/lcls-twincat-math",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 608,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-math__lcls-twincat-math__lcls-twincat-math.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-math/775a509266550ba880aba23d0c8e20e83240f12b/lcls-twincat-math/lcls-twincat-math.tsproj",
+  "repo": "pcdshub/lcls-twincat-math",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 634,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-motion__lcls-twincat-motion___Config__PLC__Library.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-motion/64407d7c13a0a0d5400264919d3a5d6b50eb2356/lcls-twincat-motion/_Config/PLC/Library.xti",
+  "repo": "pcdshub/lcls-twincat-motion",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 255386,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-motion__lcls-twincat-motion___Config__NC__NC.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-motion/64407d7c13a0a0d5400264919d3a5d6b50eb2356/lcls-twincat-motion/_Config/NC/NC.xti",
+  "repo": "pcdshub/lcls-twincat-motion",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 50402,
+  "kind": "XTI CNcSafTaskDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-motion__lcls-twincat-motion___Config__NC__Axes__Axis_AxisParameter_Test.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-motion/64407d7c13a0a0d5400264919d3a5d6b50eb2356/lcls-twincat-motion/_Config/NC/Axes/Axis_AxisParameter_Test.xti",
+  "repo": "pcdshub/lcls-twincat-motion",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 48319,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-motion__lcls-twincat-motion__lcls-twincat-motion.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-motion/64407d7c13a0a0d5400264919d3a5d6b50eb2356/lcls-twincat-motion/lcls-twincat-motion.tsproj",
+  "repo": "pcdshub/lcls-twincat-motion",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 819,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-optics__lcls-twincat-optics__lcls_twincat_optics_plc__lcls_twincat_optics_plc.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-optics/78d7ede4097f37555bd268f1dadf04a12c07b6ae/lcls-twincat-optics/lcls_twincat_optics_plc/lcls_twincat_optics_plc.tmc",
+  "repo": "pcdshub/lcls-twincat-optics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 2198756,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-optics__lcls-twincat-optics___Config__PLC__lcls_twincat_optics_plc.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-optics/78d7ede4097f37555bd268f1dadf04a12c07b6ae/lcls-twincat-optics/_Config/PLC/lcls_twincat_optics_plc.xti",
+  "repo": "pcdshub/lcls-twincat-optics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 49259,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-optics__lcls-twincat-optics___Config__NC__Axes__Axis 6.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-optics/78d7ede4097f37555bd268f1dadf04a12c07b6ae/lcls-twincat-optics/_Config/NC/Axes/Axis%206.xti",
+  "repo": "pcdshub/lcls-twincat-optics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 46488,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-optics__lcls-twincat-optics__lcls-twincat-optics.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-optics/78d7ede4097f37555bd268f1dadf04a12c07b6ae/lcls-twincat-optics/lcls-twincat-optics.tsproj",
+  "repo": "pcdshub/lcls-twincat-optics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 818,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-physics__lcls-twincat-physics__lcls_twincat_physics__lcls_twincat_physics.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-physics/fb5395a0fc11ab89fbb6077ea2c2a759cf3eaca7/lcls-twincat-physics/lcls_twincat_physics/lcls_twincat_physics.tmc",
+  "repo": "pcdshub/lcls-twincat-physics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 1436262,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-physics__lcls-twincat-physics___Config__PLC__LCLS_TwinCAT_Physics.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-physics/fb5395a0fc11ab89fbb6077ea2c2a759cf3eaca7/lcls-twincat-physics/_Config/PLC/LCLS_TwinCAT_Physics.xti",
+  "repo": "pcdshub/lcls-twincat-physics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 1216,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-physics__lcls-twincat-physics__lcls-twincat-physics.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-physics/fb5395a0fc11ab89fbb6077ea2c2a759cf3eaca7/lcls-twincat-physics/lcls-twincat-physics.tsproj",
+  "repo": "pcdshub/lcls-twincat-physics",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 639,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-pmps__lcls-twincat-pmps__PMPS__PMPS.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-pmps/cd5aab766cf5c92602719f4fb30a9b2f6501c7a8/lcls-twincat-pmps/PMPS/PMPS.tmc",
+  "repo": "pcdshub/lcls-twincat-pmps",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 979084,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-pmps__lcls-twincat-pmps__stBPIO.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-pmps/cd5aab766cf5c92602719f4fb30a9b2f6501c7a8/lcls-twincat-pmps/stBPIO.tmc",
+  "repo": "pcdshub/lcls-twincat-pmps",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 12097,
+  "kind": "TcCOM TMC",
+  "note": "no <Modules>: data types / event classes only"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-pmps__lcls-twincat-pmps___Config__PLC__PMPS.xti",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-pmps/cd5aab766cf5c92602719f4fb30a9b2f6501c7a8/lcls-twincat-pmps/_Config/PLC/PMPS.xti",
+  "repo": "pcdshub/lcls-twincat-pmps",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 1412,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-pmps__lcls-twincat-pmps__lcls-twincat-pmps.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-pmps/cd5aab766cf5c92602719f4fb30a9b2f6501c7a8/lcls-twincat-pmps/lcls-twincat-pmps.tsproj",
+  "repo": "pcdshub/lcls-twincat-pmps",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 5304,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-vacuum__L2SIVacuumLib.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-vacuum/0afc53819ec6d0424a247001bc1950a5e0865b2f/L2SIVacuumLib.tsproj",
+  "repo": "pcdshub/lcls-twincat-vacuum",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 10992,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-vacuum-system-simulator__VacuumSystemSimulator__VacuumSystemSimulator__VacuumSystemSimulator.tmc",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-vacuum-system-simulator/00f33594ee24eb20f756643f1245dcf88360e5f4/VacuumSystemSimulator/VacuumSystemSimulator/VacuumSystemSimulator.tmc",
+  "repo": "pcdshub/lcls-twincat-vacuum-system-simulator",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 7835,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pcdshub__lcls-twincat-vacuum-system-simulator__VacuumSystemSimulator__VacuumSystemSimulator.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/lcls-twincat-vacuum-system-simulator/00f33594ee24eb20f756643f1245dcf88360e5f4/VacuumSystemSimulator/VacuumSystemSimulator.tsproj",
+  "repo": "pcdshub/lcls-twincat-vacuum-system-simulator",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 5063,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__pre-commit-hooks__pre_commit_hooks__tests__data__not-pinned-version-3.1.4024.44.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/pre-commit-hooks/da7ec81bac5e12e46adcf53ba718cabd097f3a9c/pre_commit_hooks/tests/data/not-pinned-version-3.1.4024.44.tsproj",
+  "repo": "pcdshub/pre-commit-hooks",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 366454,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pcdshub__pre-commit-hooks__pre_commit_hooks__tests__data__pinned-version-3.1.4024.44.tsproj",
+  "url": "https://raw.githubusercontent.com/pcdshub/pre-commit-hooks/da7ec81bac5e12e46adcf53ba718cabd097f3a9c/pre_commit_hooks/tests/data/pinned-version-3.1.4024.44.tsproj",
+  "repo": "pcdshub/pre-commit-hooks",
+  "license": "BSD-3-Clause-LBNL",
+  "sizeBytes": 366453,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "pnjun__UrsaPQ-Manager__PLC__URSAPQ-beckhoff_controller__URSAPQ-beckhoff_controller__UrsaPQ_PLC__UrsaPQ_PLC.tmc",
+  "url": "https://raw.githubusercontent.com/pnjun/UrsaPQ-Manager/a4f7cf6c21ed3c40f56332397e8bef3656839d9d/PLC/URSAPQ-beckhoff_controller/URSAPQ-beckhoff_controller/UrsaPQ_PLC/UrsaPQ_PLC.tmc",
+  "repo": "pnjun/UrsaPQ-Manager",
+  "license": null,
+  "sizeBytes": 236305,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "pnjun__UrsaPQ-Manager__PLC__URSAPQ-beckhoff_controller__URSAPQ-beckhoff_controller__URSAPQ-beckhoff_controller.tsproj",
+  "url": "https://raw.githubusercontent.com/pnjun/UrsaPQ-Manager/a4f7cf6c21ed3c40f56332397e8bef3656839d9d/PLC/URSAPQ-beckhoff_controller/URSAPQ-beckhoff_controller/URSAPQ-beckhoff_controller.tsproj",
+  "repo": "pnjun/UrsaPQ-Manager",
+  "license": null,
+  "sizeBytes": 360079,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "rruiter87__TcControl__TcControl___Config__PLC__TcControl.xti",
+  "url": "https://raw.githubusercontent.com/rruiter87/TcControl/a220b2ac52648ffef44942f52afcda2f72eb4d66/TcControl/_Config/PLC/TcControl.xti",
+  "repo": "rruiter87/TcControl",
+  "license": "MIT",
+  "sizeBytes": 1150,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "rruiter87__TcControl__TcControl__TcControl.tsproj",
+  "url": "https://raw.githubusercontent.com/rruiter87/TcControl/a220b2ac52648ffef44942f52afcda2f72eb4d66/TcControl/TcControl.tsproj",
+  "repo": "rruiter87/TcControl",
+  "license": "MIT",
+  "sizeBytes": 682,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "rruiter87__TcTemplate__TcTemplate__TcTemplate___Config__PLC__PLC.xti",
+  "url": "https://raw.githubusercontent.com/rruiter87/TcTemplate/95ecc5edfe5e794afb13de15084bbe71910da29c/TcTemplate/TcTemplate/_Config/PLC/PLC.xti",
+  "repo": "rruiter87/TcTemplate",
+  "license": "MIT",
+  "sizeBytes": 1080,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "rruiter87__TcTemplate__TcTemplate__TcTemplate__TcTemplate.tsproj",
+  "url": "https://raw.githubusercontent.com/rruiter87/TcTemplate/95ecc5edfe5e794afb13de15084bbe71910da29c/TcTemplate/TcTemplate/TcTemplate.tsproj",
+  "repo": "rruiter87/TcTemplate",
+  "license": "MIT",
+  "sizeBytes": 568,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "runtimevic__TC3_EventBufferLibrary_TcUnit__TC3_EventBufferLibrary_TcUnit__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/runtimevic/TC3_EventBufferLibrary_TcUnit/ee51310681c05f67e097fdad980129e9ecd5049b/TC3_EventBufferLibrary_TcUnit/Untitled1/Untitled1.tmc",
+  "repo": "runtimevic/TC3_EventBufferLibrary_TcUnit",
+  "license": null,
+  "sizeBytes": 329973,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "runtimevic__TC3_EventBufferLibrary_TcUnit__TC3_EventBufferLibrary_TcUnit__TC3_EventBufferLibrary_TcUnit.tsproj",
+  "url": "https://raw.githubusercontent.com/runtimevic/TC3_EventBufferLibrary_TcUnit/ee51310681c05f67e097fdad980129e9ecd5049b/TC3_EventBufferLibrary_TcUnit/TC3_EventBufferLibrary_TcUnit.tsproj",
+  "repo": "runtimevic/TC3_EventBufferLibrary_TcUnit",
+  "license": null,
+  "sizeBytes": 1966,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "sondretordal__motion-lab__plc__MotionLab__LabController__LabController.tmc",
+  "url": "https://raw.githubusercontent.com/sondretordal/motion-lab/f5fbf84aa727626936480f2a486b1dd2a5a13794/plc/MotionLab/LabController/LabController.tmc",
+  "repo": "sondretordal/motion-lab",
+  "license": "MIT",
+  "sizeBytes": 342891,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "sondretordal__motion-lab__simulink__WaveSimulator__WaveSimulatorNew_tct__WaveSimulatorNew.tmc",
+  "url": "https://raw.githubusercontent.com/sondretordal/motion-lab/f5fbf84aa727626936480f2a486b1dd2a5a13794/simulink/WaveSimulator/WaveSimulatorNew_tct/WaveSimulatorNew.tmc",
+  "repo": "sondretordal/motion-lab",
+  "license": "MIT",
+  "sizeBytes": 44064,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "sondretordal__motion-lab__simulink__WaveSimulator__HydroSimulator_tct__HydroSimulator.tmc",
+  "url": "https://raw.githubusercontent.com/sondretordal/motion-lab/f5fbf84aa727626936480f2a486b1dd2a5a13794/simulink/WaveSimulator/HydroSimulator_tct/HydroSimulator.tmc",
+  "repo": "sondretordal/motion-lab",
+  "license": "MIT",
+  "sizeBytes": 44042,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "sondretordal__motion-lab__plc__LeicaAT960__LeicaAT960 (EtherCAT).xti",
+  "url": "https://raw.githubusercontent.com/sondretordal/motion-lab/f5fbf84aa727626936480f2a486b1dd2a5a13794/plc/LeicaAT960/LeicaAT960%20%28EtherCAT%29.xti",
+  "repo": "sondretordal/motion-lab",
+  "license": "MIT",
+  "sizeBytes": 4893,
+  "kind": "XTI CDevEtherCATDef"
+ },
+ {
+  "file": "sondretordal__motion-lab__plc__MotionLab__MotionLab.tsproj",
+  "url": "https://raw.githubusercontent.com/sondretordal/motion-lab/f5fbf84aa727626936480f2a486b1dd2a5a13794/plc/MotionLab/MotionLab.tsproj",
+  "repo": "sondretordal/motion-lab",
+  "license": "MIT",
+  "sizeBytes": 314477,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "stefanbesler__Twinson__Benchmark__Benchmark.tsproj",
+  "url": "https://raw.githubusercontent.com/stefanbesler/Twinson/71a20245d0d954696e4e126fb9208718cb8e3630/Benchmark/Benchmark.tsproj",
+  "repo": "stefanbesler/Twinson",
+  "license": "GPL-3.0",
+  "sizeBytes": 1537,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "stefanbesler__struckig__Struckig__Struckig___Config__PLC__Struckig.xti",
+  "url": "https://raw.githubusercontent.com/stefanbesler/struckig/233fbdb72463520d566425df50bd96436e02779a/Struckig/Struckig/_Config/PLC/Struckig.xti",
+  "repo": "stefanbesler/struckig",
+  "license": "GPL-3.0",
+  "sizeBytes": 476,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "stefanbesler__struckig__tests__Struckig_unittest__Struckig_unittest.tsproj",
+  "url": "https://raw.githubusercontent.com/stefanbesler/struckig/233fbdb72463520d566425df50bd96436e02779a/tests/Struckig_unittest/Struckig_unittest.tsproj",
+  "repo": "stefanbesler/struckig",
+  "license": "GPL-3.0",
+  "sizeBytes": 1603,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "stevehappy321__AISI-Hydro-Modules__A22__A22v4__Untitled1__Untitled1.tmc",
+  "url": "https://raw.githubusercontent.com/stevehappy321/AISI-Hydro-Modules/59fb0888be3849bfba847930f20a7327ed142d2a/A22/A22v4/Untitled1/Untitled1.tmc",
+  "repo": "stevehappy321/AISI-Hydro-Modules",
+  "license": null,
+  "sizeBytes": 475653,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "stevehappy321__AISI-Hydro-Modules__MotionCollection__MotionCollection__MotionDevicesPackage__MotionDevicesPackage.tmc",
+  "url": "https://raw.githubusercontent.com/stevehappy321/AISI-Hydro-Modules/59fb0888be3849bfba847930f20a7327ed142d2a/MotionCollection/MotionCollection/MotionDevicesPackage/MotionDevicesPackage.tmc",
+  "repo": "stevehappy321/AISI-Hydro-Modules",
+  "license": null,
+  "sizeBytes": 282246,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "stevehappy321__AISI-Hydro-Modules__A22__A22v4__A22v4.tsproj",
+  "url": "https://raw.githubusercontent.com/stevehappy321/AISI-Hydro-Modules/59fb0888be3849bfba847930f20a7327ed142d2a/A22/A22v4/A22v4.tsproj",
+  "repo": "stevehappy321/AISI-Hydro-Modules",
+  "license": null,
+  "sizeBytes": 327377,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "synapticon__twincat_examples__master_reset_stack__master_reset_stack__auto_fault_reset__auto_fault_reset.tmc",
+  "url": "https://raw.githubusercontent.com/synapticon/twincat_examples/28ae4c98ab06ab8b7befb275c2e5fb0ebbf53ba8/master_reset_stack/master_reset_stack/auto_fault_reset/auto_fault_reset.tmc",
+  "repo": "synapticon/twincat_examples",
+  "license": null,
+  "sizeBytes": 239246,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "synapticon__twincat_examples__master_reset_stack__master_reset_stack__master_reset_stack.tsproj",
+  "url": "https://raw.githubusercontent.com/synapticon/twincat_examples/28ae4c98ab06ab8b7befb275c2e5fb0ebbf53ba8/master_reset_stack/master_reset_stack/master_reset_stack.tsproj",
+  "repo": "synapticon/twincat_examples",
+  "license": null,
+  "sizeBytes": 66478,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "tcunit__ExampleProjects__RunTestsInSequenceExampleProjects__SequentialTestsWithStateMachines__SequentialTestsWithStateMachines___Config__PLC__SequentialTestsWithStateMachines.xti",
+  "url": "https://raw.githubusercontent.com/tcunit/ExampleProjects/c2e644cd9db3757ec95f6725925d5c5bd354e586/RunTestsInSequenceExampleProjects/SequentialTestsWithStateMachines/SequentialTestsWithStateMachines/_Config/PLC/SequentialTestsWithStateMachines.xti",
+  "repo": "tcunit/ExampleProjects",
+  "license": null,
+  "sizeBytes": 1055,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "tcunit__ExampleProjects__AdvancedExampleProject__IOLink__IOLink.tsproj",
+  "url": "https://raw.githubusercontent.com/tcunit/ExampleProjects/c2e644cd9db3757ec95f6725925d5c5bd354e586/AdvancedExampleProject/IOLink/IOLink.tsproj",
+  "repo": "tcunit/ExampleProjects",
+  "license": null,
+  "sizeBytes": 605,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "tcunit__TcUnit__TcUnit-Verifier__TcUnit-Verifier_TwinCAT__TcUnit-Verifier_TwinCAT___Config__PLC__TcUnitVerifier.xti",
+  "url": "https://raw.githubusercontent.com/tcunit/TcUnit/425c62939bb81810879a244270d47d1b610a3bd3/TcUnit-Verifier/TcUnit-Verifier_TwinCAT/TcUnit-Verifier_TwinCAT/_Config/PLC/TcUnitVerifier.xti",
+  "repo": "tcunit/TcUnit",
+  "license": "MIT",
+  "sizeBytes": 785,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "tcunit__TcUnit__TcUnit-Verifier__TcUnit-Verifier_TwinCAT__TcUnit-Verifier_TwinCAT__TcUnit-Verifier_TwinCAT.tsproj",
+  "url": "https://raw.githubusercontent.com/tcunit/TcUnit/425c62939bb81810879a244270d47d1b610a3bd3/TcUnit-Verifier/TcUnit-Verifier_TwinCAT/TcUnit-Verifier_TwinCAT/TcUnit-Verifier_TwinCAT.tsproj",
+  "repo": "tcunit/TcUnit",
+  "license": "MIT",
+  "sizeBytes": 607,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "theshamot__Higher-Level-TwinCAT-3-Library__TcList__TcList.tsproj",
+  "url": "https://raw.githubusercontent.com/theshamot/Higher-Level-TwinCAT-3-Library/a41ffa002165e7bf9cc4c9e71fae36ed4759b22e/TcList/TcList.tsproj",
+  "repo": "theshamot/Higher-Level-TwinCAT-3-Library",
+  "license": null,
+  "sizeBytes": 1414,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "tomookay__TOAST__TwinCAT Project1__PLC1__PLC1.tmc",
+  "url": "https://raw.githubusercontent.com/tomookay/TOAST/b785937f890bca5cc3aa32c1f426276b396b7b29/TwinCAT%20Project1/PLC1/PLC1.tmc",
+  "repo": "tomookay/TOAST",
+  "license": "MIT",
+  "sizeBytes": 2624090,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "tomookay__TOAST__TwinCAT Project1___Config__PLC__PLC1.xti",
+  "url": "https://raw.githubusercontent.com/tomookay/TOAST/b785937f890bca5cc3aa32c1f426276b396b7b29/TwinCAT%20Project1/_Config/PLC/PLC1.xti",
+  "repo": "tomookay/TOAST",
+  "license": "MIT",
+  "sizeBytes": 258974,
+  "kind": "XTI CNestedPlcProjDef"
+ },
+ {
+  "file": "tomookay__TOAST__TwinCAT Project1___Config__NC__Axes__Y Axis.xti",
+  "url": "https://raw.githubusercontent.com/tomookay/TOAST/b785937f890bca5cc3aa32c1f426276b396b7b29/TwinCAT%20Project1/_Config/NC/Axes/Y%20Axis.xti",
+  "repo": "tomookay/TOAST",
+  "license": "MIT",
+  "sizeBytes": 51511,
+  "kind": "XTI CNcAxisDef"
+ },
+ {
+  "file": "tomookay__TOAST__TwinCAT Project1__TOAST.tsproj",
+  "url": "https://raw.githubusercontent.com/tomookay/TOAST/b785937f890bca5cc3aa32c1f426276b396b7b29/TwinCAT%20Project1/TOAST.tsproj",
+  "repo": "tomookay/TOAST",
+  "license": "MIT",
+  "sizeBytes": 2718,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "trofimich__TwinCAT.OpenFramework__Sources__TwinCAT.OpenFramework.tsproj",
+  "url": "https://raw.githubusercontent.com/trofimich/TwinCAT.OpenFramework/f16e229409111fefb3bcf6aef7f9d0cc1cae9a91/Sources/TwinCAT.OpenFramework.tsproj",
+  "repo": "trofimich/TwinCAT.OpenFramework",
+  "license": "MIT",
+  "sizeBytes": 37183,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "vexvoltage__TwinCat3_CPP_Examples__S10-Mod2ModDataPointer__TwinCAT Project with DataPointer__TcDataPointerSampleDrv__TcDataPointerSampleDrv.tmc",
+  "url": "https://raw.githubusercontent.com/vexvoltage/TwinCat3_CPP_Examples/da855853215c3809de8f9f369ed7ef38754de1d6/S10-Mod2ModDataPointer/TwinCAT%20Project%20with%20DataPointer/TcDataPointerSampleDrv/TcDataPointerSampleDrv.tmc",
+  "repo": "vexvoltage/TwinCat3_CPP_Examples",
+  "license": null,
+  "sizeBytes": 21217,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "vexvoltage__TwinCat3_CPP_Examples__S35-AccessEthernet__TwinCAT Project with Ethernet__TcEthernetSample__TcEthernetSample.tmc",
+  "url": "https://raw.githubusercontent.com/vexvoltage/TwinCat3_CPP_Examples/da855853215c3809de8f9f369ed7ef38754de1d6/S35-AccessEthernet/TwinCAT%20Project%20with%20Ethernet/TcEthernetSample/TcEthernetSample.tmc",
+  "repo": "vexvoltage/TwinCat3_CPP_Examples",
+  "license": null,
+  "sizeBytes": 17339,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "vexvoltage__TwinCat3_CPP_Examples__S11a-Mod2ModCS__TwinCAT Project Concurrent DA__TcConcurrentDADrv__TcConcurrentDADrv.tmc",
+  "url": "https://raw.githubusercontent.com/vexvoltage/TwinCat3_CPP_Examples/da855853215c3809de8f9f369ed7ef38754de1d6/S11a-Mod2ModCS/TwinCAT%20Project%20Concurrent%20DA/TcConcurrentDADrv/TcConcurrentDADrv.tmc",
+  "repo": "vexvoltage/TwinCat3_CPP_Examples",
+  "license": null,
+  "sizeBytes": 15399,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "vexvoltage__TwinCat3_CPP_Examples__S05-CoEAccess__TwinCAT Project with CoE Access__TwinCAT-Project-with-SdoAccess-via-Ads.tsproj",
+  "url": "https://raw.githubusercontent.com/vexvoltage/TwinCat3_CPP_Examples/da855853215c3809de8f9f369ed7ef38754de1d6/S05-CoEAccess/TwinCAT%20Project%20with%20CoE%20Access/TwinCAT-Project-with-SdoAccess-via-Ads.tsproj",
+  "repo": "vexvoltage/TwinCat3_CPP_Examples",
+  "license": null,
+  "sizeBytes": 204147,
+  "kind": "TSPROJ"
+ },
+ {
+  "file": "zjw11525__RobotMotion__Cia402_6axis__MAIN__MAIN.tmc",
+  "url": "https://raw.githubusercontent.com/zjw11525/RobotMotion/76b4ab8288f8c77379a3fda3812a9350f3a87965/Cia402_6axis/MAIN/MAIN.tmc",
+  "repo": "zjw11525/RobotMotion",
+  "license": null,
+  "sizeBytes": 282665,
+  "kind": "PLC TMC"
+ },
+ {
+  "file": "zjw11525__RobotMotion__Cia402_6axis__Kinematic__Kinematic.tmc",
+  "url": "https://raw.githubusercontent.com/zjw11525/RobotMotion/76b4ab8288f8c77379a3fda3812a9350f3a87965/Cia402_6axis/Kinematic/Kinematic.tmc",
+  "repo": "zjw11525/RobotMotion",
+  "license": null,
+  "sizeBytes": 5830,
+  "kind": "TcCOM TMC"
+ },
+ {
+  "file": "zjw11525__RobotMotion__Cia402_6axis__Cia402_6axis.tsproj",
+  "url": "https://raw.githubusercontent.com/zjw11525/RobotMotion/76b4ab8288f8c77379a3fda3812a9350f3a87965/Cia402_6axis/Cia402_6axis.tsproj",
+  "repo": "zjw11525/RobotMotion",
+  "license": null,
+  "sizeBytes": 142092,
+  "kind": "TSPROJ"
+ }
+]

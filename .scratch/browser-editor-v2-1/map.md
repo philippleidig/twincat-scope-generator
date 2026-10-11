@@ -25,6 +25,8 @@ and a colour that land in the exported `.tcscopex`. Spec: [`docs/spec/v2.1.md`](
 - [What can be dragged in the project?](issues/03-dnd.md): channels and axis groups, reorder and move across scope files; holding Ctrl/Alt copies.
 - [How do slices land?](issues/04-integration.md): reviewed, then pushed straight to `main`.
 - [How does Scope store names and colours?](issues/07-scope-names-colours.md): `<Channel><Name>` + channel-level `UsedNameType` `Custom`; colour as signed ARGB in Channel and SeriesStyle `DisplayColor`/`MarkColor`.
+- [What is reachable by ADS name?](issues/05-ads-access.md): the TMC lists more than ADS exposes; hide properties/hidden/no-symbol/VAR_INST, disable call-properties, interfaces, strings; pointers via `^`; references read through.
+- [Which real files do we test against?](issues/06-corpus.md): 352 files from 120 repos; current importer: 0 crashes, two defects (pointer-to-array types, empty arrays).
 - [What does the flat list show?](issues/08-flat-list.md): every indexed path (arrays as patterns), the same rows as search results; filters apply.
 
 ## Not yet specified
