@@ -14,7 +14,7 @@
  */
 import type { AreaKind, SymbolRoot, SymbolSource, TypeTable } from './model'
 import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, parameterNote, readModuleRoots } from './tmc'
-import { readArrayDims, readTypeTable, typeNameOf } from './typeTable'
+import { finalizeSource, readTypeRef, readTypeTable } from './typeTable'
 import { child, children, text } from './xml'
 
 export const DEFAULT_NC_PORT = 501
@@ -47,14 +47,13 @@ function readVars(owner: Element, prefix: (groupName: string) => string): Symbol
         const groupName = text(vars, 'Name') || 'Vars'
         for (const v of children(vars, 'Var')) {
             const name = text(v, 'Name')
-            const typeEl = child(v, 'Type') ?? child(v, 'BaseType')
-            const type = typeNameOf(typeEl)
+            const { type, ns, dims } = readTypeRef(v, child(v, 'Type') ?? child(v, 'BaseType'))
             if (!name || !type) continue
             roots.push({
                 name: `${prefix(groupName)}${name}`,
                 type,
-                ns: typeEl?.getAttribute('Namespace') || undefined,
-                dims: readArrayDims(v),
+                ns,
+                dims,
                 area: varGroupArea(vars),
                 areaName: groupName,
                 comment: text(v, 'Comment') || undefined,
@@ -85,7 +84,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         const instance = child(project, 'Instance')
         if (!instance) continue
         const title = project.getAttribute('Name') || stem
-        const roots = readVars(instance, () => '')
+        const roots = finalizeSource(types, readVars(instance, () => ''))
         sources.push({
             ...base(sources.length),
             kind: 'PLC',
@@ -140,7 +139,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
             title: 'NC axes',
             pathPrefix: '',
             port: ncPort,
-            roots: axisRoots,
+            roots: finalizeSource(types, axisRoots),
             complete: true,
             warnings: [
                 'NC symbols exist only for axes with "Create symbols" enabled. Encoder/drive paths (Axes.<axis>.<Enc>.<variable>) are not verified yet.',

@@ -1,9 +1,16 @@
 /**
- * Type table built from `<DataTypes>` and resolution of type names into scalars,
- * structs (with inherited members) and arrays.
+ * Type table built from `<DataTypes>` and resolution of declarations into scalars, structs
+ * (with inherited members), arrays and pointers.
+ *
+ * Together with `access.ts` this decides what the browser offers (ADR 0005): declarations
+ * without an ADS symbol are dropped while reading (members whose type has no symbols when a
+ * type is registered, roots in `finalizeSource`), disabled ones resolve to `unsupported`. The
+ * walker only calls `resolveDecl`, so tree, search and "Add" agree.
  */
 import { scopeTypeForIec } from '@/domain/dataTypes'
-import type { ArrayDim, MemberDef, ResolvedType, TypeDef, TypeTable } from './model'
+import type { MemberFacts } from './access'
+import { REASON, applyAccess, memberAccess, typeAccess } from './access'
+import type { Access, ArrayDim, MemberDef, ResolvedType, SymbolRoot, TypeDef, TypeTable } from './model'
 import { child, children, properties, text } from './xml'
 
 /** `<ArrayInfo><LBound>1</LBound><Elements>10</Elements></ArrayInfo>` (one per dimension). */
@@ -15,12 +22,21 @@ export function readArrayDims(el: Element): ArrayDim[] | undefined {
     return dims.length > 0 ? dims : undefined
 }
 
+export function arrayLabel(dims: ArrayDim[], element: string): string {
+    return `ARRAY[${dims.map((d) => `${d.lower}..${d.upper}`).join(',')}] OF ${element}`
+}
+
 /** Namespace attribute of a `<Type>`/`<BaseType>`/`<Name>` element, if any. */
 function namespaceOf(el: Element | null): string | undefined {
     return el?.getAttribute('Namespace') || undefined
 }
 
-const isHidden = (el: Element) => properties(el).has('hide')
+/** `PointerTo="2"` → `POINTER TO POINTER TO `, `ReferenceTo="true"` → `REFERENCE TO `. */
+function indirection(el: Element): string {
+    const pointers = Number.parseInt(el.getAttribute('PointerTo') ?? '', 10)
+    if (pointers > 0) return 'POINTER TO '.repeat(pointers)
+    return el.getAttribute('ReferenceTo') === 'true' ? 'REFERENCE TO ' : ''
+}
 
 /**
  * Type name of a `<Type>`/`<BaseType>` element. Pointers and references are written as
@@ -28,60 +44,95 @@ const isHidden = (el: Element) => properties(el).has('hide')
  */
 export function typeNameOf(typeEl: Element | null): string {
     const name = (typeEl?.textContent ?? '').trim()
-    if (!typeEl || !name) return name
-    if (typeEl.hasAttribute('PointerTo')) return `POINTER TO ${name}`
-    if (typeEl.hasAttribute('ReferenceTo')) return `REFERENCE TO ${name}`
-    return name
+    return typeEl && name ? `${indirection(typeEl)}${name}` : name
 }
 
-/** A `<SubItem>` (struct/FB member or inline parameter field); hidden members are skipped. */
-export function readMember(el: Element): MemberDef | null {
-    const name = text(el, 'Name')
-    const typeEl = child(el, 'Type') ?? child(el, 'BaseType')
+/** The type of a declaration: name (with pointers/references folded in), namespace, array dims. */
+export interface TypeRef {
+    type: string
+    ns?: string
+    dims?: ArrayDim[]
+}
+
+/**
+ * The type of a symbol, member or alias: its `<Type>`/`<BaseType>` plus `<ArrayInfo>` dims.
+ * A pointer or reference *to an array* is marked on the first `<ArrayInfo>`
+ * (`<ArrayInfo PointerTo="1">`), so it is folded into the name as
+ * `POINTER TO ARRAY[0..65535] OF T` instead of becoming array dims.
+ */
+export function readTypeRef(el: Element, typeEl: Element | null): TypeRef {
     const type = typeNameOf(typeEl)
-    if (!name || !type || isHidden(el)) return null
-    return {
+    const ns = namespaceOf(typeEl)
+    const dims = readArrayDims(el)
+    const prefix = dims ? indirection(children(el, 'ArrayInfo')[0]) : ''
+    return prefix && type ? { type: `${prefix}${arrayLabel(dims!, type)}`, ns } : { type, ns, dims }
+}
+
+/** The type declaring a member: names static variables and applies `*_all_locals`. */
+export type Owner = MemberFacts['owner']
+
+/**
+ * A `<SubItem>` (struct/FB member or inline parameter field) or `<PropertyItem>` (property with
+ * `monitoring := 'call'`), null when it has no ADS symbol (`memberAccess`). VAR_IN_OUT becomes
+ * a reference (`REFERENCE TO ARRAY[…] OF T` when it is an array).
+ */
+export function readMember(el: Element, owner: Owner): MemberDef | null {
+    const nameEl = child(el, 'Name')
+    const name = (nameEl?.textContent ?? '').trim()
+    const { ns, dims, ...ref } = readTypeRef(el, child(el, 'Type') ?? child(el, 'BaseType'))
+    let type = ref.type
+    if (!name || !type) return null
+    const props = properties(el)
+    const access = memberAccess(props, {
         name,
-        type,
-        ns: namespaceOf(typeEl),
-        dims: readArrayDims(el),
-        comment: text(el, 'Comment') || undefined,
+        owner,
+        property: el.tagName === 'PropertyItem',
+        staticVar: nameEl?.getAttribute('Static') === 'true' && !child(el, 'BitOffs'),
+    })
+    if (!access) return null
+
+    let memberDims = dims
+    if (props.get('ItemType') === 'InOut' && !/^REFERENCE\s+TO\b/i.test(type)) {
+        // VAR_IN_OUT passes the whole value by reference, an array included.
+        type = `REFERENCE TO ${dims ? arrayLabel(dims, type) : type}`
+        memberDims = undefined
     }
+    const member: MemberDef = { name, type, ...access }
+    if (ns) member.ns = ns
+    if (memberDims) member.dims = memberDims
+    const comment = text(el, 'Comment')
+    if (comment) member.comment = comment
+    return member
 }
 
 function readTypeDef(el: Element): TypeDef | null {
     const nameEl = child(el, 'Name')
     const name = (nameEl?.textContent ?? '').trim()
     if (!name) return null
-    const comment = text(el, 'Comment') || undefined
-    const subItems = children(el, 'SubItem')
+    const props = properties(el)
+    const flags = { comment: text(el, 'Comment') || undefined, ...typeAccess(props) }
+    const items = Array.from(el.children).filter((c) => c.tagName === 'SubItem' || c.tagName === 'PropertyItem')
     const extendsEl = child(el, 'ExtendsType')
     const baseEl = child(el, 'BaseType')
 
-    if (subItems.length > 0 || extendsEl || !baseEl) {
+    if (items.length > 0 || extendsEl || !baseEl) {
         const extendsType = (extendsEl?.textContent ?? '').trim() || undefined
+        const owner = { name, props }
         return {
             kind: 'struct',
             name,
-            members: subItems.map(readMember).filter((m): m is MemberDef => m !== null),
+            members: items.map((m) => readMember(m, owner)).filter((m): m is MemberDef => m !== null),
             extends: extendsType,
-            functionBlock: properties(el).get('PouType') === 'FunctionBlock',
-            // Interfaces derive from PVOID and carry methods only.
-            interface: extendsType?.toUpperCase() === 'PVOID' && subItems.length === 0,
-            comment,
+            functionBlock: props.get('PouType') === 'FunctionBlock',
+            // Interfaces derive from PVOID and carry methods (and properties) only.
+            interface: extendsType?.toUpperCase() === 'PVOID' && children(el, 'SubItem').length === 0,
+            ...flags,
         }
     }
 
     const enumValues = children(el, 'EnumInfo').map((e) => text(e, 'Text'))
-    return {
-        kind: 'alias',
-        name,
-        base: typeNameOf(baseEl),
-        ns: namespaceOf(baseEl),
-        dims: readArrayDims(el),
-        enumValues: enumValues.length > 0 ? enumValues : undefined,
-        comment,
-    }
+    const { type, ns, dims } = readTypeRef(el, baseEl)
+    return { kind: 'alias', name, base: type, ns, dims, enumValues: enumValues.length > 0 ? enumValues : undefined, ...flags }
 }
 
 /** Collect every `<DataTypes>/<DataType>` in the document. */
@@ -98,7 +149,18 @@ export function readTypeTable(doc: Document): TypeTable {
             table[key] ??= def
         }
     }
+    for (const def of new Set(Object.values(table))) {
+        if (def.kind === 'struct') def.members = withSymbols(table, def.members)
+    }
     return table
+}
+
+/**
+ * Members whose type has symbols at all (drops empty arrays). Applied when a type is registered —
+ * after `readTypeTable` and for inline types — once every type it may refer to is known.
+ */
+export function withSymbols(table: TypeTable, members: MemberDef[]): MemberDef[] {
+    return members.filter((m) => resolveRef(table, m).kind !== 'hidden')
 }
 
 function lookup(table: TypeTable, name: string, ns?: string): TypeDef | undefined {
@@ -106,11 +168,19 @@ function lookup(table: TypeTable, name: string, ns?: string): TypeDef | undefine
     return (ns ? table[`${ns.toUpperCase()}.${key}`] : undefined) ?? table[key]
 }
 
+// ---------------------------------------------------------------------------
+// Resolution
+// ---------------------------------------------------------------------------
+
+/** Internal only: a type with no symbols at all (an empty array, or an array of them). */
+type Resolved = ResolvedType | { kind: 'hidden'; typeName: string }
+
+const POINTER_DECL = /^POINTER\s+TO\s+(.+)$/i
+const REFERENCE_DECL = /^REFERENCE\s+TO\s+(.+)$/i
 const ARRAY_DECL = /^ARRAY\s*\[(.+?)\]\s*OF\s+(.+)$/i
 const UNSUPPORTED_PREFIX: Array<[RegExp, string]> = [
-    [/^W?STRING\b/i, 'Strings cannot be recorded by TwinCAT Scope'],
-    [/^(POINTER|REFERENCE)\s+TO\b/i, 'Pointers and references cannot be recorded'],
-    [/^(PVOID|XWORD|UXINT|XINT|__XWORD|__UXINT|__XINT)$/i, 'Platform-dependent size'],
+    [/^W?STRING\b/i, REASON.string],
+    [/^(PVOID|XWORD|UXINT|XINT|__XWORD|__UXINT|__XINT)$/i, REASON.platform],
 ]
 
 /** Parse `1..10, 0..3` from a textual array declaration. */
@@ -124,7 +194,7 @@ function parseDimsText(spec: string): ArrayDim[] | null {
     return dims
 }
 
-const MAX_DEPTH = 32
+const MAX_RESOLVE_DEPTH = 32
 
 /** TwinCAT system types that files reference without defining them. */
 const BUILTIN_ALIASES: Record<string, string> = {
@@ -134,25 +204,68 @@ const BUILTIN_ALIASES: Record<string, string> = {
     PLCTONC_AXIS_REF_CTRL: 'DWORD',
 }
 
-/**
- * Resolve a type name (plus array dims declared on the symbol itself) into what the
- * browser needs to show and expand it.
- */
-export function resolveType(table: TypeTable, typeName: string, ns?: string, dims?: ArrayDim[]): ResolvedType {
-    if (dims && dims.length > 0) return { kind: 'array', dims, element: typeName, ns, typeName }
-    return resolveNamed(table, typeName.trim(), ns, 0)
+function resolveRef(table: TypeTable, ref: TypeRef): Resolved {
+    if (ref.dims && ref.dims.length > 0) return arrayOf(table, ref.dims, ref.type, ref.ns, ref.type, 0)
+    return resolveNamed(table, ref.type.trim(), ref.ns, 0)
 }
 
-function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined, depth: number): ResolvedType {
-    if (depth > MAX_DEPTH) return { kind: 'unsupported', typeName, reason: 'Type definition is recursive' }
+/**
+ * What a declaration (symbol, member, array element, pointer target) is for the browser: its
+ * type resolved and its access applied. Members and roots without symbols are dropped on import
+ * (`withSymbols`, `finalizeSource`), and the walker only creates elements of non-empty arrays and
+ * targets of pointers to types with symbols, so `hidden` cannot reach this point from an imported
+ * source; a hand-built one would show it as disabled.
+ */
+export function resolveDecl(table: TypeTable, decl: TypeRef & Access): ResolvedType {
+    const resolved = resolveRef(table, decl)
+    if (resolved.kind === 'hidden') return { kind: 'unsupported', typeName: resolved.typeName, reason: REASON.emptyArray }
+    return applyAccess(resolved, decl)
+}
+
+/**
+ * Last import step for a source's roots: drop roots whose type has no symbols and keep one root
+ * per name — a file can declare a name twice (two versions of a library GVL), ADS names are
+ * unique and case-insensitive, so the first declaration wins.
+ */
+export function finalizeSource(table: TypeTable, roots: SymbolRoot[]): SymbolRoot[] {
+    const seen = new Set<string>()
+    return roots.filter((r) => {
+        const key = r.name.toLowerCase()
+        if (seen.has(key) || resolveRef(table, r).kind === 'hidden') return false
+        seen.add(key)
+        return true
+    })
+}
+
+/** Empty arrays and arrays of empty arrays have no symbol. */
+function arrayOf(table: TypeTable, dims: ArrayDim[], element: string, ns: string | undefined, typeName: string, depth: number): Resolved {
+    if (dims.some((d) => d.upper < d.lower)) return { kind: 'hidden', typeName }
+    const el = resolveNamed(table, element, ns, depth + 1)
+    if (el.kind === 'hidden') return el
+    return { kind: 'array', dims, element, ns, typeName }
+}
+
+function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined, depth: number): Resolved {
+    if (depth > MAX_RESOLVE_DEPTH) return { kind: 'unsupported', typeName, reason: REASON.recursive }
 
     const scalar = scopeTypeForIec(typeName)
     if (scalar) return { kind: 'scalar', scopeType: scalar, typeName }
 
+    const pointer = POINTER_DECL.exec(typeName)
+    if (pointer) {
+        const target = pointer[1].trim()
+        if (resolveNamed(table, target, ns, depth + 1).kind === 'hidden') return { kind: 'unsupported', typeName, reason: REASON.pointerToHidden }
+        return { kind: 'pointer', typeName, target, ns, reason: REASON.pointer }
+    }
+    const reference = REFERENCE_DECL.exec(typeName)
+    if (reference) {
+        const target = resolveNamed(table, reference[1].trim(), ns, depth + 1)
+        return target.kind === 'hidden' ? target : { ...target, viaReference: true }
+    }
     const arrayDecl = ARRAY_DECL.exec(typeName)
     if (arrayDecl) {
         const parsed = parseDimsText(arrayDecl[1])
-        if (parsed) return { kind: 'array', dims: parsed, element: arrayDecl[2].trim(), typeName }
+        if (parsed) return arrayOf(table, parsed, arrayDecl[2].trim(), ns, typeName, depth)
     }
     for (const [pattern, reason] of UNSUPPORTED_PREFIX) {
         if (pattern.test(typeName)) return { kind: 'unsupported', typeName, reason }
@@ -161,20 +274,25 @@ function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined
     const def = lookup(table, typeName, ns)
     const builtin = BUILTIN_ALIASES[typeName.toUpperCase()]
     if (!def && builtin) return { ...resolveNamed(table, builtin, undefined, depth + 1), typeName }
-    if (!def) return { kind: 'unsupported', typeName, reason: 'Type is not defined in the imported file' }
+    if (!def) return { kind: 'unsupported', typeName, reason: REASON.undefined }
 
+    const resolved = resolveDef(table, def, typeName, depth)
+    return resolved.kind === 'hidden' ? resolved : applyAccess(resolved, def)
+}
+
+function resolveDef(table: TypeTable, def: TypeDef, typeName: string, depth: number): Resolved {
     if (def.kind === 'alias') {
-        if (def.dims) return { kind: 'array', dims: def.dims, element: def.base, ns: def.ns, typeName }
+        if (def.dims) return arrayOf(table, def.dims, def.base, def.ns, typeName, depth)
         const base = resolveNamed(table, def.base, def.ns, depth + 1)
         // Keep the alias/enum name visible; it is what users know the symbol by.
         return base.kind === 'scalar' ? { ...base, typeName } : base
     }
-    if (def.interface) return { kind: 'unsupported', typeName, reason: 'Interface references cannot be recorded' }
+    if (def.interface) return { kind: 'unsupported', typeName, reason: REASON.interface }
     return { kind: 'struct', typeName, members: structMembers(table, def, depth) }
 }
 
 function structMembers(table: TypeTable, def: Extract<TypeDef, { kind: 'struct' }>, depth: number): MemberDef[] {
-    if (!def.extends || depth > MAX_DEPTH) return def.members
+    if (!def.extends || depth > MAX_RESOLVE_DEPTH) return def.members
     const base = lookup(table, def.extends)
     if (!base || base.kind !== 'struct') return def.members
     return [...structMembers(table, base, depth + 1), ...def.members]

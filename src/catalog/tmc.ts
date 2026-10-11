@@ -13,7 +13,8 @@
  *   name and can be changed per source in the browser.
  */
 import type { AreaKind, MemberDef, SymbolRoot, SymbolSource, TypeTable } from './model'
-import { readArrayDims, readMember, readTypeTable, typeNameOf } from './typeTable'
+import { symbolAccess } from './access'
+import { finalizeSource, readMember, readTypeRef, readTypeTable, withSymbols } from './typeTable'
 import { child, children, properties, text } from './xml'
 
 export const DEFAULT_PLC_PORT = 851
@@ -49,28 +50,35 @@ function isPlcModule(moduleEl: Element): boolean {
  * A symbol or parameter declared with inline `<SubItem>`s instead of a named type:
  * register an anonymous struct type for it so it expands like any other struct.
  */
-function inlineType(types: TypeTable, owner: string, el: Element): string | null {
+function inlineType(types: TypeTable, ownerKey: string, el: Element): string | null {
     const subItems = children(el, 'SubItem')
     if (subItems.length === 0) return null
-    const name = `${owner} (inline)`
-    const members = subItems.map(readMember).filter((m): m is MemberDef => m !== null)
-    types[name.toUpperCase()] = { kind: 'struct', name, members }
+    const name = `${ownerKey} (inline)`
+    // The anonymous type declares its fields; it has no properties of its own.
+    const owner = { name, props: new Map<string, string>() }
+    const members = subItems.map((m) => readMember(m, owner)).filter((m): m is MemberDef => m !== null)
+    types[name.toUpperCase()] = { kind: 'struct', name, members: withSymbols(types, members) }
     return name
 }
 
-/** A `<Symbol>` or `<Parameter>` element as a root. */
+/**
+ * A `<Symbol>` or `<Parameter>` element as a root; null when it has no ADS symbol
+ * (`hide`, `TcNoSymbol`). A global `<FB type>.<static var>` symbol (`TcVarStatic`) is a normal root.
+ */
 function readRoot(el: Element, types: TypeTable, owner: string, path: string, area: AreaKind, areaName: string): SymbolRoot | null {
-    const typeEl = child(el, 'BaseType') ?? child(el, 'Type')
-    const type = inlineType(types, `${owner}/${path}`, el) ?? typeNameOf(typeEl)
-    if (!type || properties(el).has('hide')) return null
+    const ref = readTypeRef(el, child(el, 'BaseType') ?? child(el, 'Type'))
+    const type = inlineType(types, `${owner}/${path}`, el) ?? ref.type
+    const access = symbolAccess(properties(el))
+    if (!type || !access) return null
     return {
         name: path,
         type,
-        ns: typeEl?.getAttribute('Namespace') || undefined,
-        dims: readArrayDims(el),
+        ns: ref.ns,
+        dims: ref.dims,
         area,
         areaName,
         comment: text(el, 'Comment') || undefined,
+        ...access,
     }
 }
 
@@ -117,7 +125,7 @@ export function readModuleRoots(body: Element, types: TypeTable, plc: boolean, o
             if (root) roots.push(root)
         }
     }
-    return { roots, parametersWithoutSymbol }
+    return { roots: finalizeSource(types, roots), parametersWithoutSymbol }
 }
 
 export function parameterNote(count: number): string[] {

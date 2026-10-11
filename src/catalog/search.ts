@@ -5,11 +5,12 @@
  * (`MAIN.aAxis[*].fPos`) together with its index ranges, which keeps the index
  * proportional to the number of *distinct* member paths, independent of array
  * sizes, and maps directly onto a counter template when added to the project.
+ * Pointers contribute their target as `p^` paths; disabled symbols are listed too.
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { wildcardsToTemplate } from '@/domain/pattern'
 import type { ArrayDim, AreaKind, SymbolSource } from './model'
-import type { SymbolKind } from './walk'
+import type { SymbolKind, WalkOptions } from './walk'
 import { describe, rootNode, walk } from './walk'
 
 export interface SearchEntry {
@@ -23,6 +24,10 @@ export interface SearchEntry {
     kind: SymbolKind
     typeName: string
     scopeType?: ScopeDataType
+    /** Why a disabled entry (unsupported, pointer) cannot be recorded. */
+    reason?: string
+    /** Caveat for a recordable entry. */
+    warning?: string
     area: AreaKind
     port: number
     comment?: string
@@ -35,7 +40,7 @@ export interface SearchEntry {
 export interface SearchIndex {
     /** Sorted by path: case-insensitively, then exactly, then by source. */
     entries: SearchEntry[]
-    /** True when the index stopped at MAX_ENTRIES or the walk's depth limit and is incomplete. */
+    /** True when the index stopped at MAX_ENTRIES (or a source's share of it) or the walk's depth limit. */
     truncated: boolean
 }
 
@@ -50,37 +55,63 @@ export function buildIndex(sources: SymbolSource[]): SearchIndex {
     return { entries: entries.sort(byPath), truncated }
 }
 
-function collectEntries(sources: SymbolSource[]): SearchIndex {
+/**
+ * Pointer targets are indexed (that is how `p^` paths are found); a reference member is listed but
+ * not expanded — its target is found under its real symbol, and an MC function block's `Axis`
+ * would otherwise repeat the whole AXIS_REF.
+ */
+const SEARCH_WALK: WalkOptions = { pointers: 'expand', references: 'list' }
+
+/** A source's entries, at most `limit` of them; `full` is false when it has more. */
+function sourceEntries(source: SymbolSource, limit: number, stats: { depthLimited: boolean }): { entries: SearchEntry[]; full: boolean } {
     const entries: SearchEntry[] = []
     const seen = new Set<string>()
-    const stats = { depthLimited: false }
-    for (const source of sources) {
-        for (const root of source.roots) {
-            for (const node of walk(source, rootNode(source, root), stats)) {
-                if (entries.length >= MAX_ENTRIES) return { entries, truncated: true }
-                // The same path can be reachable twice (a struct root and its separately declared member).
-                const key = `${source.id}|${node.path}`
-                if (seen.has(key)) continue
-                seen.add(key)
-                const { kind, typeName, scopeType } = describe(node.resolved)
-                entries.push({
-                    key,
-                    sourceId: source.id,
-                    path: node.path,
-                    name: node.name,
-                    kind,
-                    typeName,
-                    scopeType,
-                    area: node.area,
-                    port: node.port,
-                    comment: node.comment,
-                    ranges: node.ranges,
-                    haystack: node.path.toLowerCase(),
-                })
-            }
+    for (const root of source.roots) {
+        for (const node of walk(source, rootNode(source, root), stats, SEARCH_WALK)) {
+            // The same path can be reachable twice (a struct root and its separately declared member).
+            const key = `${source.id}|${node.path}`
+            if (seen.has(key)) continue
+            if (entries.length === limit) return { entries, full: false }
+            seen.add(key)
+            entries.push({
+                key,
+                sourceId: source.id,
+                path: node.path,
+                name: node.name,
+                ...describe(node),
+                area: node.area,
+                port: node.port,
+                comment: node.comment,
+                ranges: node.ranges,
+                haystack: node.path.toLowerCase(),
+            })
         }
     }
-    return { entries, truncated: stats.depthLimited }
+    return { entries, full: true }
+}
+
+/**
+ * Every source's entries, within MAX_ENTRIES in total. Water-filling: sources are cut only when
+ * the total exceeds the cap, smallest first get what they need, and the rest is shared evenly —
+ * so one huge source cannot starve the others and small ones never cost a big one its entries.
+ * Peak memory: Σ min(entries, MAX_ENTRIES) over the sources, held until the cut.
+ */
+function collectEntries(sources: SymbolSource[]): SearchIndex {
+    const stats = { depthLimited: false }
+    const perSource = sources.map((source) => sourceEntries(source, MAX_ENTRIES, stats))
+    let truncated = perSource.some((p) => !p.full)
+    let remaining = MAX_ENTRIES
+    const order = perSource.map((_, i) => i).sort((a, b) => perSource[a].entries.length - perSource[b].entries.length)
+    const entries: SearchEntry[] = []
+    order.forEach((i, n) => {
+        const share = Math.floor(remaining / (order.length - n))
+        const own = perSource[i].entries
+        if (own.length > share) truncated = true
+        const taken = own.slice(0, share)
+        remaining -= taken.length
+        for (const e of taken) entries.push(e)
+    })
+    return { entries, truncated: truncated || stats.depthLimited }
 }
 
 /** The channel template for a wildcard path: `*` become counters. */

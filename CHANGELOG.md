@@ -10,6 +10,32 @@
 - Selection, inspector focus, drag to axis groups and *Add to scope* work the same in both views.
 - The chosen view is remembered in the browser (falls back to the tree when storage is blocked).
 
+### ADS-accurate symbol browser
+
+- The browser now offers exactly what can be recorded by ADS symbol name
+  ([ADR 0005](docs/adr/0005-ads-accessibility-rules.md)):
+  - **hidden**: symbols and members marked `hide` or `TcNoSymbol`, implicit `VAR_INST` members,
+    locals of `hide_all_locals` POUs and empty arrays (which produced invalid templates);
+  - **disabled with a reason**: properties with `monitoring := 'call'` (new: they were not listed),
+    static variables below FB instances ("record `<FB type>.<var>`"), `conditionalshow` members and
+    types ("Hidden in compiled libraries"); strings now say "Strings can only be shown in table charts".
+- **Pointers** expand to their target `^` (`MAIN.pData^.fValue`, `^^` for pointers to pointers), in the
+  tree, in search and in path lookup. Pointers to arrays (`<ArrayInfo PointerTo>`) were read as arrays
+  of up to 65,536 elements before.
+- **References and `VAR_IN_OUT`** (arrays included) expand like the referenced type in the tree and are recordable, with a
+  warning icon "Valid only while the reference is bound". Search lists the reference member itself but
+  not its target (an MC function block's `Axis` would repeat the whole `AXIS_REF`); adding the member
+  adds its target. `TcNoSymbol 'unused'` symbols carry a note.
+- Adding a struct or FB does not follow the pointers and references inside it (add `p^` or the
+  reference itself). Below a pointer, search follows each pointer declaration only once, so linked
+  lists and FBs pointing at each other stay small; one huge source no longer starves the others of search
+  entries, and nothing is cut while all sources fit.
+- A root name declared twice in one file (two versions of a library GVL) is listed once; the tree
+  used the last declaration, path lookup the first.
+- Path lookup finds the root by path instead of scanning all roots (faster "Add" on large PLCs).
+- Imported files stored by V2.0 are dropped on load, with a hint to import them again (their paths
+  would be wrong under the new rules).
+
 ### Project editing
 
 - **Drag & drop in the scope project**: drag a channel by its handle to reorder it (an indicator line
@@ -39,6 +65,15 @@
 - Characters XML cannot carry (control characters, e.g. pasted vertical tabs) are dropped from names and
   symbol paths on export instead of producing a file Scope cannot open.
   - Saved in project files (`name`, `color`, `colorMode` on a channel); older files open unchanged.
+
+### Tests
+
+- `npm run test:corpus` downloads 352 real TwinCAT files (`scripts/corpus/manifest.json`, commit-pinned,
+  size-checked, git-ignored `.corpus/`) and checks import, search and path invariants over all of them.
+  Result: 0 import errors, 505k search entries (V2.0: 642k), no truncated index, every sampled path
+  resolves, no hidden symbol listed.
+- Unit tests for every accessibility rule with a minimal XML snippet, plus one more real fixture
+  (Beckhoff TE2000 sample, 0BSD).
 
 ## V2.0 (2026-10-10)
 

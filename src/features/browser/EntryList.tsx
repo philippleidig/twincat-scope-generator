@@ -61,6 +61,8 @@ export function EntryList({ index, mode }: { index: SearchIndex; mode: EntryList
                             label={<Highlight text={entry.path} words={words} />}
                             title={template}
                             typeName={entry.typeName}
+                            reason={entry.reason}
+                            warning={entry.warning}
                             area={entry.area}
                             port={entry.port}
                             extra={

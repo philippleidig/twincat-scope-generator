@@ -24,16 +24,48 @@ describe('buildIndex', () => {
         const keys = index.entries.map((e) => e.key)
         expect(new Set(keys).size).toBe(keys.length)
     })
-    it('stops at MAX_ENTRIES and says so', () => {
-        const members = Array.from({ length: 600 }, (_, i) => ({ name: `m${i}`, type: 'INT' }))
-        const big: SymbolSource = {
-            ...demo,
-            types: { BIG: { kind: 'struct', name: 'BIG', members } },
-            roots: Array.from({ length: Math.ceil(MAX_ENTRIES / 600) + 1 }, (_, i) => ({ name: `X.b${i}`, type: 'BIG', area: 'internal' as const, areaName: 'I' })),
-        }
-        const r = buildIndex([big])
+    /** A source with `structs` roots of 600 INT members each (601 entries per root). */
+    const bigSource = (id: string, structs: number): SymbolSource => ({
+        ...demo,
+        id,
+        types: { BIG: { kind: 'struct', name: 'BIG', members: Array.from({ length: 600 }, (_, i) => ({ name: `m${i}`, type: 'INT' })) } },
+        roots: Array.from({ length: structs }, (_, i) => ({ name: `X.b${i}`, type: 'BIG', area: 'internal' as const, areaName: 'I' })),
+    })
+    const small: SymbolSource = { ...demo, id: 'small' }
+    const count = (r: { entries: Array<{ sourceId: string }> }, id: string) => r.entries.filter((e) => e.sourceId === id).length
+
+    it('stops at MAX_ENTRIES and says so; a huge source does not starve a small one', () => {
+        const huge = bigSource('huge', Math.ceil(MAX_ENTRIES / 600) + 1)
+        const r = buildIndex([huge])
         expect(r.entries).toHaveLength(MAX_ENTRIES)
         expect(r.truncated).toBe(true)
+        const both = buildIndex([huge, small])
+        expect(count(both, 'small')).toBe(index.entries.length)
+        expect(both.entries).toHaveLength(MAX_ENTRIES)
+        expect(both.truncated).toBe(true)
+    })
+    it('cuts nothing while all sources together fit', () => {
+        const big = bigSource('big', 250) // 150,250 entries
+        const r = buildIndex([small, big])
+        expect(count(r, 'big')).toBe(250 * 601)
+        expect(count(r, 'small')).toBe(index.entries.length)
+        expect(r.truncated).toBe(false)
+    })
+    it('follows each pointer declaration once per root, so mutually pointing FBs stay linear', () => {
+        const names = Array.from({ length: 8 }, (_, i) => `FB_${i}`)
+        const types = Object.fromEntries(
+            names.map((n) => [
+                n.toUpperCase(),
+                { kind: 'struct' as const, name: n, members: [{ name: 'v', type: 'INT' }, ...names.filter((o) => o !== n).map((o) => ({ name: `p${o}`, type: `POINTER TO ${o}` }))] },
+            ]),
+        )
+        const web: SymbolSource = { ...demo, types, roots: [{ name: 'MAIN.fb', type: 'FB_0', area: 'internal', areaName: 'I' }] }
+        const r = buildIndex([web])
+        // 56 pointer declarations, each followed once into an FB of 15 entries: linear, not 8! paths.
+        expect(r.entries.length).toBeLessThan(56 * 16)
+        // Chains of pointers cut by the depth limit are by design, not an incomplete index.
+        expect(r.truncated).toBe(false)
+        expect(r.entries.map((e) => e.path)).toContain('MAIN.fb.pFB_1^.v')
     })
 })
 

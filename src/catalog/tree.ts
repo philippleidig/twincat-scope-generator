@@ -4,7 +4,7 @@
  */
 import type { SymbolRoot, SymbolSource } from './model'
 import type { PathNode, SymbolInfo } from './walk'
-import { describe, elementNode, fullPath, memberNodes, rootNode } from './walk'
+import { derefNode, describe, elementNode, fullPath, memberNodes, rootNode } from './walk'
 
 interface NodeBase {
     /** Unique across all sources. */
@@ -34,10 +34,11 @@ export const MAX_ARRAY_CHILDREN = 1000
 
 export const sourceKey = (sourceId: string) => `source:${sourceId}`
 
-export const isExpandable = (node: BrowserNode) => node.kind === 'folder' || node.kind === 'struct' || node.kind === 'array'
+/** Folders, structs, arrays and pointers (whose one child is the target `^`). */
+export const isExpandable = (node: BrowserNode) => node.kind === 'folder' || node.kind === 'struct' || node.kind === 'array' || node.kind === 'pointer'
 
 function symbolNode(source: SymbolSource, symbol: PathNode, label: string, depth: number): SymbolNode {
-    return { key: `${source.id}|${symbol.path}`, sourceId: source.id, label, depth, symbol, ...describe(symbol.resolved) }
+    return { key: `${source.id}|${symbol.path}`, sourceId: source.id, label, depth, symbol, ...describe(symbol) }
 }
 
 /**
@@ -100,7 +101,8 @@ export function childrenOf(source: SymbolSource, node: BrowserNode): BrowserNode
         }
         return out
     }
-    return []
+    const target = derefNode(source, symbol)
+    return target ? [symbolNode(source, target, '^', depth)] : []
 }
 
 /** Children per node key, cached per source object (sources are immutable). */

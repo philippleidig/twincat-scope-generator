@@ -22,6 +22,9 @@ Engineering files describe variables, not always their ADS names, and there is n
   so a wrong assumption can be corrected without a release.
 - A complete source (PLC `.tmc`) replaces a partial listing of the same runtime (PLC I/O from a
   `.tsproj`, same kind and port).
+- Below a root, paths continue with `.member`, `[i,j]` and, through a pointer, `^`
+  (`MAIN.pData^.fValue`, as TwinCAT Scope saves it); references add nothing to the path. Which
+  members exist at all follows the ADS accessibility rules in [ADR 0005](0005-ads-accessibility-rules.md) (V2.1).
 - When the imported files name exactly one Net ID (a `.tsproj`), sources without one adopt it; with
   several Net IDs the user assigns them per source.
 

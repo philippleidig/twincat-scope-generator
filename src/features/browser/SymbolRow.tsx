@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import type { AreaKind } from '@/catalog/model'
 import type { BrowserPick } from '@/state/browserStore'
 import { useBrowserStore } from '@/state/browserStore'
@@ -14,6 +15,8 @@ interface SymbolRowProps {
     title: string
     typeName?: string
     reason?: string
+    /** Caveat for a recordable symbol (via reference, TcNoSymbol 'unused'). */
+    warning?: string
     area?: AreaKind
     port?: number
     extra?: ReactNode
@@ -24,7 +27,7 @@ interface SymbolRowProps {
 }
 
 /** One row in the tree or the result list: selectable, draggable, focusable for the inspector. */
-export function SymbolRow({ pick, indent, toggle, icon, label, title, typeName, reason, area, port, extra, role, ariaExpanded, ariaLevel, onActivate }: SymbolRowProps) {
+export function SymbolRow({ pick, indent, toggle, icon, label, title, typeName, reason, warning, area, port, extra, role, ariaExpanded, ariaLevel, onActivate }: SymbolRowProps) {
     const selected = useBrowserStore((s) => (pick ? s.selection.has(pick.key) : false))
     const focused = useBrowserStore((s) => !!pick && s.focused?.key === pick.key)
     const toggleSelected = useBrowserStore((s) => s.toggleSelected)
@@ -38,7 +41,7 @@ export function SymbolRow({ pick, indent, toggle, icon, label, title, typeName, 
             aria-level={ariaLevel}
             className={`tree-row ${selected ? 'tree-row--selected' : ''} ${focused ? 'tree-row--focused' : ''} ${!pick ? 'tree-row--muted' : ''}`}
             style={{ paddingLeft: 8 + indent * 16 }}
-            title={reason ? `${title} — ${reason}` : title}
+            title={[title, reason, warning].filter(Boolean).join(' — ')}
             draggable={!!pick}
             onDragStart={(e) => {
                 if (!pick) return
@@ -65,6 +68,7 @@ export function SymbolRow({ pick, indent, toggle, icon, label, title, typeName, 
             {icon}
             <span className="tree-row__label mono">{label}</span>
             {extra}
+            {warning && <AlertTriangle size={13} className="tree-row__warning" aria-label={warning} role="img" />}
             {typeName && <span className={`type-tag ${reason ? 'type-tag--muted' : ''}`}>{typeName}</span>}
             {area && <span className={`area-dot area-dot--${area}`} title={AREA_LABEL[area]} />}
             {port !== undefined && <span className="tree-row__meta">{port}</span>}
