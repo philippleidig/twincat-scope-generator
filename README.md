@@ -51,6 +51,10 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
   a repeated name stays in sync (`Axis {i:1:3}.Drive {i:1:3}` → 3), leading zeros pad (`{i:01:12}`).
   Expansion is capped at 5,000 per channel.
 - Per channel: data type, ADS port (with presets), target (when the project has several).
+- **Display name and colour** per channel (swatch at the start of the row): names may use the
+  template's counters (`Axis {i} ActPos`), colours come from an 18-colour palette or any custom colour;
+  pattern channels continue the palette from the chosen colour or use the same colour for all.
+  Exported as the channel name and line colour TwinCAT Scope shows.
 - **Targets** (AMS Net IDs) are managed in *Project settings*, together with project name, scope server,
   base sample time and record time.
 - **Drag & drop** from the TwinCAT Target Browser onto an axis group still works.

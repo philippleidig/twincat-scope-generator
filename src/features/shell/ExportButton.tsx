@@ -24,7 +24,8 @@ export function ExportButton() {
             downloadBlob(blob, generated.tcmproj.fileName.replace(/\.tcmproj$/, '_scope.zip'))
             const n = generated.scopeFiles.length
             toast.success(`Exported ${n} scope file${n === 1 ? '' : 's'} · ${generated.tcmproj.acquisitionCount} acquisitions`)
-            for (const issue of issues) toast.warning(issue)
+            // One toast for all issues, so it does not push the success message out; the icon lists them all.
+            if (issues.length > 0) toast.warning(issues.length === 1 ? issues[0] : `${issues.length} issues: ${issues[0]} — and ${issues.length - 1} more`)
         } catch (e) {
             toast.warning(`Export failed: ${e instanceof Error ? e.message : String(e)}`)
         } finally {

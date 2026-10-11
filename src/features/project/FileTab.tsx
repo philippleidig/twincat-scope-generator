@@ -1,7 +1,9 @@
+import { useRef } from 'react'
 import type { ScopeFile } from '@/domain/project'
 import { fileAcquisitionCount, scopeFileLabel } from '@/domain/project'
 import { applyDrop } from '@/state/actions'
 import { dragKind, readProjectDrag } from '@/state/projectDrag'
+import { focusKey, useFocusRequest } from '@/state/focusRequest'
 import { useProjectStore } from '@/state/projectStore'
 import { toast } from '@/state/toastStore'
 import { isCopyDrag, usePendingDrop } from './dnd'
@@ -20,6 +22,8 @@ const copyKey = (d: { copy: boolean }) => String(d.copy)
 export function FileTab({ file, selected }: FileTabProps) {
     const selectFile = useProjectStore((s) => s.selectFile)
     const [drop, setDrop] = usePendingDrop(copyKey)
+    const tabRef = useRef<HTMLButtonElement>(null)
+    useFocusRequest(focusKey.fileTab(file.id), tabRef)
 
     const accepts = (e: React.DragEvent) => {
         const kind = dragKind(e.dataTransfer.types)
@@ -31,6 +35,7 @@ export function FileTab({ file, selected }: FileTabProps) {
             type="button"
             role="tab"
             aria-selected={selected}
+            ref={tabRef}
             className={`file-tab ${drop ? 'file-tab--drop' : ''}`}
             onClick={() => selectFile(file.id)}
             onDragOver={(e) => {

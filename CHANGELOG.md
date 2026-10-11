@@ -20,7 +20,25 @@
 - Symbols from the browser or the TwinCAT Target Browser can be dropped at a precise position between
   channels.
 - **"Move to…" menu** on every channel and axis group (move up/down, to another axis group or file) as
-  a keyboard-friendly alternative to dragging.
+  a keyboard-friendly alternative to dragging. After a move to another axis group or file, focus stays
+  on the moved item (or the tab of its new file).
+- **Channel names and colours**: the swatch at the start of a channel row opens a second line with a
+  **display name** and a **colour**.
+  - The name may insert the template's counters as `{i}` (`Axis {i} ActPos` with
+    `GVL.aAxis[{i:1:4}].fActPos` → "Axis 1 ActPos" … "Axis 4 ActPos", padding as in the template). The
+    field shows the effective name as placeholder, the counters available and a preview; unknown
+    counters (or a counter with its range, or stray braces) are flagged with the reason (the export then
+    falls back to the symbol name and the export dialog warns).
+  - Colour from a palette of 18, any colour via the native colour picker, or *Auto* (palette colours by
+    position, as before). A pattern channel colours its acquisitions with consecutive palette colours
+    starting at the chosen one, or with **the same colour for all**.
+  - Exported to TwinCAT Scope: the channel's `<Name>` is the display name with its name relation set to
+    `Custom`; the colour goes to the channel's `DisplayColor` and the series style's `DisplayColor` and
+    `MarkColor` (signed ARGB). Acquisitions keep the symbol names. Without names and colours the exported
+    files are unchanged.
+- Characters XML cannot carry (control characters, e.g. pasted vertical tabs) are dropped from names and
+  symbol paths on export instead of producing a file Scope cannot open.
+  - Saved in project files (`name`, `color`, `colorMode` on a channel); older files open unchanged.
 
 ## V2.0 (2026-10-10)
 

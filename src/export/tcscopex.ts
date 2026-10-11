@@ -10,12 +10,18 @@ import type { ScopeDataType } from '@/domain/dataTypes'
 import { SCOPE_DATA_TYPE_SIZE } from '@/domain/dataTypes'
 import type { Project, ProjectSettings } from '@/domain/project'
 import { sanitizeFileName, uniqueName } from '@/domain/project'
-import { expandTemplate, validateTemplate } from '@/domain/pattern'
+import { autoColor, expandChannel } from '@/domain/channelStyle'
 
 /** One recorded value: a fully expanded channel. */
 export interface Acquisition {
   guid: string
   symbolName: string
+  /** Channel name in Scope: the channel's display name, else the symbol name. */
+  displayName: string
+  /** `displayName` comes from the channel's display name (Scope's name relation `Custom`). */
+  customName: boolean
+  /** `#rrggbb`: the channel's colour, else a palette colour by position in the axis group. */
+  color: string
   amsNetId: string
   targetPort: number
   dataType: ScopeDataType
@@ -44,8 +50,14 @@ export interface GeneratedProject {
   tcmproj: GeneratedFile
 }
 
-function escapeXml(text: string): string {
+/** Characters XML 1.0 does not allow at all (control characters, lone surrogates, U+FFFE/U+FFFF). */
+// eslint-disable-next-line no-control-regex -- the allowed whitespace controls are listed on purpose
+const XML_ILLEGAL = /[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu
+
+/** Text for XML content and attributes; characters XML cannot carry are dropped. */
+export function escapeXml(text: string): string {
   return text
+    .replace(XML_ILLEGAL, '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -56,17 +68,10 @@ function escapeXml(text: string): string {
 /** Source of GUIDs; injectable so tests can produce deterministic output. */
 export type IdGen = () => string
 
-/** Channel colors (TwinCAT stores ARGB as signed int32). */
-const CHANNEL_COLORS = [
-  -16744448,  // Green
-  -16776961,  // Blue
-  -65536,     // Red
-  -256,       // Yellow
-  -16711681,  // Cyan
-  -65281,     // Magenta
-  -23296,     // Orange
-  -8388480,   // Purple
-]
+/** `#rrggbb` as TwinCAT stores colours: ARGB (alpha 255) as a signed 32-bit integer (`#008000` → -16744448). */
+export function toArgb(hex: string): number {
+  return (0xff000000 | parseInt(hex.slice(1), 16)) | 0
+}
 
 /**
  * Expand every channel into acquisitions and assign unique, file-system-safe file
@@ -82,17 +87,19 @@ export function planProject(project: Project, id: IdGen = uuidv4): PlannedScopeF
   for (const file of project.scopeFiles) {
     const axisGroups: PlannedAxisGroup[] = []
     for (const ag of file.axisGroups) {
-      const acquisitions = ag.channels.flatMap((ch) => {
-        if (!validateTemplate(ch.symbol).valid) return []
-        return expandTemplate(ch.symbol).map((symbolName) => ({
-          guid: id(),
-          symbolName,
-          amsNetId: netIdByTarget.get(ch.targetId) ?? fallbackNetId,
-          targetPort: ch.port,
-          dataType: ch.dataType,
-          baseSampleTime: project.settings.baseSampleTime,
-        }))
-      })
+      const expanded = ag.channels.flatMap((ch) => expandChannel(ch).map((a) => ({ ch, a })))
+      // Channels without a colour get palette colours by their position in the axis group.
+      const acquisitions = expanded.map(({ ch, a }, i): Acquisition => ({
+        guid: id(),
+        symbolName: a.symbolName,
+        displayName: a.displayName,
+        customName: a.customName,
+        color: a.color ?? autoColor(i),
+        amsNetId: netIdByTarget.get(ch.targetId) ?? fallbackNetId,
+        targetPort: ch.port,
+        dataType: ch.dataType,
+        baseSampleTime: project.settings.baseSampleTime,
+      }))
       if (acquisitions.length > 0) axisGroups.push({ name: ag.name, acquisitions })
     }
     if (axisGroups.length === 0) continue
@@ -248,10 +255,13 @@ ${indent}</AdsAcquisition>`
 /**
  * Generate XML for a single Channel referencing an acquisition
  */
-function generateChannelXml(id: IdGen, acq: Acquisition, sortPriority: number, colorIndex: number, indent: string): string {
+function generateChannelXml(id: IdGen, acq: Acquisition, sortPriority: number, indent: string): string {
   const channelGuid = id()
-  const color = CHANNEL_COLORS[colorIndex % CHANNEL_COLORS.length]
-  const name = escapeXml(acq.symbolName)
+  const color = toArgb(acq.color)
+  const name = escapeXml(acq.displayName)
+  const symbolName = escapeXml(acq.symbolName)
+  // Scope shows the acquisition's name unless the channel's name relation says `Custom`.
+  const usedNameType = acq.customName ? 'Custom' : 'Acquisition'
 
   return `${indent}<Channel AssemblyName="TwinCAT.Measurement.Scope.API.Model">
 ${indent}  <Comment />
@@ -268,7 +278,7 @@ ${indent}      <BitMask>18446744073709551615</BitMask>
 ${indent}      <Comment />
 ${indent}      <DisplayColor>Black</DisplayColor>
 ${indent}      <Guid>${id()}</Guid>
-${indent}      <Name>Y: ${name}</Name>
+${indent}      <Name>Y: ${symbolName}</Name>
 ${indent}      <Offset>0</Offset>
 ${indent}      <ResultingUnit>
 ${unitXml(`${indent}        `)}
@@ -349,7 +359,7 @@ ${indent}      <Guid>${id()}</Guid>
 ${indent}      <Name>MeasurementMemberBase</Name>
 ${indent}      <SortPriority>100</SortPriority>
 ${indent}      <Title>MeasurementMemberBase</Title>
-${indent}      <UsedNameType>Acquisition</UsedNameType>
+${indent}      <UsedNameType>${usedNameType}</UsedNameType>
 ${indent}    </NameRelationInfo>
 ${indent}  </SubMember>
 ${indent}  <Title>MeasurementMemberBase</Title>
@@ -361,7 +371,7 @@ ${indent}</Channel>`
  */
 function generateAxisGroupXml(id: IdGen, agAcq: PlannedAxisGroup, sortPriority: number, indent: string): string {
   const channelsXml = agAcq.acquisitions
-    .map((acq, i) => generateChannelXml(id, acq, 10 + i, i, `${indent}    `))
+    .map((acq, i) => generateChannelXml(id, acq, 10 + i, `${indent}    `))
     .join('\n')
 
   return `${indent}<AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">

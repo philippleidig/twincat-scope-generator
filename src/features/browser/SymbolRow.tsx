@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { AreaKind } from '@/catalog/model'
 import type { BrowserPick } from '@/state/browserStore'
 import { useBrowserStore } from '@/state/browserStore'
-import { setPickDragData } from '@/state/actions'
+import { setPickDragData } from '@/state/projectDrag'
 import { AREA_LABEL } from './picks'
 
 interface SymbolRowProps {

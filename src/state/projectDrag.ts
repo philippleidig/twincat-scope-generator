@@ -4,8 +4,9 @@
  * module-level drag state. During `dragover` only the types are readable, the data only on `drop`.
  */
 import type { BrowserPick } from './browserStore'
-import { PICK_MIME } from './browserStore'
 
+/** MIME type of a drag carrying browser picks (JSON). */
+export const PICK_MIME = 'application/x-scope-picks'
 export const CHANNEL_MIME = 'application/x-scope-channel'
 export const AXIS_GROUP_MIME = 'application/x-scope-axis-group'
 
@@ -25,6 +26,12 @@ export function dragKind(types: readonly string[]): DragKind | null {
     if (types.includes(PICK_MIME)) return 'picks'
     if (types.includes('text/plain')) return 'text'
     return null
+}
+
+/** Serialise browser picks for a drag. */
+export function setPickDragData(dataTransfer: DataTransfer, picks: BrowserPick[]): void {
+    dataTransfer.setData(PICK_MIME, JSON.stringify(picks))
+    dataTransfer.effectAllowed = 'copy'
 }
 
 export function setChannelDragData(dataTransfer: DataTransfer, channelId: string): void {
