@@ -1,4 +1,4 @@
-import { Ban, Boxes, Braces, Brackets, Cpu, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
+import { Ban, Boxes, Braces, Brackets, CornerDownRight, Cpu, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
 import type { SourceKind } from '@/catalog/model'
 import type { BrowserNode } from '@/catalog/tree'
 
@@ -13,6 +13,8 @@ export function KindIcon({ kind, open = false }: { kind: BrowserNode['kind']; op
             return <Brackets {...props} />
         case 'scalar':
             return <Variable {...props} />
+        case 'pointer':
+            return <CornerDownRight {...props} />
         default:
             return <Ban {...props} />
     }

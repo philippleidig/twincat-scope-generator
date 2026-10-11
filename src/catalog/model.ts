@@ -13,8 +13,21 @@ export interface ArrayDim {
     upper: number
 }
 
-export interface MemberDef {
+/**
+ * What the walker needs to know about whether a member, root or type can be recorded by its
+ * ADS symbol name (see ADR 0004). Things without an ADS symbol at all are dropped (or, for
+ * types, resolve to `hidden`); these are the cases that stay visible.
+ */
+export interface Access {
+    /** Shown muted with this reason and never recordable (property, static variable, `conditionalshow`). */
+    disabled?: string
+    /** Recordable, with a caveat shown next to it (`TcNoSymbol 'unused'`). */
+    note?: string
+}
+
+export interface MemberDef extends Access {
     name: string
+    /** Type name; pointers and references are folded in (`POINTER TO ARRAY [0..9] OF INT`). */
     type: string
     /** Namespace hint for `type`, when the file gives one. */
     ns?: string
@@ -22,11 +35,17 @@ export interface MemberDef {
     comment?: string
 }
 
+/** Flags a type definition can carry, from its `<Properties>`. */
+interface TypeFlags extends Access {
+    /** `hide` or `TcNoSymbol`: no symbol of this type has an ADS symbol. */
+    hidden?: boolean
+}
+
 export type TypeDef =
     /** Alias or enum: behaves like `base` (with optional array dims). */
-    | { kind: 'alias'; name: string; base: string; ns?: string; dims?: ArrayDim[]; enumValues?: string[]; comment?: string }
+    | ({ kind: 'alias'; name: string; base: string; ns?: string; dims?: ArrayDim[]; enumValues?: string[]; comment?: string } & TypeFlags)
     /** STRUCT or FUNCTION_BLOCK; `extends` contributes inherited members first. */
-    | { kind: 'struct'; name: string; members: MemberDef[]; extends?: string; functionBlock?: boolean; interface?: boolean; comment?: string }
+    | ({ kind: 'struct'; name: string; members: MemberDef[]; extends?: string; functionBlock?: boolean; interface?: boolean; comment?: string } & TypeFlags)
 
 /** Type definitions keyed by upper-case name and by upper-case `namespace.name`. */
 export type TypeTable = Record<string, TypeDef>
@@ -34,7 +53,7 @@ export type TypeTable = Record<string, TypeDef>
 export type AreaKind = 'input' | 'output' | 'internal' | 'parameter'
 
 /** A symbol as declared in the file: a global/program variable, a module parameter, an axis variable, ... */
-export interface SymbolRoot {
+export interface SymbolRoot extends Access {
     /** Path relative to the source's `pathPrefix`, e.g. `MAIN.fbAxis` or `Inputs.Value`. */
     name: string
     type: string
@@ -71,9 +90,21 @@ export interface SymbolSource {
     warnings: string[]
 }
 
-/** How a type looks once aliases, enums and inheritance are resolved. */
-export type ResolvedType =
+/**
+ * How a type looks once aliases, enums, inheritance, references and pointers are resolved.
+ *
+ * - `pointer`: not recordable itself; its one child `^` is the pointed-to `target`.
+ * - `unsupported`: shown disabled with `reason` (strings, interfaces, properties, …).
+ * - `hidden`: has no ADS symbol; the walker drops it (never shown).
+ *
+ * `viaReference` marks a type reached through `REFERENCE TO`/`VAR_IN_OUT` (expanded like the
+ * referenced type, valid only while bound); `note` is a caveat from the type definition.
+ */
+export type ResolvedType = (
     | { kind: 'scalar'; scopeType: ScopeDataType; typeName: string }
     | { kind: 'struct'; typeName: string; members: MemberDef[] }
     | { kind: 'array'; dims: ArrayDim[]; element: string; ns?: string; typeName: string }
+    | { kind: 'pointer'; typeName: string; target: string; ns?: string; reason: string }
     | { kind: 'unsupported'; typeName: string; reason: string }
+    | { kind: 'hidden'; typeName: string; reason: string }
+) & { viaReference?: boolean; note?: string }

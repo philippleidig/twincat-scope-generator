@@ -8,6 +8,7 @@ export function fixture(name: string): string {
 
 export const FIXTURES = {
     plcTmc: 'Beckhoff__TF6000_ADS_DOTNET_V5_Samples__PLC.tmc',
+    accessTmc: 'Beckhoff__TE2000_Client_Samples__UserGuidance_PLC.tmc',
     inheritanceTmc: '0w8States__PLC-Design-Patterns__Strategy_PLC1.tmc',
     tcomTmc: 'Beckhoff__TF6311_Samples__TCPServer.tmc',
     ncAxisXti: 'pcdshub__lcls-twincat-motion__NC_Axis_TestStateInitTiming.xti',

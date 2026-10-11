@@ -5,6 +5,7 @@
  * (`MAIN.aAxis[*].fPos`) together with its index ranges, which keeps the index
  * proportional to the number of *distinct* member paths, independent of array
  * sizes, and maps directly onto a counter template when added to the project.
+ * Pointers contribute their target as `p^` paths; disabled symbols are listed too.
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { wildcardsToTemplate } from '@/domain/pattern'
@@ -23,6 +24,12 @@ export interface SearchEntry {
     kind: SymbolKind
     typeName: string
     scopeType?: ScopeDataType
+    /** Why a disabled entry (unsupported, pointer) cannot be recorded. */
+    reason?: string
+    /** Reached through a reference: recordable while the reference is bound. */
+    viaReference?: boolean
+    /** Caveat for a recordable entry. */
+    warning?: string
     area: AreaKind
     port: number
     comment?: string
@@ -52,15 +59,12 @@ export function buildIndex(sources: SymbolSource[]): SearchIndex {
                 const key = `${source.id}|${node.path}`
                 if (seen.has(key)) continue
                 seen.add(key)
-                const { kind, typeName, scopeType } = describe(node.resolved)
                 entries.push({
                     key,
                     sourceId: source.id,
                     path: node.path,
                     name: node.name,
-                    kind,
-                    typeName,
-                    scopeType,
+                    ...describe(node),
                     area: node.area,
                     port: node.port,
                     comment: node.comment,

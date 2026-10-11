@@ -130,3 +130,6 @@ Desktop.ini
 # Playwright
 test-results/
 playwright-report/
+
+# Real-file test corpus (scripts/corpus/fetch.mjs)
+.corpus/

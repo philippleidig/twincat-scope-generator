@@ -51,8 +51,12 @@ describe('resolveType', () => {
         const fb = resolveType(table, 'FB_Child')
         expect(fb.kind === 'struct' && fb.members.map((m) => m.name)).toEqual(['bBusy', 'fVal', 'pNext'])
     })
-    it('marks pointers, strings, interfaces and unknown types as unsupported', () => {
-        expect(resolveType(table, 'POINTER TO FB_Child').kind).toBe('unsupported')
+    it('resolves pointers to their target and references to the referenced type', () => {
+        expect(resolveType(table, 'POINTER TO FB_Child')).toMatchObject({ kind: 'pointer', target: 'FB_Child' })
+        expect(resolveType(table, 'REFERENCE TO T_Alias')).toMatchObject({ kind: 'scalar', scopeType: 'UINT32', viaReference: true })
+        expect(resolveType(table, 'POINTER TO ARRAY [0..0, 1..0] OF INT')).toMatchObject({ kind: 'unsupported', reason: /without ADS symbols/ })
+    })
+    it('marks strings, interfaces and unknown types as unsupported', () => {
         expect(resolveType(table, 'STRING(80)').kind).toBe('unsupported')
         expect(resolveType(table, 'I_Thing')).toMatchObject({ kind: 'unsupported', reason: /Interface/ })
         expect(resolveType(table, 'ST_Missing')).toMatchObject({ kind: 'unsupported', reason: /not defined/ })

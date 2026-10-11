@@ -313,6 +313,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.tree-row__warning {
+    flex: none;
+    color: var(--warning);
+}
 .type-tag--muted {
     color: var(--text-3);
     text-decoration: line-through;

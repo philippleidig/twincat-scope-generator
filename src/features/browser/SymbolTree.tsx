@@ -91,6 +91,7 @@ export function SymbolTree({ sources }: { sources: SymbolSource[] }) {
                         title={node.kind === 'folder' ? node.path : node.symbol.path}
                         typeName={symbol?.typeName}
                         reason={symbol?.reason}
+                        warning={symbol?.warning}
                         area={symbol?.symbol.area}
                         onActivate={expandable ? () => toggleExpanded(node.key) : undefined}
                     />
