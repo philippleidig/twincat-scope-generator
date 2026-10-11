@@ -9,6 +9,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { afterAll, describe, expect, it } from 'vitest'
 import { resolve } from 'node:path'
+import { bootSymbolTables, leafPaths } from './__fixtures__/adsSymbolTable'
 import { MAX_EXPANSION, expansionCount, validateTemplate } from '@/domain/pattern'
 import { NOTE } from './access'
 import { importTwinCatFile } from './importFile'
@@ -21,15 +22,19 @@ interface ManifestEntry {
     file: string
     kind: string
     license: string | null
+    /** A boot project (`CurrentConfig.xml`): the ADS symbol tables TwinCAT built from this project file. */
+    symbolsOf?: string
 }
 
 const dir = resolve(process.cwd(), '.corpus')
 const manifest: ManifestEntry[] = JSON.parse(readFileSync(resolve(process.cwd(), 'scripts/corpus/manifest.json'), 'utf8'))
 const available = existsSync(dir) && manifest.every((m) => existsSync(resolve(dir, m.file)))
+/** Project files; boot projects are references for them, not imported themselves. */
+const projectFiles = manifest.filter((m) => !m.symbolsOf)
 
 /** Resolve at most this many index entries per file (evenly spaced). */
 const SAMPLE = 2_000
-const KINDS = new Set(['PLC', 'TcCOM', 'NC', 'Other'])
+const KINDS = new Set(['PLC', 'TcCOM', 'NC', 'IO', 'Other'])
 
 const summary = {
     files: 0,
@@ -46,6 +51,8 @@ const summary = {
     sampled: 0,
     unresolved: 0,
     hiddenLeaks: 0,
+    /** Ports whose symbol table a boot project holds, and how many of its paths an I/O source has. */
+    referencePorts: [] as string[],
     disabled: new Map<string, number>(),
     ms: 0,
 }
@@ -166,6 +173,7 @@ describe('real-file corpus', () => {
             ['sampled paths', summary.sampled],
             ['  unresolved', summary.unresolved],
             ['  hidden leaks', summary.hiddenLeaks],
+            ...summary.referencePorts.map((r): [string, string] => ['reference symbol table', r]),
             ['time (s)', (summary.ms / 1000).toFixed(1)],
         ]
         const disabled = [...summary.disabled].sort((a, b) => b[1] - a[1])
@@ -179,7 +187,7 @@ describe('real-file corpus', () => {
         )
     })
 
-    it.skipIf(!available).each(manifest.map((m) => [m.file, m] as const))('%s', (file) => {
+    it.skipIf(!available).each(projectFiles.map((m) => [m.file, m] as const))('%s', (file) => {
         const t0 = performance.now()
         summary.files++
         const content = readFileSync(resolve(dir, file), 'utf8')
@@ -192,5 +200,25 @@ describe('real-file corpus', () => {
         }
         check(file, sources, content)
         summary.ms += performance.now() - t0
+    })
+
+    /**
+     * I/O images: the paths of the source for an image with ADS server and symbols on must be exactly
+     * the symbols TwinCAT downloaded to that image's port (`IO: Download Symbols`).
+     */
+    it.skipIf(!available).each(manifest.filter((m) => m.symbolsOf).map((m) => [m.file, m] as const))('reference symbols: %s', (file, m) => {
+        const tables = bootSymbolTables(parseXml(readFileSync(resolve(dir, file), 'utf8')))
+        const sources = importTwinCatFile(m.symbolsOf!, readFileSync(resolve(dir, m.symbolsOf!), 'utf8'))
+        let compared = 0
+        for (const [port, table] of tables) {
+            const io = sources.filter((s) => s.kind === 'IO' && s.port === port)
+            if (io.length === 0) continue
+            compared++
+            const ours = buildIndex(io).entries.filter((e) => e.kind === 'scalar').map((e) => e.path.toLowerCase()).sort()
+            const reference = leafPaths(table).map((p) => p.toLowerCase()).sort()
+            summary.referencePorts.push(`port ${port}: ${reference.length} symbols, ${reference.filter((p) => ours.includes(p)).length} matched`)
+            expect(ours, `${file}: I/O symbols on port ${port}`).toEqual(reference)
+        }
+        expect(compared, `${file}: no I/O image port in the symbol tables`).toBeGreaterThan(0)
     })
 })

@@ -14,6 +14,9 @@ part of the built app). Each file keeps its original license; the license texts 
 | `Beckhoff-USA-Community__MIL-SIL-HIL-Simulink-TwinCAT__TcCOM_TempCtrl.xti` | [Beckhoff-USA-Community/MIL-SIL-HIL-Simulink-TwinCAT](https://github.com/Beckhoff-USA-Community/MIL-SIL-HIL-Simulink-TwinCAT/blob/HEAD/twincat/sil/_Config/TcCOM%20Objects/TempCtrl.xti) | BSD-2-Clause |
 | `RodrigoSoares256__TwinCAT-Projects__EtherCATDiag_Term2_EL2008.xti` | [RodrigoSoares256/TwinCAT-Projects](https://github.com/RodrigoSoares256/TwinCAT-Projects/blob/HEAD/EtherCATDiag/_Config/IO/Device%201%20(EtherCAT)/Term%201%20(EK1101)/Term%202%20(EL2008).xti) | MIT |
 
+`adsSymbolTable.ts` (tests only) reads the ADS symbol tables a boot project's `CurrentConfig.xml`
+holds; the corpus run compares the I/O importer with them.
+
 The much larger real-file corpus (352 files from `scripts/corpus/manifest.json`) is not committed:
 `npm run test:corpus` downloads it into the git-ignored `.corpus/` folder and runs
 `src/catalog/corpus.test.ts` over it. Only files with a permissive licence are copied here.

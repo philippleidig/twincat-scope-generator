@@ -8,4 +8,6 @@ export const PORT_PRESETS = [
     { port: 350, label: 'Task 1 / TcCOM' },
     { port: 351, label: 'Task 2' },
     { port: 352, label: 'Task 3' },
+    { port: 27905, label: 'I/O image 1' },
+    { port: 27906, label: 'I/O image 2' },
 ]

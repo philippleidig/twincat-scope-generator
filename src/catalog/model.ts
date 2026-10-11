@@ -63,7 +63,7 @@ export interface SymbolRoot extends Access {
     port?: number
 }
 
-export type SourceKind = 'PLC' | 'TcCOM' | 'NC' | 'Other'
+export type SourceKind = 'PLC' | 'TcCOM' | 'NC' | 'IO' | 'Other'
 
 export interface SymbolSource {
     id: string

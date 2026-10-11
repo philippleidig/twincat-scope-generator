@@ -4,10 +4,15 @@ Vocabulary of the Scope Generator. Code, UI and docs use these terms with exactl
 
 ## Symbol catalog (what was imported)
 
-**Source** — What one imported file contributes for one runtime: a PLC, a TcCOM object/class or the NC.
+**Source** — What one imported file contributes for one runtime: a PLC, a TcCOM object/class, the NC
+or the process image of an I/O device.
 Has a kind, an ADS **port**, an optional **path prefix** and target **AMS Net ID**, a type table and
 its root symbols. One file can yield several sources (a `.tsproj` with PLC and NC).
 _Avoid_: file, project (a file is the container, a source is what it describes).
+
+**Process image (I/O)** — The I/O data of one device (and task) as an ADS server of its own, port
+27904 + image id, once "Enable ADS Server" and "Create symbols" are set on the device's *Image*. Paths
+are `<box>.<PDO>.<entry>` (EtherCAT), boxes flat at top level. See ADR 0006.
 
 **Complete source** — A source that lists every symbol of its runtime (a PLC `.tmc`). A partial source
 (the I/O variables of a PLC in a `.tsproj`) is dropped when a complete one for the same kind and port exists.
@@ -54,7 +59,7 @@ current catalog only when added, into **channel specs**.
 (`GVL.aAxis[*].fActPos`) together with their **ranges**, so an array contributes one entry, not one per element.
 Disabled symbols and pointers are entries too (with their reason), pointer targets as `p^` paths.
 
-**Corpus** — The 352 public TwinCAT files in `scripts/corpus/manifest.json`, downloaded into `.corpus/`
+**Corpus** — The 352 public TwinCAT files (plus one boot project whose I/O symbol table is the reference for the I/O importer) in `scripts/corpus/manifest.json`, downloaded into `.corpus/`
 by `npm run test:corpus` and used to check importer invariants. Never committed.
 
 **Browser view** — How the symbol browser shows the catalog: the **tree** (sources → folders → symbols →

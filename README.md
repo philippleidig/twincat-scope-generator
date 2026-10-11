@@ -24,7 +24,8 @@ menu move it between machines.
 |---|---|
 | PLC `.tmc` (in the PLC project folder) | **Every** PLC symbol with its real ADS path (`MAIN.fbAxis`, `GVL.nCount`), types from `<DataTypes>` incl. structs, function blocks (with inheritance), enums, aliases and arrays. Port from the project (`Port_851`). |
 | TcCOM `.tmc` / object `.xti` | Data areas and parameters as `<object name>.<data area>.<symbol>` on the task port (350 by default). |
-| `.xti` / `.tsproj` | NC axes as `Axes.<axis>.<member>` on port 501 (axis state such as `ActPos`, `SetPos`, `ActVelo`, and `ToPlc`/`FromPlc`), TcCOM objects, PLC variables linked to I/O, and the target's AMS Net ID. Parts stored in separate files are listed so you can import them too. |
+| `.xti` / `.tsproj` | NC axes as `Axes.<axis>.<member>` on port 501 (axis state such as `ActPos`, `SetPos`, `ActVelo`, and `ToPlc`/`FromPlc`), TcCOM objects, PLC variables linked to I/O, **I/O devices** (below), and the target's AMS Net ID. Parts stored in separate files are listed so you can import them too. |
+| I/O device (in the `.tsproj` or its own `.xti`) | The device's **process image** on its own ADS port (27904 + image id, usually 27905): `<box>.<PDO>.<entry>` such as `Term 2 (EL3102).AI Standard Channel 1.Value`, `<box>.WcState`, `Inputs.Frm0State`. Needs "Enable ADS Server" and "Create symbols" on the ADS tab of the device's *Image* ([ADR 0006](docs/adr/0006-io-process-image-symbols.md)). |
 
 Import the whole solution folder to get everything at once: the PLC `.tmc` supersedes the I/O
 listing of the same PLC, and the Net ID from the `.tsproj` is applied to the other files.
@@ -56,6 +57,10 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
     warning icon: the value is valid only while the reference is bound. Search lists the reference
     member but not what it points to (find that under its real symbol); the tree expands it;
   - `TcNoSymbol 'unused'` symbols stay recordable with a note (no symbol if the code never uses them).
+- **I/O devices**: one source per process image (EtherCAT verified against a real symbol table; PROFINET,
+  PROFIBUS, CANopen, EtherNet/IP boxes listed by their variables, not verified yet). Only PDOs assigned to
+  a sync manager are listed, entries split at `__` into structs (`Status.Error`). A warning says when the
+  file has the image's ADS server switched off; keep "Generate hierarchical symbol names" off.
 - Each source's **port**, **path prefix** (object name for TcCOM) and **target Net ID** can be edited.
 - How paths and ports are derived per source, and how sure we are: [ADR 0003](docs/adr/0003-symbol-paths-per-source-kind.md).
 
@@ -92,7 +97,7 @@ npm run lint
 npm test               # unit + component tests (Vitest)
 npm run test:coverage  # with coverage thresholds
 npm run test:e2e       # Playwright; set PW_CHROMIUM_PATH to use a preinstalled Chromium
-npm run test:corpus    # downloads 352 real TwinCAT files (scripts/corpus/manifest.json) into .corpus/
+npm run test:corpus    # downloads 352 real TwinCAT files + 1 boot project (scripts/corpus/manifest.json) into .corpus/
                        # and checks import/search/path invariants over all of them (~2 min);
                        # behind an HTTPS proxy the download needs Node ≥ 22.21 (NODE_USE_ENV_PROXY)
 ```
@@ -112,6 +117,9 @@ src/
 Vocabulary: [GLOSSARY.md](GLOSSARY.md) · decisions: [docs/adr](docs/adr) · code review:
 [docs/review](docs/review/thermonuclear-review.md) · open questions:
 [.scratch/offline-scope-builder/map.md](.scratch/offline-scope-builder/map.md).
+
+The corpus also holds one committed boot project (`CurrentConfig.xml`) whose I/O symbol table TwinCAT
+built; the corpus run requires the I/O importer to reproduce it exactly.
 
 Parser tests run against real TwinCAT files from public repositories
 (see [src/catalog/__fixtures__](src/catalog/__fixtures__/README.md) for sources and licenses).

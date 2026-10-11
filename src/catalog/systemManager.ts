@@ -8,11 +8,13 @@
  *   PLC's `.tmc`, which is preferred when both are imported.)
  * - TcCOM objects  `<Module><Name>instance</Name><TmcDesc>…<Parameters>/<DataAreas>`
  * - NC axes        `<Axis><Name>…<Vars>`, `<Encoder>`/`<Drive>` with their own `<Vars>`
+ * - I/O devices    `<Device><Image>…<Box>`: the process image by ADS symbol name (`io.ts`)
  *
  * Items saved as separate files (`<Axis File="Axis 1.xti"/>`) are reported so they can
  * be imported too. `__FILENAME__` names stand for the file's own name.
  */
 import type { AreaKind, SymbolRoot, SymbolSource, TypeTable } from './model'
+import { readIoSources } from './io'
 import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, parameterNote, readModuleRoots } from './tmc'
 import { finalizeSource, readTypeRef, readTypeTable } from './typeTable'
 import { child, children, text } from './xml'
@@ -147,15 +149,14 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         })
     }
 
+    sources.push(...readIoSources(doc, stem, base, sources.length))
+
     const warnings: string[] = []
     if (references.length > 0) {
         warnings.push(`Parts of this project are stored in separate files; import them as well: ${references.join(', ')}`)
     }
-    if (all(doc, 'Pdo').length > 0 && sources.length === 0) {
-        warnings.push('EtherCAT process data cannot be recorded by symbol name; record the PLC or TcCOM variables linked to it.')
-    }
     if (sources.length === 0) {
-        return [{ ...base(0), kind: 'Other', title: stem, pathPrefix: '', port: DEFAULT_PLC_PORT, roots: [], complete: true, warnings: warnings.length ? warnings : ['No PLC, TcCOM or NC symbols found in this file.'] }]
+        return [{ ...base(0), kind: 'Other', title: stem, pathPrefix: '', port: DEFAULT_PLC_PORT, roots: [], complete: true, warnings: warnings.length ? warnings : ['No PLC, TcCOM, NC or I/O symbols found in this file.'] }]
     }
     sources[0].warnings.push(...warnings)
     return sources

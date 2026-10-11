@@ -2827,5 +2827,14 @@
   "license": null,
   "sizeBytes": 142092,
   "kind": "TSPROJ"
+ },
+ {
+  "file": "SeanyCash__TwinCAT_CNC__CNC_MACHINE___Boot__TwinCAT RT (x64)__CurrentConfig.xml",
+  "url": "https://raw.githubusercontent.com/SeanyCash/TwinCAT_CNC/0e1020338c10cf77249aeaff34520f9516816167/CNC_MACHINE/_Boot/TwinCAT%20RT%20(x64)/CurrentConfig.xml",
+  "repo": "SeanyCash/TwinCAT_CNC",
+  "license": null,
+  "sizeBytes": 439459,
+  "kind": "BOOT CurrentConfig",
+  "symbolsOf": "SeanyCash__TwinCAT_CNC__CNC_MACHINE__CNC_MACHINE.tsproj"
  }
 ]

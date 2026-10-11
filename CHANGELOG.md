@@ -1,5 +1,26 @@
 # Changelog
 
+## V2.2 (unreleased)
+
+### I/O process images
+
+- **I/O devices** in a `.tsproj` or `.xti` become sources of kind *IO*: the device's process image,
+  read by ADS symbol name on the image's own port (27904 + image id, `27905` for `Image` with id 1)
+  ([ADR 0006](docs/adr/0006-io-process-image-symbols.md)). Before, EtherCAT files only said that
+  process data cannot be recorded by symbol.
+- EtherCAT: `Inputs.Frm0State` & co., per box one struct per PDO assigned to a sync manager
+  (`Term 2 (EL3102).AI Standard Channel 1.Status.Error`; `__` in entry names nests, padding is skipped,
+  `Samples__ARRAY [i]` becomes an array), `WcState` and `InputToggle` per box. Checked against the
+  symbol table TwinCAT downloaded to such an image (all 149 paths identical).
+- Devices with several images (one per task): boxes linked to the NC go to the first image, the rest to
+  the second; each image is its own source with its own port.
+- A warning names the Image whose ADS server is off in the file; a terminal exported alone gets port
+  27905 and a hint to check it.
+- PROFINET, PROFIBUS, CANopen, EtherNet/IP and other devices: box and device variables
+  (`<box>.<group>.<var>`), marked as not verified yet.
+- Path lookup accepts member names with dots (`CC Inputs.Current actual value Ch.1`).
+- Port presets *I/O image 1* (27905) and *I/O image 2* (27906).
+
 ## V2.1 (unreleased)
 
 ### Phones and tablets

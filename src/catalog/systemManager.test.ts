@@ -54,14 +54,6 @@ describe('TcCOM object .xti', () => {
     })
 })
 
-describe('EtherCAT terminal .xti', () => {
-    it('explains that process data is not recordable by symbol', () => {
-        const [s] = load(FIXTURES.ethercatXti)
-        expect(s).toMatchObject({ kind: 'Other', roots: [] })
-        expect(s.warnings[0]).toMatch(/EtherCAT/)
-    })
-})
-
 describe('.tsproj', () => {
     it('reports the target Net ID and referenced files of a split project', () => {
         const [s] = load(FIXTURES.splitTsproj)

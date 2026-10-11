@@ -1,4 +1,4 @@
-import { Ban, Boxes, Braces, Brackets, CornerDownRight, Cpu, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
+import { Ban, Boxes, Braces, Brackets, CornerDownRight, Cpu, EthernetPort, FileCode2, Folder, FolderOpen, Move3d, Variable } from 'lucide-react'
 import type { SourceKind } from '@/catalog/model'
 import type { BrowserNode } from '@/catalog/tree'
 
@@ -29,6 +29,8 @@ export function SourceIcon({ kind, size = 16 }: { kind: SourceKind; size?: numbe
             return <Move3d {...props} />
         case 'TcCOM':
             return <Boxes {...props} />
+        case 'IO':
+            return <EthernetPort {...props} />
         default:
             return <FileCode2 {...props} />
     }

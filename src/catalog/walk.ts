@@ -190,8 +190,6 @@ export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimi
 // Path lookup
 // ---------------------------------------------------------------------------
 
-const SEGMENT = /\.([^.[\]^]+)|\[([^\]]+)\]|(\^)/gy
-
 /** Roots by lower-case full path, per source (sources are immutable). */
 const rootIndex = new WeakMap<SymbolSource, Map<string, SymbolRoot>>()
 
@@ -216,40 +214,59 @@ function findRoot(source: SymbolSource, lower: string): [SymbolRoot, number] | n
     return null
 }
 
+/** The member of `node` named at the start of `lower` (longest name ending at `.`, `[`, `^` or the end). */
+function memberAt(source: SymbolSource, node: PathNode, lower: string): PathNode | null {
+    let best: PathNode | null = null
+    for (const m of memberNodes(source, node)) {
+        const name = m.name.toLowerCase()
+        if (!lower.startsWith(name) || (lower.length > name.length && !'.[^'.includes(lower[name.length]))) continue
+        if (!best || name.length > best.name.length) best = m
+    }
+    return best
+}
+
+/** Element of an array node from the text between `[` and `]` (`3`, `1,2` or `*`). */
+function elementAt(source: SymbolSource, node: PathNode, spec: string): PathNode | null {
+    const parts = spec.split(',').map((p) => p.trim())
+    if (node.resolved.kind !== 'array' || parts.length !== node.resolved.dims.length) return null
+    if (parts.every((p) => p === '*')) return elementNode(source, node, '*')
+    const index = parts.map(Number)
+    const dims = node.resolved.dims
+    if (index.some((v, i) => !Number.isInteger(v) || v < dims[i].lower || v > dims[i].upper)) return null
+    return elementNode(source, node, index)
+}
+
 /**
  * Find the node for a full symbol path (`GVL.aAxis[3].fActPos`, with wildcards
  * `GVL.aAxis[*].fActPos` whose ranges are taken from the type, or through a pointer
- * `MAIN.pData^.fValue`). Matching is case-insensitive, like ADS symbol names. Returns null
- * when the path does not exist.
+ * `MAIN.pData^.fValue`). Matching is case-insensitive, like ADS symbol names. Member names may
+ * contain dots (I/O entries such as `Current actual value Ch.1`); the longest matching member
+ * wins. Returns null when the path does not exist.
  */
 export function resolvePath(source: SymbolSource, path: string): PathNode | null {
     // Roots can be prefixes of each other (`MAIN.fb` and `MAIN.fb.x`): take the longest match.
-    const found = findRoot(source, path.toLowerCase())
+    const lower = path.toLowerCase()
+    const found = findRoot(source, lower)
     if (!found) return null
     let node: PathNode | null = rootNode(source, found[0])
-    const rest = path.slice(found[1])
-    SEGMENT.lastIndex = 0
-    let consumed = 0
-    for (const m of rest.matchAll(SEGMENT)) {
-        consumed += m[0].length
+    let pos = found[1]
+    while (pos < path.length) {
         if (!node) return null
-        if (m[3] !== undefined) {
+        const c = path[pos]
+        if (c === '^') {
             node = derefNode(source, node)
-        } else if (m[1] !== undefined) {
-            const name = m[1].toLowerCase()
-            node = memberNodes(source, node).find((c) => c.name.toLowerCase() === name) ?? null
+            pos++
+        } else if (c === '[') {
+            const end = path.indexOf(']', pos)
+            if (end === -1) return null
+            node = elementAt(source, node, path.slice(pos + 1, end))
+            pos = end + 1
+        } else if (c === '.') {
+            node = memberAt(source, node, lower.slice(pos + 1))
+            if (node) pos += 1 + node.name.length
         } else {
-            const parts = m[2].split(',').map((p) => p.trim())
-            if (node.resolved.kind !== 'array' || parts.length !== node.resolved.dims.length) return null
-            if (parts.every((p) => p === '*')) {
-                node = elementNode(source, node, '*')
-            } else {
-                const index = parts.map(Number)
-                const dims = node.resolved.dims
-                if (index.some((v, i) => !Number.isInteger(v) || v < dims[i].lower || v > dims[i].upper)) return null
-                node = elementNode(source, node, index)
-            }
+            return null
         }
     }
-    return consumed === rest.length ? node : null
+    return node
 }

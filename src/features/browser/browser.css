@@ -99,6 +99,10 @@
     background: color-mix(in srgb, var(--kind-struct) 14%, transparent);
     color: var(--kind-struct);
 }
+.source-card__icon--IO {
+    background: color-mix(in srgb, var(--kind-scalar) 14%, transparent);
+    color: var(--kind-scalar);
+}
 .source-card__titles {
     display: flex;
     flex: 1;
