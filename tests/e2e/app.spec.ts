@@ -56,6 +56,21 @@ test('switches panes on small screens', async ({ page }) => {
     await expect(page.getByRole('region', { name: 'Scope project' })).toBeVisible()
 })
 
+test('keeps the symbol list usable on a phone, portrait and landscape', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 })
+    await page.getByRole('button', { name: 'Try the demo machine' }).click()
+    const tree = page.getByRole('tree')
+    expect((await tree.boundingBox())!.height).toBeGreaterThan(150)
+    await expect(page.getByRole('treeitem', { name: /MAIN/ })).toBeInViewport()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+
+    await page.setViewportSize({ width: 667, height: 375 })
+    expect((await tree.boundingBox())!.height).toBeGreaterThan(150)
+    await page.getByRole('button', { name: 'Expand MAIN', exact: true }).click()
+    await page.getByRole('checkbox', { name: 'Select MAIN.nCycle', exact: true }).check()
+    await expect(page.getByRole('button', { name: /Add to scope/ })).toBeInViewport()
+})
+
 test('reorders channels by dragging and moves one to another file', async ({ page }) => {
     const symbols = page.getByLabel('Symbol path')
     const values = () => symbols.evaluateAll((inputs) => inputs.map((i) => (i as HTMLInputElement).value))

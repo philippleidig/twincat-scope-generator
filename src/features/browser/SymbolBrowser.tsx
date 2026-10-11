@@ -65,14 +65,14 @@ export function SymbolBrowser() {
                 <div className="panel__actions">
                     {sources.length > 0 && body === 'tree' && (
                         <Button variant="ghost" size="sm" icon={<ListTree size={15} />} onClick={collapseAll}>
-                            Collapse
+                            <span className="narrow-hide">Collapse</span>
                         </Button>
                     )}
                     <Button size="sm" icon={<FolderUp size={15} />} onClick={folder.open} disabled={!hydrated}>
-                        Folder
+                        <span className="narrow-hide">Folder</span>
                     </Button>
                     <Button size="sm" variant="primary" icon={<FileUp size={15} />} onClick={files.open} disabled={!hydrated}>
-                        Import files
+                        <span className="narrow-hide">Import files</span>
                     </Button>
                 </div>
                 {files.input}

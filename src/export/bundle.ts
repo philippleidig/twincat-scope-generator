@@ -25,3 +25,32 @@ export function downloadBlob(blob: Blob, fileName: string): void {
 export function downloadText(content: string, fileName: string, type = 'application/json'): void {
     downloadBlob(new Blob([content], { type }), fileName)
 }
+
+/**
+ * Whether the browser can hand a `.zip` to the OS share sheet (Mail, Outlook, Teams, …).
+ * Safari on iOS/iPadOS/macOS can; Chromium only shares a fixed list of media and text
+ * types, so there it stays false and the download is the only way out.
+ */
+export function canShareZip(): boolean {
+    if (typeof navigator === 'undefined' || typeof navigator.canShare !== 'function') return false
+    try {
+        return navigator.canShare({ files: [new File([], 'probe.zip', { type: 'application/zip' })] })
+    } catch {
+        return false
+    }
+}
+
+/**
+ * Open the OS share sheet with the zip attached. Resolves false when the user closed the
+ * sheet without sharing; rejects on any other failure.
+ */
+export async function shareZip(blob: Blob, fileName: string, title: string): Promise<boolean> {
+    const file = new File([blob], fileName, { type: 'application/zip' })
+    try {
+        await navigator.share({ files: [file], title })
+        return true
+    } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return false
+        throw e
+    }
+}

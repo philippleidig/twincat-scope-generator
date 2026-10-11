@@ -210,11 +210,15 @@
 }
 
 /* ---------- Symbol list ---------- */
+/* On short screens (phones, landscape) the list keeps a usable height and the panel scrolls instead. */
+.panel.browser {
+    overflow-y: auto;
+}
 .browser__list {
     display: flex;
     flex: 1;
     flex-direction: column;
-    min-height: 0;
+    min-height: 220px;
 }
 .result-summary,
 .browser-note {
@@ -373,6 +377,9 @@
     color: var(--text-2);
 }
 .selection-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -393,8 +400,56 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-@media (max-width: 560px) {
+/* Touch screens have no hover or double-click; the expand arrows do the job. */
+@media (max-width: 900px) {
+    .inspector--empty {
+        display: none;
+    }
+}
+@media (max-width: 560px), (max-height: 500px) {
     .source-card__settings {
         grid-template-columns: 1fr;
+    }
+    .source-list {
+        flex: none;
+        padding: var(--space-2) var(--space-3) 0;
+    }
+    .browser-toolbar {
+        padding: var(--space-2) var(--space-3);
+    }
+    .search-box__input {
+        padding-right: 10px;
+    }
+    .search-box__kbd {
+        display: none;
+    }
+    .browser-toolbar__row .segmented button {
+        padding: 0 10px;
+    }
+    /* One swipeable row of filters instead of three wrapped ones. */
+    .filter-row {
+        flex-wrap: nowrap;
+        margin: 0 calc(-1 * var(--space-3));
+        padding: 0 var(--space-3);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar {
+        display: none;
+    }
+    .filter-row .chip,
+    .filter-row__sep {
+        flex: none;
+    }
+    .tree-row__check {
+        width: 18px;
+        height: 18px;
+    }
+    .inspector,
+    .selection-bar {
+        padding-left: var(--space-3);
+    }
+    .selection-bar__target {
+        font-size: 12px;
     }
 }

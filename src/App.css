@@ -163,7 +163,7 @@
     }
     .workspace {
         grid-template-columns: minmax(0, 1fr);
-        padding: var(--space-2) var(--space-4) var(--space-4);
+        padding: var(--space-2) var(--space-4) var(--space-2);
     }
     .workspace--browser .project,
     .workspace--project .browser {
@@ -173,7 +173,11 @@
         width: 140px;
     }
 }
-@media (max-width: 560px) {
+@media (max-width: 560px), (max-height: 500px) {
+    /* Phones (portrait and landscape): every pixel of height goes to the symbol list and the channels. */
+    .app {
+        --header-h: 52px;
+    }
     .app-header {
         gap: 2px;
         padding: 0 var(--space-2);
@@ -182,5 +186,31 @@
     .project-name,
     .header-link {
         display: none;
+    }
+    .pane-switch {
+        margin: 6px var(--space-2) 0;
+    }
+    .pane-switch button {
+        height: 34px;
+    }
+    .workspace {
+        padding: 6px var(--space-2) 0;
+    }
+    .panel {
+        border-radius: var(--radius);
+    }
+    .panel__header {
+        padding: var(--space-2) var(--space-3);
+    }
+    .panel__title {
+        white-space: nowrap;
+    }
+    .panel__subtitle,
+    .app-footer__detail {
+        display: none;
+    }
+    .app-footer {
+        padding: 4px var(--space-2) max(6px, env(safe-area-inset-bottom));
+        font-size: 11px;
     }
 }

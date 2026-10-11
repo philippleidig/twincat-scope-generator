@@ -34,8 +34,11 @@ export default function App() {
                 <ProjectPanel />
             </main>
             <footer className="app-footer">
-                Independent open-source tool — <strong>not a Beckhoff product</strong>, not affiliated with or endorsed by Beckhoff Automation
-                GmbH &amp; Co. KG. “TwinCAT” is a trademark of its owner. Files never leave your browser.
+                Independent open-source tool — <strong>not a Beckhoff product</strong>
+                <span className="app-footer__detail">
+                    , not affiliated with or endorsed by Beckhoff Automation GmbH &amp; Co. KG. “TwinCAT” is a trademark of its owner
+                </span>
+                . Files never leave your browser.
             </footer>
             <Toaster />
         </div>

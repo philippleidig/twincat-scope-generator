@@ -232,6 +232,31 @@ describe('header', () => {
         expect(createObjectURL).toHaveBeenCalled()
     })
 
+    it('shares the zip through the OS share sheet where the browser supports it', async () => {
+        const user = userEvent.setup()
+        const share = vi.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new DOMException('blocked', 'NotAllowedError'))
+        Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true })
+        Object.defineProperty(navigator, 'share', { value: share, configurable: true })
+        try {
+            useProjectStore.getState().addChannels(useProjectStore.getState().project.scopeFiles[0].axisGroups[0].id, [{ symbol: 'MAIN.a' }])
+            render(<App />)
+            await user.click(screen.getByRole('button', { name: /Share ZIP/ }))
+            expect(await screen.findByText('Shared 1 scope file as Scope_Project_scope.zip')).toBeInTheDocument()
+            expect(share.mock.calls[0][0].files[0]).toMatchObject({ name: 'Scope_Project_scope.zip', type: 'application/zip' })
+
+            await user.click(screen.getByRole('button', { name: /Share ZIP/ }))
+            expect(await screen.findByText(/tap Share again/)).toBeInTheDocument()
+        } finally {
+            Reflect.deleteProperty(navigator, 'canShare')
+            Reflect.deleteProperty(navigator, 'share')
+        }
+    })
+
+    it('offers no share button where the browser cannot share a zip', () => {
+        render(<App />)
+        expect(screen.queryByRole('button', { name: /Share ZIP/ })).toBeNull()
+    })
+
     it('saves and opens project files', async () => {
         const user = userEvent.setup()
         Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:x'), revokeObjectURL: vi.fn() })

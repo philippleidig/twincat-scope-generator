@@ -9,6 +9,12 @@ body,
 #root {
     height: 100%;
 }
+/* Mobile browsers: follow the visible area as the address bar shows and hides. */
+@supports (height: 100dvh) {
+    #root {
+        height: 100dvh;
+    }
+}
 
 body {
     margin: 0;
@@ -60,4 +66,26 @@ code,
     overflow: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border-strong) transparent;
+}
+
+/* Button labels that collapse to the icon on phones; the text stays the accessible name. */
+@media (max-width: 560px) {
+    .narrow-hide {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+}
+
+/* iOS Safari zooms into any focused field below 16px and does not zoom back out. */
+@media (pointer: coarse) and (max-width: 560px), (pointer: coarse) and (max-height: 500px) {
+    input:not([type='checkbox'], [type='radio']),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
 }

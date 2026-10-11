@@ -56,7 +56,7 @@ export function BrowserToolbar() {
                 </div>
                 <div className="segmented" role="group" aria-label="Browser view">
                     <button type="button" aria-pressed={state.view === 'tree'} onClick={() => state.setView('tree')} title="Hierarchical tree">
-                        <ListTree size={14} aria-hidden /> Tree
+                        <ListTree size={14} aria-hidden /> <span className="narrow-hide">Tree</span>
                     </button>
                     <button
                         type="button"
@@ -64,7 +64,7 @@ export function BrowserToolbar() {
                         onClick={() => state.setView('list')}
                         title="Flat list of every symbol, sorted by path"
                     >
-                        <List size={14} aria-hidden /> List
+                        <List size={14} aria-hidden /> <span className="narrow-hide">List</span>
                     </button>
                 </div>
             </div>

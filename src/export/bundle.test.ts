@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import JSZip from 'jszip'
-import { createZipArchive, downloadBlob } from './bundle'
+import { canShareZip, createZipArchive, downloadBlob, shareZip } from './bundle'
 
 describe('createZipArchive', () => {
     it('contains every scope file and the project file', async () => {
@@ -30,5 +30,45 @@ describe('downloadBlob', () => {
         vi.runAllTimers()
         expect(revoke).toHaveBeenCalledWith('blob:x')
         vi.useRealTimers()
+    })
+})
+
+describe('sharing', () => {
+    const stub = (props: Partial<Navigator>) => {
+        for (const [key, value] of Object.entries(props)) Object.defineProperty(navigator, key, { value, configurable: true })
+    }
+    afterEach(() => {
+        Reflect.deleteProperty(navigator, 'canShare')
+        Reflect.deleteProperty(navigator, 'share')
+    })
+
+    it('needs the browser to accept a zip file', () => {
+        expect(canShareZip()).toBe(false)
+        const canShare = vi.fn((data?: ShareData) => data?.files?.[0]?.name.endsWith('.zip') === true)
+        stub({ canShare })
+        expect(canShareZip()).toBe(true)
+        stub({ canShare: () => false })
+        expect(canShareZip()).toBe(false)
+        stub({
+            canShare: () => {
+                throw new TypeError('no files')
+            },
+        })
+        expect(canShareZip()).toBe(false)
+    })
+
+    it('attaches the zip and treats a closed share sheet as not shared', async () => {
+        const share = vi.fn(async (data?: ShareData) => {
+            expect(data?.files?.[0]).toMatchObject({ name: 'P_scope.zip', type: 'application/zip' })
+        })
+        stub({ share })
+        expect(await shareZip(new Blob(['x']), 'P_scope.zip', 'P')).toBe(true)
+        expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: 'P' }))
+
+        stub({ share: vi.fn().mockRejectedValue(new DOMException('closed', 'AbortError')) })
+        expect(await shareZip(new Blob(['x']), 'P_scope.zip', 'P')).toBe(false)
+
+        stub({ share: vi.fn().mockRejectedValue(new DOMException('blocked', 'NotAllowedError')) })
+        await expect(shareZip(new Blob(['x']), 'P_scope.zip', 'P')).rejects.toThrow('blocked')
     })
 })

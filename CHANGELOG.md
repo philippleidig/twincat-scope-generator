@@ -2,6 +2,18 @@
 
 ## V2.1 (unreleased)
 
+### Phones and tablets
+
+- The symbol list is usable on phones again (it collapsed to a few pixels): compact header, panel
+  buttons collapse to icons, the filter chips become one swipeable row, the disclaimer shortens to one
+  line and the empty inspector hint is hidden on touch screens.
+- Landscape and other short screens keep at least a usable list height; the panel scrolls instead and
+  the selection bar stays pinned at the bottom.
+- Fields use 16px text on touch phones so iOS Safari no longer zooms in on focus.
+- **Share** button next to *Export ZIP* where the browser can share a zip (Safari on iPhone, iPad and
+  Mac): opens the system share sheet with the zip attached, e.g. for Mail, Outlook or Teams. Chrome and
+  Edge only share media and text files, so there the button is hidden and *Export ZIP* stays.
+
 ### Symbol browser
 
 - **Tree | List** toggle next to the search box. *List* shows every symbol path as one flat,

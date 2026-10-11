@@ -45,7 +45,7 @@ export function ProjectPanel() {
                 </div>
                 <div className="panel__actions">
                     <Button size="sm" variant="ghost" icon={<Library size={15} />} onClick={() => setLibraryOpen(true)}>
-                        Pattern library
+                        <span className="narrow-hide">Pattern library</span>
                     </Button>
                 </div>
             </header>
