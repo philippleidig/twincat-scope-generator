@@ -2,6 +2,19 @@
 
 ## V2.2 (unreleased)
 
+### Filters
+
+- New filter chips, shown only when they narrow what is imported and with the number of symbols each
+  keeps: **runtime** (*PLC*, *NC*, *I/O*, *TcCOM*), PLC **Global** / **Programs** (from `TcVarGlobal`
+  in the `.tmc`), **Inputs** / **Outputs**, and **Hide system**.
+- *Hide system* is on by default, in the tree as well: TwinCAT's own lists (`TwinCAT_SystemInfoVarList`,
+  `Global_Version`, `TwinCAT_PreventOnlineChangeGvl`, `TC_EVENTS`), the EtherCAT frame state and each
+  box's `WcState`/`InputToggle`. *Clear* turns it back on.
+- Removed: the BOOL / Integer / Real chips (`type:` in the search still filters by type), *Internal*,
+  *Parameter* and *Recordable only* (symbols that cannot be recorded stay greyed out).
+- Imported files stored by V2.1 are removed once with a hint to import them again: they lack the I/O
+  sources and the flags the filters use.
+
 ### I/O process images
 
 - **I/O devices** in a `.tsproj` or `.xti` become sources of kind *IO*: the device's process image,

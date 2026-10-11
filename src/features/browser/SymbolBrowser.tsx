@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FileUp, FolderUp, ListTree, Loader2, Sparkles } from 'lucide-react'
 import { useCatalogStore } from '@/state/catalogStore'
 import { browserBody, useBrowserStore } from '@/state/browserStore'
@@ -6,6 +6,7 @@ import { Button } from '@/ui/components/Button'
 import { useFilePicker } from '@/ui/components/useFilePicker'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
 import demoTsproj from '@/catalog/demo/DemoMachine.tsproj?raw'
+import { withoutSystemRoots } from '@/catalog/tree'
 import { useFileImport } from './useFileImport'
 import { SourceCard } from './SourceCard'
 import { BrowserToolbar } from './BrowserToolbar'
@@ -28,6 +29,8 @@ export function SymbolBrowser() {
     const importFiles = useCatalogStore((s) => s.importFiles)
     const body = useBrowserStore(browserBody)
     const collapseAll = useBrowserStore((s) => s.collapseAll)
+    const hideSystem = useBrowserStore((s) => s.hideSystem)
+    const treeSources = useMemo(() => (hideSystem ? sources.map(withoutSystemRoots) : sources), [sources, hideSystem])
     const importFromDisk = useFileImport()
     const files = useFilePicker((f) => void importFromDisk(f), { accept: ACCEPT, multiple: true, testId: 'import-input' })
     const folder = useFilePicker((f) => void importFromDisk(f), { directory: true })
@@ -121,7 +124,7 @@ export function SymbolBrowser() {
                     )}
                     <div className="browser__list">
                         {/* Keyed per body so the scroll position does not carry over between views. */}
-                        {body === 'tree' ? <SymbolTree key="tree" sources={sources} /> : <EntryList key={body} index={index} mode={body} />}
+                        {body === 'tree' ? <SymbolTree key="tree" sources={treeSources} /> : <EntryList key={body} index={index} mode={body} />}
                     </div>
                     <Inspector />
                     <SelectionBar />

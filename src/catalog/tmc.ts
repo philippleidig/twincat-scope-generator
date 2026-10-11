@@ -61,16 +61,23 @@ function inlineType(types: TypeTable, ownerKey: string, el: Element): string | n
     return name
 }
 
+/** Variable lists TwinCAT adds to every PLC project (task and application info, library versions, …). */
+const PLC_SYSTEM_LISTS = new Set(['TWINCAT_SYSTEMINFOVARLIST', 'GLOBAL_VERSION', 'TWINCAT_PREVENTONLINECHANGEGVL', 'TC_EVENTS'])
+
+const isPlcSystemSymbol = (path: string) => PLC_SYSTEM_LISTS.has(path.split('.')[0].toUpperCase())
+
 /**
  * A `<Symbol>` or `<Parameter>` element as a root; null when it has no ADS symbol
  * (`hide`, `TcNoSymbol`). A global `<FB type>.<static var>` symbol (`TcVarStatic`) is a normal root.
+ * PLC symbols also say whether they belong to a GVL (`TcVarGlobal`) or a program.
  */
-function readRoot(el: Element, types: TypeTable, owner: string, path: string, area: AreaKind, areaName: string): SymbolRoot | null {
+function readRoot(el: Element, types: TypeTable, owner: string, path: string, area: AreaKind, areaName: string, plc = false): SymbolRoot | null {
     const ref = readTypeRef(el, child(el, 'BaseType') ?? child(el, 'Type'))
     const type = inlineType(types, `${owner}/${path}`, el) ?? ref.type
-    const access = symbolAccess(properties(el))
+    const props = properties(el)
+    const access = symbolAccess(props)
     if (!type || !access) return null
-    return {
+    const root: SymbolRoot = {
         name: path,
         type,
         ns: ref.ns,
@@ -80,6 +87,11 @@ function readRoot(el: Element, types: TypeTable, owner: string, path: string, ar
         comment: text(el, 'Comment') || undefined,
         ...access,
     }
+    if (plc) {
+        root.global = props.has('TcVarGlobal')
+        if (isPlcSystemSymbol(path)) root.system = true
+    }
+    return root
 }
 
 /** `CreateSymbol="true"` attribute or a `CreateSymbol` property set to true. */
@@ -121,7 +133,7 @@ export function readModuleRoots(body: Element, types: TypeTable, plc: boolean, o
         for (const s of children(area, 'Symbol')) {
             const symbolName = text(s, 'Name')
             if (!symbolName) continue
-            const root = readRoot(s, types, owner, plc ? symbolName : `${areaName}.${symbolName}`, kind, areaName)
+            const root = readRoot(s, types, owner, plc ? symbolName : `${areaName}.${symbolName}`, kind, areaName, plc)
             if (root) roots.push(root)
         }
     }

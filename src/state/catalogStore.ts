@@ -30,10 +30,11 @@ interface CatalogState {
 
 /**
  * Versioned: V2.1 reads pointers, references and access flags into the stored sources, so sources
- * stored by V2.0 (under `sources`) would produce wrong paths. They are dropped with a hint.
+ * stored by V2.0 (under `sources`) would produce wrong paths; V2.2 adds I/O sources and the PLC
+ * scope and system flags the filters use. Outdated sources are dropped with a hint.
  */
-const STORAGE_KEY = 'sources@2.1'
-const OUTDATED_KEYS = ['sources']
+const STORAGE_KEY = 'sources@2.2'
+const OUTDATED_KEYS = ['sources', 'sources@2.1']
 
 /** New sources: rebuild the index, persist, and drop picks that may point at changed paths. */
 function commit(sources: SymbolSource[]): Pick<CatalogState, 'sources' | 'index'> {

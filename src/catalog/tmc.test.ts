@@ -90,6 +90,25 @@ describe('bundled demo', () => {
     })
 })
 
+describe('PLC scope and system lists (real .tmc files)', () => {
+    it('marks GVL symbols global and program symbols not, from TcVarGlobal', () => {
+        const [plc] = importTwinCatFile('PLC.tmc', fixture(FIXTURES.plcTmc))
+        const prefixes = (global: boolean) => new Set(plc.roots.filter((r) => r.global === global).map((r) => r.name.split('.')[0]))
+        expect(prefixes(true)).toEqual(new Set(['GVL', 'Global_Version', 'TwinCAT_SystemInfoVarList']))
+        expect(prefixes(false)).toEqual(new Set(['MAIN']))
+    })
+    it("marks TwinCAT's own variable lists as system symbols", () => {
+        const [plc] = importTwinCatFile('PLC.tmc', fixture(FIXTURES.accessTmc))
+        const system = new Set(plc.roots.filter((r) => r.system).map((r) => r.name.split('.')[0]))
+        expect(system).toEqual(new Set(['Global_Version', 'TC_EVENTS', 'TwinCAT_PreventOnlineChangeGvl', 'TwinCAT_SystemInfoVarList']))
+        expect(plc.roots.find((r) => r.name.startsWith('Global_Variables.'))?.system).toBeUndefined()
+    })
+    it('leaves TcCOM symbols without a PLC scope', () => {
+        const [module] = importTwinCatFile('TempCtrl.xti', fixture(FIXTURES.tcomXti))
+        expect(module.roots.every((r) => r.global === undefined && !r.system)).toBe(true)
+    })
+})
+
 describe('edge cases', () => {
     it('reports a TMC without modules', () => {
         const [source] = importTwinCatFile('types.tmc', '<TcModuleClass><DataTypes/></TcModuleClass>')

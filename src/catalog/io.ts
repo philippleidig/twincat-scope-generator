@@ -194,8 +194,8 @@ function etherCatBoxRoots(ecat: Element, boxName: string, types: TypeBuilder): S
         roots.push(root)
     }
     if (roots.length > 0) {
-        roots.push({ name: `${boxName}.WcState`, type: 'BOOL', area: 'input', areaName: 'WcState', comment: 'Working counter state of the box (TRUE = invalid)' })
-        if (inputs) roots.push({ name: `${boxName}.InputToggle`, type: 'BOOL', area: 'input', areaName: 'WcState' })
+        roots.push({ name: `${boxName}.WcState`, type: 'BOOL', area: 'input', areaName: 'WcState', comment: 'Working counter state of the box (TRUE = invalid)', system: true })
+        if (inputs) roots.push({ name: `${boxName}.InputToggle`, type: 'BOOL', area: 'input', areaName: 'WcState', system: true })
     }
     return roots
 }
@@ -290,7 +290,7 @@ function deviceSources(doc: Document, device: Element, fileStem: string, builder
     const ethercat = device.getAttribute('DevType') === ETHERCAT_DEVICE
 
     const deviceRoots: SymbolRoot[] = ethercat
-        ? ETHERCAT_DEVICE_VARS.map(({ name, area }) => ({ name, type: 'UINT', area, areaName: area === 'input' ? 'Inputs' : 'Outputs' }))
+        ? ETHERCAT_DEVICE_VARS.map(({ name, area }) => ({ name, type: 'UINT', area, areaName: area === 'input' ? 'Inputs' : 'Outputs', system: true }))
         : varsRoots(device, '')
     const boxes: BoxSymbols[] = []
     collectBoxes(device, '', fileStem, builder, boxes)

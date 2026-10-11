@@ -18,6 +18,14 @@
       <SubItem><Name>eState</Name><Type>E_AxisState</Type><BitSize>16</BitSize><BitOffs>208</BitOffs></SubItem>
       <SubItem><Name>stDrive</Name><Type>ST_Drive</Type><BitSize>64</BitSize><BitOffs>256</BitOffs></SubItem>
     </DataType>
+    <DataType><Name>ST_LibVersion</Name><BitSize>288</BitSize>
+      <SubItem><Name>iMajor</Name><Type>UINT</Type><BitSize>16</BitSize><BitOffs>0</BitOffs></SubItem>
+      <SubItem><Name>iMinor</Name><Type>UINT</Type><BitSize>16</BitSize><BitOffs>16</BitOffs></SubItem>
+      <SubItem><Name>iBuild</Name><Type>UINT</Type><BitSize>16</BitSize><BitOffs>32</BitOffs></SubItem>
+      <SubItem><Name>iRevision</Name><Type>UINT</Type><BitSize>16</BitSize><BitOffs>48</BitOffs></SubItem>
+      <SubItem><Name>nFlags</Name><Type>DWORD</Type><BitSize>32</BitSize><BitOffs>64</BitOffs></SubItem>
+      <SubItem><Name>sVersion</Name><Type>STRING(23)</Type><BitSize>192</BitSize><BitOffs>96</BitOffs></SubItem>
+    </DataType>
     <DataType><Name>FB_Base</Name><BitSize>128</BitSize>
       <SubItem><Name>bBusy</Name><Type>BOOL</Type><BitSize>8</BitSize><BitOffs>64</BitOffs><Properties><Property><Name>ItemType</Name><Value>Output</Value></Property></Properties></SubItem>
       <SubItem><Name>nErrorId</Name><Type>UDINT</Type><BitSize>32</BitSize><BitOffs>96</BitOffs><Properties><Property><Name>ItemType</Name><Value>Output</Value></Property></Properties></SubItem>
@@ -40,22 +48,23 @@
       <DataAreas>
         <DataArea>
           <AreaNo AreaType="InputDst" CreateSymbols="true">0</AreaNo><Name>PlcTask Inputs</Name><ContextId>0</ContextId>
-          <Symbol><Name>GVL_IO.bEmergencyStop</Name><Comment><![CDATA[ E-stop channel, TRUE = ok ]]></Comment><BitSize>8</BitSize><BaseType>BOOL</BaseType><BitOffs>0</BitOffs></Symbol>
-          <Symbol><Name>GVL_IO.nPressureRaw</Name><BitSize>16</BitSize><BaseType>INT</BaseType><BitOffs>16</BitOffs></Symbol>
+          <Symbol><Name>GVL_IO.bEmergencyStop</Name><Comment><![CDATA[ E-stop channel, TRUE = ok ]]></Comment><BitSize>8</BitSize><BaseType>BOOL</BaseType><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>0</BitOffs></Symbol>
+          <Symbol><Name>GVL_IO.nPressureRaw</Name><BitSize>16</BitSize><BaseType>INT</BaseType><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>16</BitOffs></Symbol>
         </DataArea>
         <DataArea>
           <AreaNo AreaType="OutputSrc" CreateSymbols="true">1</AreaNo><Name>PlcTask Outputs</Name><ContextId>0</ContextId>
-          <Symbol><Name>GVL_IO.bHeaterOn</Name><BitSize>8</BitSize><BaseType>BOOL</BaseType><BitOffs>0</BitOffs></Symbol>
-          <Symbol><Name>GVL_IO.nValvePosition</Name><BitSize>16</BitSize><BaseType>UINT</BaseType><BitOffs>16</BitOffs></Symbol>
+          <Symbol><Name>GVL_IO.bHeaterOn</Name><BitSize>8</BitSize><BaseType>BOOL</BaseType><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>0</BitOffs></Symbol>
+          <Symbol><Name>GVL_IO.nValvePosition</Name><BitSize>16</BitSize><BaseType>UINT</BaseType><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>16</BitOffs></Symbol>
         </DataArea>
         <DataArea>
           <AreaNo AreaType="Internal" CreateSymbols="true">3</AreaNo><Name>PlcTask Internal</Name><ContextId>0</ContextId>
-          <Symbol><Name>GVL.aAxis</Name><Comment><![CDATA[ Gantry axes ]]></Comment><BitSize>1280</BitSize><BaseType>ST_Axis</BaseType><ArrayInfo><LBound>1</LBound><Elements>4</Elements></ArrayInfo><BitOffs>0</BitOffs></Symbol>
-          <Symbol><Name>GVL.fCycleLoad</Name><BitSize>32</BitSize><BaseType>REAL</BaseType><BitOffs>1280</BitOffs></Symbol>
+          <Symbol><Name>GVL.aAxis</Name><Comment><![CDATA[ Gantry axes ]]></Comment><BitSize>1280</BitSize><BaseType>ST_Axis</BaseType><ArrayInfo><LBound>1</LBound><Elements>4</Elements></ArrayInfo><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>0</BitOffs></Symbol>
+          <Symbol><Name>GVL.fCycleLoad</Name><BitSize>32</BitSize><BaseType>REAL</BaseType><Properties><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>1280</BitOffs></Symbol>
           <Symbol><Name>MAIN.fbConveyor</Name><BitSize>576</BitSize><BaseType>FB_Conveyor</BaseType><BitOffs>1344</BitOffs></Symbol>
           <Symbol><Name>MAIN.nCycle</Name><BitSize>32</BitSize><BaseType>UDINT</BaseType><BitOffs>1920</BitOffs></Symbol>
           <Symbol><Name>MAIN.eMachineState</Name><BitSize>16</BitSize><BaseType>E_AxisState</BaseType><BitOffs>1952</BitOffs></Symbol>
           <Symbol><Name>MAIN.sOperator</Name><BitSize>648</BitSize><BaseType>STRING(80)</BaseType><BitOffs>1968</BitOffs></Symbol>
+          <Symbol><Name>Global_Version.stLibVersion_Tc2_Standard</Name><BitSize>288</BitSize><BaseType>ST_LibVersion</BaseType><Properties><Property><Name>const_non_replaced</Name></Property><Property><Name>TcVarGlobal</Name></Property></Properties><BitOffs>2624</BitOffs></Symbol>
         </DataArea>
       </DataAreas>
       <Properties><Property><Name>ApplicationName</Name><Value>Port_851</Value></Property></Properties>

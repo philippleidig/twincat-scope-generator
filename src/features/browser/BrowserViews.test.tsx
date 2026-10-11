@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
+import demoTsproj from '@/catalog/demo/DemoMachine.tsproj?raw'
 import { buildIndex } from '@/catalog/search'
 import { importTwinCatFile } from '@/catalog/importFile'
 import { expectSortedByPath } from '@/test/sortedByPath'
@@ -66,7 +67,8 @@ describe('browser views', () => {
         render(<SymbolBrowser />)
         await user.click(viewButton('List'))
 
-        const { entries } = useCatalogStore.getState().index
+        // System symbols (Global_Version) are hidden by default.
+        const entries = useCatalogStore.getState().index.entries.filter((e) => !e.system)
         expect(screen.getByText(`${entries.length} symbols`)).toBeInTheDocument()
         const shown = renderedPaths()
         expect(shown.length).toBeGreaterThan(10)
@@ -87,14 +89,42 @@ describe('browser views', () => {
         expect(screen.queryByRole('listbox', { name: 'Search results' })).not.toBeInTheDocument()
 
         await user.clear(screen.getByLabelText('Search symbols'))
-        await user.click(screen.getByRole('button', { name: 'BOOL' }))
-        const bools = useCatalogStore.getState().index.entries.filter((e) => e.scopeType === 'BIT')
-        expect(within(symbolList()).getAllByRole('option')).toHaveLength(bools.length)
+        await user.click(screen.getByRole('button', { name: /^Programs/ }))
+        const programs = useCatalogStore.getState().index.entries.filter((e) => e.global === false)
+        expect(within(symbolList()).getAllByRole('option')).toHaveLength(programs.length)
+        expect(renderedPaths().every((p) => p!.startsWith('MAIN.'))).toBe(true)
 
-        await user.click(screen.getByRole('button', { name: 'Input' }))
-        await user.click(screen.getByRole('button', { name: 'Output' }))
+        await user.click(screen.getByRole('button', { name: /^Inputs/ }))
+        await user.click(screen.getByRole('button', { name: /^Outputs/ }))
         await user.type(screen.getByLabelText('Search symbols'), 'nothing-matches')
         expect(screen.getByText('No matching symbols')).toBeInTheDocument()
+    })
+
+    it('offers only the filters that apply, with counts', async () => {
+        const user = userEvent.setup()
+        render(<SymbolBrowser />)
+        const filters = screen.getByRole('group', { name: 'Filters' })
+        // One PLC only: no runtime filter. No parameters or internal chip.
+        expect(within(filters).getAllByRole('button').map((b) => b.textContent)).toEqual(['Global15', 'Programs11', 'Inputs2', 'Outputs2', 'Hide system7'])
+
+        act(() => {
+            useCatalogStore.getState().importFiles([{ name: 'DemoMachine.tsproj', text: demoTsproj }])
+        })
+        const runtime = within(screen.getByRole('group', { name: 'Filters' })).getAllByRole('button').slice(0, 3)
+        expect(runtime.map((b) => b.textContent)).toEqual(['PLC26', 'NC16', 'I/O104'])
+        await user.click(screen.getByRole('button', { name: /^NC/ }))
+        expect(screen.getByText('16 matches')).toBeInTheDocument()
+    })
+
+    it('hides system symbols in the tree without leaving it', async () => {
+        const user = userEvent.setup()
+        render(<SymbolBrowser />)
+        expect(screen.queryByRole('treeitem', { name: /Global_Version/ })).not.toBeInTheDocument()
+        await user.click(screen.getByRole('button', { name: /^Hide system/ }))
+        expect(screen.getByRole('tree', { name: 'Symbols' })).toBeInTheDocument()
+        expect(screen.getByRole('treeitem', { name: /Global_Version/ })).toBeInTheDocument()
+        await user.click(screen.getByRole('button', { name: 'Clear' }))
+        expect(screen.queryByRole('treeitem', { name: /Global_Version/ })).not.toBeInTheDocument()
     })
 
     it('keeps selection and focus across view switches and adds from the list', async () => {

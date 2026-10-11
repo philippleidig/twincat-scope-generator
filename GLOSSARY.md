@@ -29,6 +29,14 @@ name + members + indices.
 **Area** — Where a root symbol lives: `input`, `output`, `internal`, `parameter`
 (from `AreaType`/`VarGrpType`). Members inherit the area of their root.
 
+**PLC scope** — Whether a PLC root symbol is declared in a global variable list (**global**, the
+`TcVarGlobal` property in the `.tmc`) or in a program (**program**). Unknown outside a `.tmc`.
+
+**System symbol** — A root symbol TwinCAT generates rather than the project: the PLC lists
+`TwinCAT_SystemInfoVarList`, `Global_Version`, `TwinCAT_PreventOnlineChangeGvl`, `TC_EVENTS`, an
+EtherCAT master's `Inputs.Frm0*`/`Outputs.Frm0*` and each box's `WcState`/`InputToggle`. Hidden by
+default.
+
 **Recordable** — A symbol whose resolved type maps to a **scope data type** (numeric or BOOL) and
 that has an ADS symbol. Strings, interfaces, pointers themselves and **disabled symbols** are not
 recordable; values reached **via reference** or through a pointer's `^` are.

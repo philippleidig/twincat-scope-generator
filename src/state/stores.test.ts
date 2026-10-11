@@ -3,7 +3,7 @@ import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
 import { selectActiveGroup, useProjectStore } from './projectStore'
 import { useCatalogStore } from './catalogStore'
 import { useSampleStore, DEFAULT_SAMPLES } from './sampleStore'
-import { useBrowserStore, isFiltering } from './browserStore'
+import { useBrowserStore, hasCustomFilters, isFiltering } from './browserStore'
 import { addPicks, addSpecs, applyDrop, describeAddResult, openProjectFile, resolvePicks, saveProjectFile } from './actions'
 import { toast, useToasts } from './toastStore'
 import type { BrowserPick } from './browserStore'
@@ -90,11 +90,11 @@ describe('catalogStore', () => {
             { name: 'DemoMachine.tmc', text: demoTmc },
             { name: 'broken.tmc', text: '<TcModuleClass>' },
         ])
-        expect(reports[0]).toMatchObject({ fileName: 'DemoMachine.tmc', sourceIds: ['DemoMachine.tmc#0'], symbols: 10 })
+        expect(reports[0]).toMatchObject({ fileName: 'DemoMachine.tmc', sourceIds: ['DemoMachine.tmc#0'], symbols: 11 })
         expect(reports[1].error).toMatch(/Not a valid XML/)
         useCatalogStore.getState().importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
         expect(useCatalogStore.getState().sources).toHaveLength(1)
-        expect(useCatalogStore.getState().index.entries).toHaveLength(26)
+        expect(useCatalogStore.getState().index.entries).toHaveLength(33)
     })
 
     it('drops a PLC I/O listing when the same PLC .tmc is present', () => {
@@ -250,13 +250,20 @@ describe('browserStore', () => {
     it('toggles filters, selection and expansion', () => {
         const s = useBrowserStore.getState()
         expect(isFiltering(useBrowserStore.getState())).toBe(false)
-        s.toggleScopeType('BIT')
+        expect(useBrowserStore.getState().hideSystem).toBe(true)
+        // Showing system symbols is not filtering (the tree stays), but "Clear" restores the default.
+        s.setHideSystem(false)
+        expect(isFiltering(useBrowserStore.getState())).toBe(false)
+        expect(hasCustomFilters(useBrowserStore.getState())).toBe(true)
+        s.toggleKind('NC')
+        s.togglePlcScope('global')
         s.toggleArea('input')
-        s.setRecordableOnly(true)
         s.setQuery('x')
         expect(isFiltering(useBrowserStore.getState())).toBe(true)
         s.clearFilters()
         expect(isFiltering(useBrowserStore.getState())).toBe(false)
+        expect(hasCustomFilters(useBrowserStore.getState())).toBe(false)
+        expect(useBrowserStore.getState().hideSystem).toBe(true)
         const pick: BrowserPick = { key: 'k', sourceId: 's', path: 'p', kind: 'scalar' }
         s.toggleSelected(pick)
         expect(useBrowserStore.getState().selection.size).toBe(1)

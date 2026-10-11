@@ -70,7 +70,7 @@ describe('App', () => {
         const user = userEvent.setup()
         useCatalogStore.getState().importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
         render(<App />)
-        await user.click(screen.getByRole('button', { name: 'Output' }))
+        await user.click(screen.getByRole('button', { name: /^Outputs/ }))
         expect(screen.getByText('2 matches')).toBeInTheDocument()
         await user.type(screen.getByLabelText('Search symbols'), 'nothing-like-this')
         expect(screen.getByText('No matching symbols')).toBeInTheDocument()
@@ -86,7 +86,7 @@ describe('App', () => {
             new File([demoTmc], 'DemoMachine.tmc'),
             new File(['<nope'], 'broken.xti'),
         ])
-        expect(await screen.findByText(/Imported 1 file · 10 symbols/)).toBeInTheDocument()
+        expect(await screen.findByText(/Imported 1 file · 11 symbols/)).toBeInTheDocument()
         expect(screen.getByText(/broken\.xti|Not a valid XML/)).toBeInTheDocument()
         expect(screen.getByText('DemoMachine (PLC)', { selector: '.source-card__title' })).toBeInTheDocument()
     })

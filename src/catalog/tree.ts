@@ -68,6 +68,19 @@ function folderChildren(source: SymbolSource, prefix: string, roots: SymbolRoot[
     return [...folders, ...leaves]
 }
 
+const withoutSystem = new WeakMap<SymbolSource, SymbolSource>()
+
+/**
+ * The source without its system roots (`SymbolRoot.system`) — the same object for the same input,
+ * so cached children stay valid while the filter is toggled.
+ */
+export function withoutSystemRoots(source: SymbolSource): SymbolSource {
+    if (!source.roots.some((r) => r.system)) return source
+    let filtered = withoutSystem.get(source)
+    if (!filtered) withoutSystem.set(source, (filtered = { ...source, roots: source.roots.filter((r) => !r.system) }))
+    return filtered
+}
+
 /** Top level of a source. */
 export function sourceChildren(source: SymbolSource, depth = 0): BrowserNode[] {
     return folderChildren(source, '', source.roots, depth)

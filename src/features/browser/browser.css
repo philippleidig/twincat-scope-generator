@@ -212,6 +212,15 @@
 .chip--clear {
     border-style: dashed;
 }
+.chip__count {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
+}
+.chip[aria-pressed='true'] .chip__count {
+    color: inherit;
+    opacity: 0.75;
+}
 
 /* ---------- Symbol list ---------- */
 /* On short screens (phones, landscape) the list keeps a usable height and the panel scrolls instead. */

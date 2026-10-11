@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import demoTmc from './demo/DemoMachine.tmc?raw'
 import { importTwinCatFile } from './importFile'
 import type { BrowserNode } from './tree'
-import { MAX_ARRAY_CHILDREN, cachedChildren, childrenOf, isExpandable, sourceChildren } from './tree'
+import { MAX_ARRAY_CHILDREN, cachedChildren, childrenOf, isExpandable, sourceChildren, withoutSystemRoots } from './tree'
 import type { SymbolSource } from './model'
 
 const [demo] = importTwinCatFile('DemoMachine.tmc', demoTmc)
@@ -16,8 +16,16 @@ describe('symbol tree', () => {
             ['GVL_IO', 'folder'],
             ['GVL', 'folder'],
             ['MAIN', 'folder'],
+            ['Global_Version', 'folder'],
         ])
         expect(top.every(isExpandable)).toBe(true)
+    })
+
+    it('leaves out system roots on request, as the same source each time', () => {
+        const visible = withoutSystemRoots(demo)
+        expect(sourceChildren(visible).map((n) => n.label)).toEqual(['GVL_IO', 'GVL', 'MAIN'])
+        expect(withoutSystemRoots(demo)).toBe(visible)
+        expect(withoutSystemRoots(visible)).toBe(visible)
     })
 
     it('expands folders, structs and arrays lazily with concrete paths', () => {

@@ -8,12 +8,13 @@ export const RESULT_LIMIT = 2000
 export function useSearch(index: SearchIndex, order: SearchQuery['order']) {
     // Typing stays responsive on large indexes: results catch up a frame later.
     const query = useDeferredValue(useBrowserStore((s) => s.query))
-    const scopeTypes = useBrowserStore((s) => s.scopeTypes)
+    const kinds = useBrowserStore((s) => s.kinds)
+    const plcScopes = useBrowserStore((s) => s.plcScopes)
     const areas = useBrowserStore((s) => s.areas)
-    const recordableOnly = useBrowserStore((s) => s.recordableOnly)
+    const hideSystem = useBrowserStore((s) => s.hideSystem)
     return useMemo(
-        () => search(index, { text: query, scopeTypes, areas, recordableOnly, order }, RESULT_LIMIT),
-        [index, query, scopeTypes, areas, recordableOnly, order],
+        () => search(index, { text: query, kinds, plcScopes, areas, hideSystem, order }, RESULT_LIMIT),
+        [index, query, kinds, plcScopes, areas, hideSystem, order],
     )
 }
 

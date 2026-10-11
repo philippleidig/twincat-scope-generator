@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import demoTmc from './demo/DemoMachine.tmc?raw'
+import demoTsproj from './demo/DemoMachine.tsproj?raw'
 import { importTwinCatFile } from './importFile'
-import { MAX_ENTRIES, buildIndex, parseTerms, search, templateOf } from './search'
-import type { SymbolSource } from './model'
+import { MAX_ENTRIES, buildIndex, facets, parseTerms, search, templateOf } from './search'
+import type { SourceKind, SymbolSource } from './model'
 import { expectSortedByPath } from '@/test/sortedByPath'
 
 const [demo] = importTwinCatFile('DemoMachine.tmc', demoTmc)
@@ -86,10 +87,17 @@ describe('search', () => {
         expect(paths('area:out')).toEqual(['GVL_IO.bHeaterOn', 'GVL_IO.nValvePosition'])
         expect(paths('port:852')).toEqual([])
     })
-    it('filters by scope type, area, source and recordability', () => {
-        expect(paths('', { scopeTypes: new Set(['BIT']), areas: new Set(['input']) })).toEqual(['GVL_IO.bEmergencyStop'])
-        expect(paths('conveyor', { recordableOnly: true })).not.toContain('MAIN.fbConveyor')
+    it('filters by PLC scope, area and source', () => {
+        expect(paths('', { plcScopes: new Set(['program']), areas: new Set(['internal']) })).toContain('MAIN.fbConveyor.bBusy')
+        expect(paths('', { plcScopes: new Set(['program']) }).every((p) => p.startsWith('MAIN.'))).toBe(true)
+        expect(paths('', { plcScopes: new Set(['global']), areas: new Set(['input']) })).toEqual(['GVL_IO.bEmergencyStop', 'GVL_IO.nPressureRaw'])
         expect(paths('', { sourceIds: new Set(['other']) })).toEqual([])
+    })
+    it('hides system symbols on request', () => {
+        expect(paths('stLibVersion')).toContain('Global_Version.stLibVersion_Tc2_Standard')
+        expect(paths('stLibVersion', { hideSystem: true })).toEqual([])
+        // System lists are global variable lists: hiding them leaves the project's own GVLs.
+        expect(new Set(paths('', { plcScopes: new Set(['global']), hideSystem: true }).map((p) => p.split('.')[0]))).toEqual(new Set(['GVL', 'GVL_IO']))
     })
     it('reports the total beyond the limit', () => {
         const r = search(index, { text: '' }, 3)
@@ -107,5 +115,36 @@ describe('search', () => {
     })
     it('parses an empty query to no terms', () => {
         expect(parseTerms('   ')).toEqual([])
+    })
+})
+
+describe('runtime filter and facets', () => {
+    const all = buildIndex([demo, ...importTwinCatFile('DemoMachine.tsproj', demoTsproj)])
+    const kindPaths = (kinds: string[], extra = {}) =>
+        search(all, { text: '', kinds: new Set(kinds as SourceKind[]), ...extra }, Infinity).entries.map((e) => e.path)
+
+    it('keeps the entries of the chosen source kinds', () => {
+        expect(kindPaths(['NC']).every((p) => p.startsWith('Axes.'))).toBe(true)
+        expect(kindPaths(['NC'])).toContain('Axes.Gantry X.ActPos')
+        expect(kindPaths(['NC', 'IO'])).toContain('Term 5 (EL7041).STM Velocity.Velocity')
+        expect(kindPaths(['NC', 'IO'])).not.toContain('MAIN.nCycle')
+    })
+    it('treats EtherCAT frame and working counter state as system symbols', () => {
+        expect(kindPaths(['IO'])).toContain('Term 2 (EL1008).WcState')
+        const io = kindPaths(['IO'], { hideSystem: true })
+        expect(io).not.toContain('Inputs.Frm0State')
+        expect(io).not.toContain('Term 2 (EL1008).WcState')
+        expect(io).not.toContain('Term 2 (EL1008).InputToggle')
+        expect(io).toContain('Term 2 (EL1008).Channel 1.Input')
+    })
+    it('counts what each filter would keep', () => {
+        const shown = facets(all, true)
+        const hidden = all.entries.filter((e) => e.system).length
+        expect(shown.system).toBe(hidden)
+        expect([...shown.kinds.keys()].sort()).toEqual(['IO', 'NC', 'PLC'])
+        expect(shown.kinds.get('NC')).toBe(16)
+        expect([...shown.kinds.values()].reduce((a, b) => a + b)).toBe(all.entries.length - hidden)
+        expect(shown.plcScopes.get('program')).toBe(all.entries.filter((e) => e.global === false).length)
+        expect(facets(all, false).kinds.get('IO')).toBe(all.entries.filter((e) => e.sourceKind === 'IO').length)
     })
 })

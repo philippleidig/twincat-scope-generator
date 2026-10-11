@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import type { ScopeDataType } from '@/domain/dataTypes'
-import type { AreaKind } from '@/catalog/model'
+import type { AreaKind, SourceKind } from '@/catalog/model'
+import type { PlcScope } from '@/catalog/search'
 import type { SymbolKind } from '@/catalog/walk'
 import { sourceKey } from '@/catalog/tree'
 import { safeLocalStorage } from './safeStorage'
@@ -24,9 +24,11 @@ export type BrowserView = 'tree' | 'list'
 interface BrowserState {
     view: BrowserView
     query: string
-    scopeTypes: Set<ScopeDataType>
+    kinds: Set<SourceKind>
+    plcScopes: Set<PlcScope>
     areas: Set<AreaKind>
-    recordableOnly: boolean
+    /** On by default: TwinCAT's own symbols (system lists, frame and working counter state) are left out. */
+    hideSystem: boolean
     expanded: Set<string>
     selection: Map<string, BrowserPick>
     /** Row whose details the inspector shows. */
@@ -34,9 +36,11 @@ interface BrowserState {
 
     setView: (view: BrowserView) => void
     setQuery: (q: string) => void
-    toggleScopeType: (t: ScopeDataType) => void
+    toggleKind: (k: SourceKind) => void
+    togglePlcScope: (s: PlcScope) => void
     toggleArea: (a: AreaKind) => void
-    setRecordableOnly: (v: boolean) => void
+    setHideSystem: (v: boolean) => void
+    /** Back to no query and the default filters. */
     clearFilters: () => void
     toggleExpanded: (key: string) => void
     collapseAll: () => void
@@ -62,19 +66,21 @@ export const useBrowserStore = create<BrowserState>()(
         (set) => ({
             view: 'tree',
             query: '',
-            scopeTypes: new Set(),
+            kinds: new Set(),
+            plcScopes: new Set(),
             areas: new Set(),
-            recordableOnly: false,
+            hideSystem: true,
             expanded: new Set(),
             selection: new Map(),
             focused: null,
 
             setView: (view) => set({ view }),
             setQuery: (query) => set({ query }),
-            toggleScopeType: (t) => set((s) => ({ scopeTypes: toggled(s.scopeTypes, t) })),
+            toggleKind: (k) => set((s) => ({ kinds: toggled(s.kinds, k) })),
+            togglePlcScope: (p) => set((s) => ({ plcScopes: toggled(s.plcScopes, p) })),
             toggleArea: (a) => set((s) => ({ areas: toggled(s.areas, a) })),
-            setRecordableOnly: (recordableOnly) => set({ recordableOnly }),
-            clearFilters: () => set({ query: '', scopeTypes: new Set(), areas: new Set(), recordableOnly: false }),
+            setHideSystem: (hideSystem) => set({ hideSystem }),
+            clearFilters: () => set({ query: '', kinds: new Set(), plcScopes: new Set(), areas: new Set(), hideSystem: true }),
             toggleExpanded: (key) => set((s) => ({ expanded: toggled(s.expanded, key) })),
             collapseAll: () => set({ expanded: new Set() }),
             toggleSelected: (pick) =>
@@ -103,11 +109,19 @@ export const useBrowserStore = create<BrowserState>()(
     ),
 )
 
-export const isFiltering = (s: Pick<BrowserState, 'query' | 'scopeTypes' | 'areas' | 'recordableOnly'>) =>
-    s.query.trim() !== '' || s.scopeTypes.size > 0 || s.areas.size > 0 || s.recordableOnly
+type FilterState = Pick<BrowserState, 'query' | 'kinds' | 'plcScopes' | 'areas' | 'hideSystem'>
+
+/**
+ * A query or a narrowing filter is set. Hiding system symbols is the default and does not count:
+ * the tree leaves them out itself.
+ */
+export const isFiltering = (s: FilterState) => s.query.trim() !== '' || s.kinds.size > 0 || s.plcScopes.size > 0 || s.areas.size > 0
+
+/** Anything differs from the defaults, so "Clear" has something to do. */
+export const hasCustomFilters = (s: FilterState) => isFiltering(s) || !s.hideSystem
 
 /** What the browser body shows: the tree, search results (tree view while filtering) or the flat list. */
 export type BrowserBody = 'tree' | 'results' | 'list'
 
-export const browserBody = (s: Pick<BrowserState, 'view' | 'query' | 'scopeTypes' | 'areas' | 'recordableOnly'>): BrowserBody =>
+export const browserBody = (s: FilterState & Pick<BrowserState, 'view'>): BrowserBody =>
     s.view === 'list' ? 'list' : isFiltering(s) ? 'results' : 'tree'

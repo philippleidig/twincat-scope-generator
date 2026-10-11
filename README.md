@@ -36,7 +36,10 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
   by path, arrays as patterns; search text and filters narrow it. The choice is remembered.
 - **Search**: all words must match anywhere in the path (`axis actpos`); `*`/`?` globs match the whole
   path (`*.fActPos`, `MAIN.*Axis*`); `type:LREAL`, `area:input`, `port:852` filter by field.
-- **Filters**: BOOL / Integer / Real, Input / Output / Internal / Parameter, *Recordable only*.
+- **Filters** (only those that apply to the imported files, with counts): runtime *PLC / NC / I/O /
+  TcCOM*; PLC *Global* (GVLs) / *Programs*; *Inputs / Outputs*; *Hide system* (on by default) leaves
+  out TwinCAT's own symbols — `TwinCAT_SystemInfoVarList`, `Global_Version`, …, the EtherCAT frame
+  state and each box's `WcState`/`InputToggle` — in the tree too.
 - **Arrays become patterns**: a search hit `GVL.aAxis[*].fActPos` is added as
   `GVL.aAxis[{i:1:4}].fActPos` — one channel, four acquisitions.
 - **Structs and FBs**: adding one adds every recordable member below it (without following the

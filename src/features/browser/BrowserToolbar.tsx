@@ -1,16 +1,31 @@
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useMemo, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { List, ListTree, Search, X } from 'lucide-react'
-import type { ScopeDataType } from '@/domain/dataTypes'
-import type { AreaKind } from '@/catalog/model'
-import { isFiltering, useBrowserStore } from '@/state/browserStore'
-import { AREA_LABEL } from './picks'
+import type { AreaKind, SourceKind } from '@/catalog/model'
+import type { PlcScope } from '@/catalog/search'
+import { facets } from '@/catalog/search'
+import { useCatalogStore } from '@/state/catalogStore'
+import { hasCustomFilters, useBrowserStore } from '@/state/browserStore'
+import { SourceIcon } from './symbolIcons'
 
-const TYPE_FILTERS: Array<{ label: string; types: ScopeDataType[] }> = [
-    { label: 'BOOL', types: ['BIT'] },
-    { label: 'Integer', types: ['INT8', 'INT16', 'INT32', 'INT64', 'UINT8', 'UINT16', 'UINT32', 'UINT64'] },
-    { label: 'Real', types: ['REAL32', 'REAL64'] },
+const KINDS: Array<{ kind: SourceKind; label: string }> = [
+    { kind: 'PLC', label: 'PLC' },
+    { kind: 'NC', label: 'NC' },
+    { kind: 'IO', label: 'I/O' },
+    { kind: 'TcCOM', label: 'TcCOM' },
 ]
-const AREAS: AreaKind[] = ['input', 'output', 'internal', 'parameter']
+const PLC_SCOPES: Array<{ scope: PlcScope; label: string; title: string }> = [
+    { scope: 'global', label: 'Global', title: 'PLC variables of global variable lists (GVLs)' },
+    { scope: 'program', label: 'Programs', title: 'PLC variables of programs (MAIN, …) and the function block instances in them' },
+]
+const AREAS: Array<{ area: AreaKind; label: string }> = [
+    { area: 'input', label: 'Inputs' },
+    { area: 'output', label: 'Outputs' },
+]
+const SYSTEM_TITLE =
+    "Leave out TwinCAT's own symbols: TwinCAT_SystemInfoVarList, Global_Version, TwinCAT_PreventOnlineChangeGvl, TC_EVENTS, the EtherCAT frame state (Inputs.Frm0*, Outputs.Frm0*) and each box's WcState and InputToggle"
+
+const Count = ({ n }: { n: number }) => <span className="chip__count">{n.toLocaleString()}</span>
 
 export function BrowserToolbar() {
     const state = useBrowserStore()
@@ -29,10 +44,58 @@ export function BrowserToolbar() {
         return () => document.removeEventListener('keydown', onKey)
     }, [])
 
-    const typeFilterOn = (types: ScopeDataType[]) => types.every((t) => state.scopeTypes.has(t))
-    const toggleTypeFilter = (types: ScopeDataType[]) => {
-        const on = typeFilterOn(types)
-        for (const t of types) if (state.scopeTypes.has(t) === on) state.toggleScopeType(t)
+    const index = useCatalogStore((s) => s.index)
+    const counts = useMemo(() => facets(index, state.hideSystem), [index, state.hideSystem])
+
+    // Only filters that can narrow what is imported, each group separated from the next.
+    const groups: Array<{ key: string; chips: ReactNode[] }> = []
+    const kinds = KINDS.filter((k) => counts.kinds.has(k.kind))
+    if (kinds.length > 1) {
+        groups.push({
+            key: 'kinds',
+            chips: kinds.map(({ kind, label }) => (
+                <button key={kind} type="button" className="chip" aria-pressed={state.kinds.has(kind)} onClick={() => state.toggleKind(kind)}>
+                    <SourceIcon kind={kind} size={13} />
+                    {label}
+                    <Count n={counts.kinds.get(kind) ?? 0} />
+                </button>
+            )),
+        })
+    }
+    if (PLC_SCOPES.every((p) => counts.plcScopes.has(p.scope))) {
+        groups.push({
+            key: 'plc',
+            chips: PLC_SCOPES.map(({ scope, label, title }) => (
+                <button key={scope} type="button" className="chip" title={title} aria-pressed={state.plcScopes.has(scope)} onClick={() => state.togglePlcScope(scope)}>
+                    {label}
+                    <Count n={counts.plcScopes.get(scope) ?? 0} />
+                </button>
+            )),
+        })
+    }
+    const areas = AREAS.filter((a) => counts.areas.has(a.area))
+    if (areas.length > 0) {
+        groups.push({
+            key: 'areas',
+            chips: areas.map(({ area, label }) => (
+                <button key={area} type="button" className="chip" aria-pressed={state.areas.has(area)} onClick={() => state.toggleArea(area)}>
+                    <span className={`area-dot area-dot--${area}`} />
+                    {label}
+                    <Count n={counts.areas.get(area) ?? 0} />
+                </button>
+            )),
+        })
+    }
+    if (counts.system > 0) {
+        groups.push({
+            key: 'system',
+            chips: [
+                <button key="system" type="button" className="chip" title={SYSTEM_TITLE} aria-pressed={state.hideSystem} onClick={() => state.setHideSystem(!state.hideSystem)}>
+                    Hide system
+                    <Count n={counts.system} />
+                </button>,
+            ],
+        })
     }
 
     return (
@@ -68,29 +131,21 @@ export function BrowserToolbar() {
                     </button>
                 </div>
             </div>
-            <div className="filter-row" role="group" aria-label="Filters">
-                {TYPE_FILTERS.map((f) => (
-                    <button key={f.label} type="button" className="chip" aria-pressed={typeFilterOn(f.types)} onClick={() => toggleTypeFilter(f.types)}>
-                        {f.label}
-                    </button>
-                ))}
-                <span className="filter-row__sep" />
-                {AREAS.map((a) => (
-                    <button key={a} type="button" className="chip" aria-pressed={state.areas.has(a)} onClick={() => state.toggleArea(a)}>
-                        <span className={`area-dot area-dot--${a}`} />
-                        {AREA_LABEL[a]}
-                    </button>
-                ))}
-                <span className="filter-row__sep" />
-                <button type="button" className="chip" aria-pressed={state.recordableOnly} onClick={() => state.setRecordableOnly(!state.recordableOnly)}>
-                    Recordable only
-                </button>
-                {isFiltering(state) && (
-                    <button type="button" className="chip chip--clear" onClick={state.clearFilters}>
-                        <X size={13} /> Clear
-                    </button>
-                )}
-            </div>
+            {(groups.length > 0 || hasCustomFilters(state)) && (
+                <div className="filter-row" role="group" aria-label="Filters">
+                    {groups.map((g, i) => (
+                        <Fragment key={g.key}>
+                            {i > 0 && <span className="filter-row__sep" />}
+                            {g.chips}
+                        </Fragment>
+                    ))}
+                    {hasCustomFilters(state) && (
+                        <button type="button" className="chip chip--clear" onClick={state.clearFilters}>
+                            <X size={13} /> Clear
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

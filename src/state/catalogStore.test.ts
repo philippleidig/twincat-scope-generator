@@ -26,10 +26,18 @@ describe('catalog persistence', () => {
         expect(stored.has('sources')).toBe(false)
         expect(useToasts.getState().toasts.map((t) => t.message)).toEqual([expect.stringMatching(/import them again/)])
     })
+    it('drops sources stored by V2.1, which lack I/O sources and the filter flags', async () => {
+        const { useCatalogStore, useToasts } = await load()
+        stored.set('sources@2.1', [{ id: 'old', complete: true }])
+        await useCatalogStore.getState().hydrate()
+        expect(useCatalogStore.getState().sources).toEqual([])
+        expect(stored.has('sources@2.1')).toBe(false)
+        expect(useToasts.getState().toasts.map((t) => t.message)).toEqual([expect.stringMatching(/import them again/)])
+    })
     it('restores sources stored by this version', async () => {
         const { useCatalogStore, useToasts } = await load()
         const source = { id: 'a', complete: true, roots: [], types: {}, pathPrefix: '', port: 851 }
-        stored.set('sources@2.1', [source])
+        stored.set('sources@2.2', [source])
         await useCatalogStore.getState().hydrate()
         expect(useCatalogStore.getState().sources).toEqual([source])
         expect(useToasts.getState().toasts).toEqual([])
