@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FileUp, FolderUp, ListTree, Loader2, Sparkles } from 'lucide-react'
 import { useCatalogStore } from '@/state/catalogStore'
-import { isFiltering, useBrowserStore } from '@/state/browserStore'
+import { browserBody, useBrowserStore } from '@/state/browserStore'
 import { Button } from '@/ui/components/Button'
 import { useFilePicker } from '@/ui/components/useFilePicker'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
@@ -9,7 +9,7 @@ import { useFileImport } from './useFileImport'
 import { SourceCard } from './SourceCard'
 import { BrowserToolbar } from './BrowserToolbar'
 import { SymbolTree } from './SymbolTree'
-import { SearchResults } from './SearchResults'
+import { EntryList } from './EntryList'
 import { SelectionBar } from './SelectionBar'
 import { Inspector } from './Inspector'
 import './browser.css'
@@ -25,7 +25,7 @@ export function SymbolBrowser() {
     const index = useCatalogStore((s) => s.index)
     const hydrated = useCatalogStore((s) => s.hydrated)
     const importFiles = useCatalogStore((s) => s.importFiles)
-    const filtering = useBrowserStore(isFiltering)
+    const body = useBrowserStore(browserBody)
     const collapseAll = useBrowserStore((s) => s.collapseAll)
     const importFromDisk = useFileImport()
     const files = useFilePicker((f) => void importFromDisk(f), { accept: ACCEPT, multiple: true, testId: 'import-input' })
@@ -63,7 +63,7 @@ export function SymbolBrowser() {
                     <p className="panel__subtitle">Offline target browser for TwinCAT project files</p>
                 </div>
                 <div className="panel__actions">
-                    {sources.length > 0 && (
+                    {sources.length > 0 && body === 'tree' && (
                         <Button variant="ghost" size="sm" icon={<ListTree size={15} />} onClick={collapseAll}>
                             Collapse
                         </Button>
@@ -114,7 +114,10 @@ export function SymbolBrowser() {
                     {index.truncated && (
                         <p className="browser-note">The symbol index is very large and was truncated; search may miss deep members.</p>
                     )}
-                    <div className="browser__list">{filtering ? <SearchResults index={index} /> : <SymbolTree sources={sources} />}</div>
+                    <div className="browser__list">
+                        {/* Keyed per body so the scroll position does not carry over between views. */}
+                        {body === 'tree' ? <SymbolTree key="tree" sources={sources} /> : <EntryList key={body} index={index} mode={body} />}
+                    </div>
                     <Inspector />
                     <SelectionBar />
                 </>

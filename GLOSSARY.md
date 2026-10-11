@@ -37,6 +37,10 @@ current catalog only when added, into **channel specs**.
 **Search entry** — One node of the search index. Array indices are written as `*`
 (`GVL.aAxis[*].fActPos`) together with their **ranges**, so an array contributes one entry, not one per element.
 
+**Browser view** — How the symbol browser shows the catalog: the **tree** (sources → folders → symbols →
+members → elements; a query switches it to search results) or the **list** (every search entry, sorted
+by path, narrowed by query and filters). Both produce the same picks.
+
 ## Scope project (what is exported)
 
 **Project** — Everything in one `.tcmproj`: settings, targets and scope files.
