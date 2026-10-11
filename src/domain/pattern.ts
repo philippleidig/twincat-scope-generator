@@ -82,19 +82,25 @@ function format(value: number, width: number): string {
     return width > 0 ? String(value).padStart(width, '0') : String(value)
 }
 
+/** One expansion of a template: the symbol path and the (formatted) value of each counter. */
+export interface Expansion {
+    symbol: string
+    values: ReadonlyMap<string, string>
+}
+
 /**
- * All symbol paths a template expands to, in counter order (first counter varies slowest).
+ * Every expansion of a template, in counter order (first counter varies slowest).
  * Callers must validate first; an invalid template expands to nothing.
  */
-export function expandTemplate(template: string): string[] {
+export function expandTemplateValues(template: string): Expansion[] {
     if (!validateTemplate(template).valid) return []
     const counters = parseCounters(template)
-    const out: string[] = []
+    const out: Expansion[] = []
     const values = new Map<string, string>()
 
     const walk = (i: number) => {
         if (i === counters.length) {
-            out.push(template.replace(COUNTER, (_, name: string) => values.get(name)!))
+            out.push({ symbol: template.replace(COUNTER, (_, name: string) => values.get(name)!), values: new Map(values) })
             return
         }
         const c = counters[i]
@@ -105,6 +111,11 @@ export function expandTemplate(template: string): string[] {
     }
     walk(0)
     return out
+}
+
+/** All symbol paths a template expands to (see `expandTemplateValues`). */
+export function expandTemplate(template: string): string[] {
+    return expandTemplateValues(template).map((e) => e.symbol)
 }
 
 const COUNTER_NAMES = ['i', 'j', 'k', 'l', 'm', 'n']

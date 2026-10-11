@@ -10,12 +10,16 @@ import type { ScopeDataType } from '@/domain/dataTypes'
 import { SCOPE_DATA_TYPE_SIZE } from '@/domain/dataTypes'
 import type { Project, ProjectSettings } from '@/domain/project'
 import { sanitizeFileName, uniqueName } from '@/domain/project'
-import { expandTemplate, validateTemplate } from '@/domain/pattern'
+import { autoColor, expandChannel } from '@/domain/channelStyle'
 
 /** One recorded value: a fully expanded channel. */
 export interface Acquisition {
   guid: string
   symbolName: string
+  /** Channel name in Scope (the symbol name unless the channel has a display name). */
+  displayName: string
+  /** `#rrggbb`; unset: a palette colour by position in the axis group. */
+  color?: string
   amsNetId: string
   targetPort: number
   dataType: ScopeDataType
@@ -56,17 +60,10 @@ function escapeXml(text: string): string {
 /** Source of GUIDs; injectable so tests can produce deterministic output. */
 export type IdGen = () => string
 
-/** Channel colors (TwinCAT stores ARGB as signed int32). */
-const CHANNEL_COLORS = [
-  -16744448,  // Green
-  -16776961,  // Blue
-  -65536,     // Red
-  -256,       // Yellow
-  -16711681,  // Cyan
-  -65281,     // Magenta
-  -23296,     // Orange
-  -8388480,   // Purple
-]
+/** `#rrggbb` as TwinCAT stores colours: ARGB (alpha 255) as a signed 32-bit integer (`#008000` → -16744448). */
+export function toArgb(hex: string): number {
+  return (0xff000000 | parseInt(hex.slice(1), 16)) | 0
+}
 
 /**
  * Expand every channel into acquisitions and assign unique, file-system-safe file
@@ -82,17 +79,18 @@ export function planProject(project: Project, id: IdGen = uuidv4): PlannedScopeF
   for (const file of project.scopeFiles) {
     const axisGroups: PlannedAxisGroup[] = []
     for (const ag of file.axisGroups) {
-      const acquisitions = ag.channels.flatMap((ch) => {
-        if (!validateTemplate(ch.symbol).valid) return []
-        return expandTemplate(ch.symbol).map((symbolName) => ({
+      const acquisitions = ag.channels.flatMap((ch) =>
+        expandChannel(ch).map(({ symbolName, displayName, color }) => ({
           guid: id(),
           symbolName,
+          displayName,
+          color,
           amsNetId: netIdByTarget.get(ch.targetId) ?? fallbackNetId,
           targetPort: ch.port,
           dataType: ch.dataType,
           baseSampleTime: project.settings.baseSampleTime,
-        }))
-      })
+        })),
+      )
       if (acquisitions.length > 0) axisGroups.push({ name: ag.name, acquisitions })
     }
     if (axisGroups.length === 0) continue
@@ -250,8 +248,11 @@ ${indent}</AdsAcquisition>`
  */
 function generateChannelXml(id: IdGen, acq: Acquisition, sortPriority: number, colorIndex: number, indent: string): string {
   const channelGuid = id()
-  const color = CHANNEL_COLORS[colorIndex % CHANNEL_COLORS.length]
-  const name = escapeXml(acq.symbolName)
+  const color = toArgb(acq.color ?? autoColor(colorIndex))
+  const name = escapeXml(acq.displayName)
+  const symbolName = escapeXml(acq.symbolName)
+  // Scope shows the acquisition's name unless the channel's name relation says `Custom`.
+  const usedNameType = acq.displayName === acq.symbolName ? 'Acquisition' : 'Custom'
 
   return `${indent}<Channel AssemblyName="TwinCAT.Measurement.Scope.API.Model">
 ${indent}  <Comment />
@@ -268,7 +269,7 @@ ${indent}      <BitMask>18446744073709551615</BitMask>
 ${indent}      <Comment />
 ${indent}      <DisplayColor>Black</DisplayColor>
 ${indent}      <Guid>${id()}</Guid>
-${indent}      <Name>Y: ${name}</Name>
+${indent}      <Name>Y: ${symbolName}</Name>
 ${indent}      <Offset>0</Offset>
 ${indent}      <ResultingUnit>
 ${unitXml(`${indent}        `)}
@@ -349,7 +350,7 @@ ${indent}      <Guid>${id()}</Guid>
 ${indent}      <Name>MeasurementMemberBase</Name>
 ${indent}      <SortPriority>100</SortPriority>
 ${indent}      <Title>MeasurementMemberBase</Title>
-${indent}      <UsedNameType>Acquisition</UsedNameType>
+${indent}      <UsedNameType>${usedNameType}</UsedNameType>
 ${indent}    </NameRelationInfo>
 ${indent}  </SubMember>
 ${indent}  <Title>MeasurementMemberBase</Title>

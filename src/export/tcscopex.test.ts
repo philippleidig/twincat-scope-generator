@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createProject, ops } from '@/domain/project'
 import type { Project } from '@/domain/project'
-import { generateProject, generateTcmprojXml, planProject } from './tcscopex'
+import { generateProject, generateTcmprojXml, planProject, toArgb } from './tcscopex'
 
 const sequentialIds = () => {
     let n = 0
@@ -79,6 +79,55 @@ describe('generateProject', () => {
         const { scopeFiles, tcmproj } = generateProject(sample(), sequentialIds())
         expect(scopeFiles[0].content).toMatchSnapshot()
         expect(tcmproj.content).toMatchSnapshot()
+    })
+
+    it('writes display names and colours (golden file)', () => {
+        let p = createProject()
+        const g = p.scopeFiles[0].axisGroups[0].id
+        p = ops.addChannels(p, g, [
+            { symbol: 'GVL.aAxis[{i:1:2}].fActPos', name: 'Axis {i} <pos>', color: '#ff0000' },
+            { symbol: 'MAIN.b', color: '#123456' },
+            { symbol: 'MAIN.c' },
+        ])
+        const xml = generateProject(p, sequentialIds()).scopeFiles[0].content
+        const doc = parse(xml)
+        expect(doc.getElementsByTagName('parsererror')).toHaveLength(0)
+
+        const channels = [...doc.getElementsByTagName('Channel')]
+        const child = (el: Element, tag: string) => [...el.children].find((c) => c.tagName === tag)!.textContent
+        const subMember = (el: Element) => [...el.children].find((c) => c.tagName === 'SubMember')!
+        // The channel-level name relation is a direct child of the channel's SubMember.
+        const usedNameType = (el: Element) => child([...subMember(el).children].find((c) => c.tagName === 'NameRelationInfo')!, 'UsedNameType')
+        const series = (el: Element) => el.getElementsByTagName('SeriesStyle')[0]
+
+        expect(channels.map((c) => child(c, 'Name'))).toEqual(['Axis 1 <pos>', 'Axis 2 <pos>', 'MAIN.b', 'MAIN.c'])
+        expect(channels.map(usedNameType)).toEqual(['Custom', 'Custom', 'Acquisition', 'Acquisition'])
+        expect(channels.map((c) => c.getElementsByTagName('AcquisitionInterpreter')[0].getElementsByTagName('Name')[0].textContent)).toEqual([
+            'Y: GVL.aAxis[1].fActPos',
+            'Y: GVL.aAxis[2].fActPos',
+            'Y: MAIN.b',
+            'Y: MAIN.c',
+        ])
+        // Acquisitions keep the symbol names.
+        expect([...doc.getElementsByTagName('AdsAcquisition')].map((a) => child(a, 'Name'))).toEqual([
+            'GVL.aAxis[1].fActPos',
+            'GVL.aAxis[2].fActPos',
+            'MAIN.b',
+            'MAIN.c',
+        ])
+        // Red, then the next palette colour (yellow); a custom colour; the automatic colour of position 3 (yellow).
+        const expected = [-65536, -256, toArgb('#123456'), -256].map(String)
+        expect(channels.map((c) => child(c, 'DisplayColor'))).toEqual(expected)
+        expect(channels.map((c) => child(series(c), 'DisplayColor'))).toEqual(expected)
+        expect(channels.map((c) => child(series(c), 'MarkColor'))).toEqual(expected)
+        expect(xml).toMatchSnapshot()
+    })
+
+    it('converts #rrggbb to signed ARGB', () => {
+        expect(toArgb('#008000')).toBe(-16744448)
+        expect(toArgb('#FFFFFF')).toBe(-1)
+        expect(toArgb('#000000')).toBe(-16777216)
+        expect(toArgb('#123456')).toBe(-15584170)
     })
 
     it('escapes the project name', () => {

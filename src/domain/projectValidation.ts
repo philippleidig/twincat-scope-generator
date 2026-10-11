@@ -2,9 +2,10 @@
  * Validation of a scope project and loading it from untrusted JSON (project files, persisted state).
  */
 import { v4 as uuid } from 'uuid'
+import { displayNameError, hasDisplayName, isHexColor, normalizeColor } from './channelStyle'
 import { isScopeDataType } from './dataTypes'
 import { validateTemplate } from './pattern'
-import type { Project, ProjectSettings } from './project'
+import type { Channel, Project, ProjectSettings } from './project'
 import { allChannels, createProject, projectAcquisitionCount, sanitizeFileName } from './project'
 
 const AMS_NET_ID = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
@@ -64,13 +65,21 @@ export function parseProject(json: unknown): Project {
         axisGroups: arr(f.axisGroups).map((a) => ({
             id: str(a.id, uuid()),
             name: str(a.name, 'Axis Group'),
-            channels: arr(a.channels).map((c) => ({
-                id: str(c.id, uuid()),
-                symbol: str(c.symbol, ''),
-                dataType: isScopeDataType(c.dataType) ? c.dataType : 'REAL64',
-                port: num(c.port, settings.defaultPort),
-                targetId: typeof c.targetId === 'string' && targetIds.has(c.targetId) ? c.targetId : targets[0].id,
-            })),
+            channels: arr(a.channels).map((c) => {
+                const channel: Channel = {
+                    id: str(c.id, uuid()),
+                    symbol: str(c.symbol, ''),
+                    dataType: isScopeDataType(c.dataType) ? c.dataType : 'REAL64',
+                    port: num(c.port, settings.defaultPort),
+                    targetId: typeof c.targetId === 'string' && targetIds.has(c.targetId) ? c.targetId : targets[0].id,
+                }
+                // Optional (V2.1): kept only when well-formed. A name with unknown counters is kept
+                // (the editor shows the error, the export falls back to the symbol name).
+                if (typeof c.name === 'string' && c.name.trim()) channel.name = c.name
+                if (isHexColor(c.color)) channel.color = normalizeColor(c.color)
+                if (c.colorMode === 'same') channel.colorMode = 'same'
+                return channel
+            }),
         })),
     }))
 
@@ -97,6 +106,10 @@ export function projectIssues(project: Project): string[] {
     if (invalid > 0) issues.push(`${invalid} channel${invalid === 1 ? ' has an' : 's have'} invalid symbol paths and will be skipped`)
     const empty = allChannels(project).filter((c) => !c.symbol.trim()).length
     if (empty > 0) issues.push(`${empty} empty channel${empty === 1 ? '' : 's'} will be skipped`)
+    const badNames = allChannels(project).filter((c) => hasDisplayName(c) && displayNameError(c.name!, c.symbol)).length
+    if (badNames > 0) {
+        issues.push(`${badNames} channel name${badNames === 1 ? ' uses' : 's use'} unknown counters — the symbol path is used instead`)
+    }
     const names = project.scopeFiles.map((f) => f.name)
     project.scopeFiles.forEach((f, i) => {
         const error = fileNameError(f.name, names.filter((_, j) => j !== i))

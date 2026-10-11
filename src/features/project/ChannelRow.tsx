@@ -1,12 +1,14 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { ArrowRightLeft, Copy, GripVertical, Trash2 } from 'lucide-react'
 import type { Channel, Target } from '@/domain/project'
 import { validateTemplate } from '@/domain/pattern'
+import { displayNameError, hasDisplayName } from '@/domain/channelStyle'
 import { setChannelDragData } from '@/state/projectDrag'
 import { useProjectStore } from '@/state/projectStore'
 import { IconButton } from '@/ui/components/Button'
 import { Menu } from '@/ui/components/Menu'
 import { ChannelFields } from './ChannelFields'
+import { ChannelStyleEditor } from './ChannelStyleEditor'
 import type { DropEdge } from './dnd'
 import { dropAttrs, setDragImage } from './dnd'
 import { channelMoveItems } from './moveMenu'
@@ -22,16 +24,24 @@ interface ChannelRowProps {
     dropCopy?: boolean
 }
 
-/** One channel: drag handle, its fields, actions and the template error. */
+/** One channel: drag handle, name/colour toggle, its fields, actions, the template error and the name/colour editor. */
 export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dropEdge, dropCopy = false }: ChannelRowProps) {
     const removeChannel = useProjectStore((s) => s.removeChannel)
     const duplicateChannel = useProjectStore((s) => s.duplicateChannel)
 
     const validation = channel.symbol.trim() ? validateTemplate(channel.symbol) : null
     const error = validation && !validation.valid ? validation.errors[0] : null
+    const [styleOpen, setStyleOpen] = useState(false)
+    const named = hasDisplayName(channel)
+    const nameInvalid = named && !!displayNameError(channel.name!, channel.symbol)
 
     return (
-        <li className={`channel ${error ? 'channel--error' : ''}`} data-channel-index={index} {...dropAttrs(dropEdge, dropCopy)}>
+        <li
+            className={`channel ${error ? 'channel--error' : ''}`}
+            data-channel-index={index}
+            data-channel-id={channel.id}
+            {...dropAttrs(dropEdge, dropCopy)}
+        >
             <div className="channel__main">
                 <span
                     className="drag-handle"
@@ -45,7 +55,21 @@ export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dr
                 >
                     <GripVertical size={14} />
                 </span>
+                <button
+                    type="button"
+                    className={`channel__swatch ${channel.color ? '' : 'channel__swatch--auto'} ${nameInvalid ? 'channel__swatch--invalid' : ''}`}
+                    style={channel.color ? { background: channel.color } : undefined}
+                    aria-label="Name and colour"
+                    aria-expanded={styleOpen}
+                    title={`${named ? `Name: ${channel.name}` : 'No name'} · colour: ${channel.color ?? 'automatic'}`}
+                    onClick={() => setStyleOpen((o) => !o)}
+                />
                 <ChannelFields channel={channel} targets={targets} error={error} />
+                {named && !styleOpen && (
+                    <span className={`channel__name ${nameInvalid ? 'channel__name--invalid' : ''}`} title="Display name">
+                        {channel.name}
+                    </span>
+                )}
                 <div className="channel__actions">
                     <Menu
                         trigger={(props) => (
@@ -68,6 +92,7 @@ export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dr
                     {error}
                 </p>
             )}
+            {styleOpen && <ChannelStyleEditor channel={channel} />}
         </li>
     )
 })
