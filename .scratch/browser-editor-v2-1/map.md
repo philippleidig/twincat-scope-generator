@@ -9,6 +9,11 @@ reachable by ADS symbol name (verified against a large corpus of real TwinCAT fi
 axis groups can be dragged within and across scope files; channels get a display name (with counters)
 and a colour that land in the exported `.tcscopex`. Spec: [`docs/spec/v2.1.md`](../../docs/spec/v2.1.md).
 
+**Reached** (2026-10-11): all four slices are on `main` — B `b5129a1`, C `e36bacd`, D `b759697`,
+A `8ce45fa`. Final corpus run (352 files): 0 import errors, 505,405 index entries, 0 truncated,
+0 unresolved of 160,017 sampled paths, 0 hidden leaks; invalid templates only for arrays over
+5,000 elements (reported). Each slice passed the correctness and code-quality review (A in four rounds).
+
 ## Notes
 
 - **Execution is in scope** (the user's override of "plan, don't do"): the spec is implemented in
@@ -28,6 +33,8 @@ and a colour that land in the exported `.tcscopex`. Spec: [`docs/spec/v2.1.md`](
 - [What is reachable by ADS name?](issues/05-ads-access.md): the TMC lists more than ADS exposes; hide properties/hidden/no-symbol/VAR_INST, disable call-properties, interfaces, strings; pointers via `^`; references read through.
 - [Which real files do we test against?](issues/06-corpus.md): 352 files from 120 repos; current importer: 0 crashes, two defects (pointer-to-array types, empty arrays).
 - [What does the flat list show?](issues/08-flat-list.md): every indexed path (arrays as patterns), the same rows as search results; filters apply.
+- Type-level `hide`/`TcNoSymbol` does not hide symbols of that type (review of slice A, corrected in the spec and ADR 0005); type-level `conditionalshow` disables instances.
+- Search follows every pointer/reference reached without another indirection; below one, each declaration once per root (bounded walk). The tree and `resolvePath` go deeper on demand.
 
 ## Not yet specified
 
