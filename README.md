@@ -31,6 +31,8 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 
 - **Tree** like the Target Browser: sources → `MAIN`/`GVL`/`Axes › Axis 1`… → symbols → members →
   array elements, expanded lazily so huge projects stay fast (16 MB `.tmc`: ~1 s to import).
+- **List** view (toggle *Tree | List* next to the search box): every symbol path as one flat list sorted
+  by path, arrays as patterns; search text and filters narrow it. The choice is remembered.
 - **Search**: all words must match anywhere in the path (`axis actpos`); `*`/`?` globs match the whole
   path (`*.fActPos`, `MAIN.*Axis*`); `type:LREAL`, `area:input`, `port:852` filter by field.
 - **Filters**: BOOL / Integer / Real, Input / Output / Internal / Parameter, *Recordable only*.

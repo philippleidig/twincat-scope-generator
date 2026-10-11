@@ -2,6 +2,14 @@
 
 ## V2.1 (unreleased)
 
+### Symbol browser
+
+- **Tree | List** toggle next to the search box. *List* shows every symbol path as one flat,
+  virtualised list sorted by path (arrays as patterns, ×N badge), narrowed by search text and filter
+  chips without switching modes; long lists are capped with a "Showing n of m" hint.
+- Selection, inspector focus, drag to axis groups and *Add to scope* work the same in both views.
+- The chosen view is remembered in the browser (falls back to the tree when storage is blocked).
+
 ### Project editing
 
 - **Drag & drop in the scope project**: drag a channel by its handle to reorder it (an indicator line

@@ -73,3 +73,19 @@ test('reorders channels by dragging and moves one to another file', async ({ pag
     await page.getByRole('tab', { name: /Scope_2/ }).click()
     await expect.poll(values).toEqual(['MAIN.b'])
 })
+
+test('adds symbols picked in the flat list view', async ({ page }) => {
+    await page.getByRole('button', { name: 'Try the demo machine' }).click()
+    await page.getByRole('group', { name: 'Browser view' }).getByRole('button', { name: 'List' }).click()
+    const list = page.getByRole('listbox', { name: 'Symbol list' })
+    await list.getByRole('checkbox', { name: 'Select GVL.aAxis[{i:1:4}].fActPos', exact: true }).check()
+    await list.getByRole('checkbox', { name: 'Select GVL.fCycleLoad', exact: true }).check()
+    await page.getByRole('button', { name: /Add to scope/ }).click()
+
+    await expect(page.getByLabel('Symbol path')).toHaveCount(2)
+    await expect(page.getByLabel('Symbol path').first()).toHaveValue('GVL.aAxis[{i:1:4}].fActPos')
+
+    // The choice survives a reload.
+    await page.reload()
+    await expect(page.getByRole('listbox', { name: 'Symbol list' })).toBeVisible()
+})
