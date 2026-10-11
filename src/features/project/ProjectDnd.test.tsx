@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { allChannels } from '@/domain/project'
 import { useProjectStore } from '@/state/projectStore'
 import { useToasts } from '@/state/toastStore'
-import { AXIS_GROUP_MIME, CHANNEL_MIME } from './dnd'
+import { AXIS_GROUP_MIME, CHANNEL_MIME } from '@/state/projectDrag'
 import { ProjectPanel } from './ProjectPanel'
 
 /** A DataTransfer stand-in: jsdom has none. */
@@ -53,8 +53,11 @@ function dragStart(el: HTMLElement) {
 beforeEach(() => {
     useProjectStore.getState().reset()
     useToasts.setState({ toasts: [] })
-    // Every element is 20px high at y = 0: clientY 5 is its upper half, 15 its lower half.
-    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 0, height: 20, bottom: 20, left: 0, right: 100, width: 100, x: 0, y: 0, toJSON: () => ({}) })
+    // Channel row i spans y = 26i … 26i + 20 (6px gaps between rows); everything else y = 0 … 20.
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+        const index = this instanceof HTMLElement ? Number(this.dataset.channelIndex ?? 0) : 0
+        return DOMRect.fromRect({ x: 0, y: index * 26, width: 100, height: 20 })
+    })
     const s = useProjectStore.getState()
     const fileId = s.project.scopeFiles[0].id
     s.addChannels(s.project.scopeFiles[0].axisGroups[0].id, [{ symbol: 'a' }, { symbol: 'b' }, { symbol: 'c' }])
@@ -62,6 +65,8 @@ beforeEach(() => {
     s.addChannels(project().scopeFiles[0].axisGroups[1].id, [{ symbol: 'd' }])
     s.addScopeFile()
 })
+
+afterEach(() => vi.restoreAllMocks())
 
 describe('dragging channels', () => {
     it('puts the channel id on the drag as JSON under its own type', () => {
@@ -81,10 +86,33 @@ describe('dragging channels', () => {
         expect(rows('Axis Group 1')[0]).toHaveAttribute('data-drop', 'before')
         expect(dataTransfer.dropEffect).toBe('move')
         drag('dragOver', target, { dataTransfer, clientY: 15 })
-        expect(rows('Axis Group 1')[0]).toHaveAttribute('data-drop', 'after')
+        expect(rows('Axis Group 1')[0]).not.toHaveAttribute('data-drop')
+        expect(rows('Axis Group 1')[1]).toHaveAttribute('data-drop', 'before')
         drag('drop', target, { dataTransfer, clientY: 15 })
         expect(symbols()).toEqual(['a', 'c', 'b'])
-        expect(rows('Axis Group 1')[0]).not.toHaveAttribute('data-drop')
+        expect(rows('Axis Group 1')[1]).not.toHaveAttribute('data-drop')
+        expect(useToasts.getState().toasts[0].message).toBe('Moved channel to Scope_1 › Axis Group 1')
+    })
+
+    it('drops in the gap between two rows at that position', () => {
+        render(<ProjectPanel />)
+        const dataTransfer = dragStart(rows('Axis Group 1')[0])
+        const list = within(card('Axis Group 1')).getByRole('list')
+        drag('dragOver', list, { dataTransfer, clientY: 49 })
+        expect(rows('Axis Group 1')[2]).toHaveAttribute('data-drop', 'before')
+        expect(screen.queryByText('Move to Axis Group 1')).not.toBeInTheDocument()
+        drag('drop', list, { dataTransfer, clientY: 49 })
+        expect(symbols()).toEqual(['b', 'a', 'c'])
+    })
+
+    it('clears the indicator when the drag is cancelled', () => {
+        render(<ProjectPanel />)
+        const dataTransfer = dragStart(rows('Axis Group 1')[0])
+        drag('dragOver', rows('Axis Group 1')[2], { dataTransfer, clientY: 60 })
+        expect(rows('Axis Group 1')[2]).toHaveAttribute('data-drop', 'before')
+        fireEvent.dragEnd(document)
+        expect(rows('Axis Group 1')[2]).not.toHaveAttribute('data-drop')
+        expect(symbols()).toEqual(['a', 'b', 'c'])
     })
 
     it('moves into another axis group at the indicated position or appended on the header', () => {
@@ -120,10 +148,10 @@ describe('dragging channels', () => {
     it('copies with new ids while Ctrl is held and shows a "+" badge', () => {
         render(<ProjectPanel />)
         const dataTransfer = dragStart(rows('Axis Group 1')[0])
-        drag('dragOver', rows('Axis Group 1')[2], { dataTransfer, clientY: 15, ctrlKey: true })
+        drag('dragOver', rows('Axis Group 1')[2], { dataTransfer, clientY: 70, ctrlKey: true })
         expect(rows('Axis Group 1')[2]).toHaveAttribute('data-drop-copy')
         expect(dataTransfer.dropEffect).toBe('copy')
-        drag('drop', rows('Axis Group 1')[2], { dataTransfer, clientY: 15, ctrlKey: true })
+        drag('drop', rows('Axis Group 1')[2], { dataTransfer, clientY: 70, ctrlKey: true })
         expect(symbols()).toEqual(['a', 'b', 'c', 'a'])
         expect(new Set(allChannels(project()).map((c) => c.id)).size).toBe(5)
 
@@ -134,15 +162,15 @@ describe('dragging channels', () => {
         drag('drop', tab, { dataTransfer: toTab, ctrlKey: true })
         expect(symbols(0, 1)).toEqual(['d'])
         expect(symbols(1, 0)).toEqual(['d'])
-        expect(useToasts.getState().toasts[0].message).toBe('Copied channel to Scope_2 › Axis Group 1')
+        expect(useToasts.getState().toasts.at(-1)?.message).toBe('Copied channel to Scope_2 › Axis Group 1')
     })
 
     it('inserts Target Browser symbols at the row they are dropped on', () => {
         render(<ProjectPanel />)
         const xml = '<TargetBrowserExportInfo><Symbols><Symbol><Name>MAIN.q</Name><BaseType>BOOL</BaseType></Symbol></Symbols></TargetBrowserExportInfo>'
         const dataTransfer = { types: ['text/plain'], getData: () => xml, dropEffect: '' }
-        drag('dragOver', rows('Axis Group 1')[1], { dataTransfer, clientY: 5 })
-        drag('drop', rows('Axis Group 1')[1], { dataTransfer, clientY: 5 })
+        drag('dragOver', rows('Axis Group 1')[1], { dataTransfer, clientY: 30 })
+        drag('drop', rows('Axis Group 1')[1], { dataTransfer, clientY: 30 })
         expect(symbols()).toEqual(['a', 'MAIN.q', 'b', 'c'])
     })
 
@@ -204,6 +232,8 @@ describe('"Move to…" menus', () => {
         expect(screen.getByRole('menuitem', { name: 'Move up' })).toBeDisabled()
         await user.click(screen.getByRole('menuitem', { name: 'Move down' }))
         expect(symbols()).toEqual(['b', 'a', 'c'])
+        // Focus stays on the moved row's menu button for further keyboard moves.
+        expect(within(rows('Axis Group 1')[1]).getByRole('button', { name: 'Move channel to…' })).toHaveFocus()
 
         await user.click(within(rows('Axis Group 1')[1]).getByRole('button', { name: 'Move channel to…' }))
         await user.click(screen.getByRole('menuitem', { name: 'Move up' }))
@@ -232,5 +262,18 @@ describe('"Move to…" menus', () => {
         await user.click(screen.getByRole('menuitem', { name: 'Move to Scope_2' }))
         expect(groupNames(0)).toEqual(['Axis Group 2'])
         expect(groupNames(1)).toEqual(['Axis Group 1', 'Axis Group 1'])
+    })
+
+    it('can be used with the keyboard and names untitled files like the tabs', async () => {
+        const user = userEvent.setup()
+        useProjectStore.getState().updateScopeFile(project().scopeFiles[1].id, { name: '' })
+        render(<ProjectPanel />)
+        const trigger = within(rows('Axis Group 1')[0]).getByRole('button', { name: 'Move channel to…' })
+        trigger.focus()
+        await user.keyboard('{Enter}')
+        expect(screen.getByRole('menuitem', { name: 'Move to Untitled › Axis Group 1' })).toBeInTheDocument()
+        await user.keyboard('{Escape}')
+        expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+        expect(trigger).toHaveFocus()
     })
 })

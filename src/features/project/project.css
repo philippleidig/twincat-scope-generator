@@ -315,12 +315,18 @@
 .drag-handle:active {
     cursor: grabbing;
 }
-/* Indicator line between rows / axis groups where the drop inserts. */
+/*
+ * Indicator line where a drop inserts, centred in the gap before/after a channel row or axis group
+ * (each sets --drop-gap to the gap of its list), with a "+" badge while the drop copies.
+ */
 .channel {
+    --drop-gap: 6px;
     position: relative;
 }
-.channel[data-drop]::before,
-.axis-group[data-drop]::before {
+.axis-group {
+    --drop-gap: var(--space-3);
+}
+[data-drop]::before {
     content: '';
     position: absolute;
     right: 0;
@@ -331,21 +337,13 @@
     background: var(--accent);
     pointer-events: none;
 }
-.channel[data-drop='before']::before {
-    top: -4px;
+[data-drop='before']::before {
+    top: calc(var(--drop-gap) / -2 - 1px);
 }
-.channel[data-drop='after']::before {
-    bottom: -4px;
+[data-drop='after']::before {
+    bottom: calc(var(--drop-gap) / -2 - 1px);
 }
-.axis-group[data-drop='before']::before {
-    top: calc(-1 * var(--space-3) / 2 - 1px);
-}
-.axis-group[data-drop='after']::before {
-    bottom: calc(-1 * var(--space-3) / 2 - 1px);
-}
-/* "+" badge on the indicator while the drop copies. */
-.channel[data-drop-copy]::after,
-.axis-group[data-drop-copy]::after {
+[data-drop-copy]::after {
     content: '+';
     position: absolute;
     left: -6px;
@@ -362,17 +360,11 @@
     line-height: 1;
     pointer-events: none;
 }
-.channel[data-drop='before'][data-drop-copy]::after {
-    top: -11px;
+[data-drop='before'][data-drop-copy]::after {
+    top: calc(var(--drop-gap) / -2 - 8px);
 }
-.channel[data-drop='after'][data-drop-copy]::after {
-    bottom: -11px;
-}
-.axis-group[data-drop='before'][data-drop-copy]::after {
-    top: calc(-1 * var(--space-3) / 2 - 8px);
-}
-.axis-group[data-drop='after'][data-drop-copy]::after {
-    bottom: calc(-1 * var(--space-3) / 2 - 8px);
+[data-drop='after'][data-drop-copy]::after {
+    bottom: calc(var(--drop-gap) / -2 - 8px);
 }
 .drop-badge {
     display: inline-grid;

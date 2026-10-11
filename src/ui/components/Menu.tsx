@@ -22,11 +22,25 @@ interface MenuProps {
 export function Menu({ trigger, items, align = 'end' }: MenuProps) {
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
+    /** Set when the menu closes by keyboard or selection: focus goes back to the trigger, not to <body>. */
+    const refocus = useRef(false)
+
+    useEffect(() => {
+        if (open || !refocus.current) return
+        refocus.current = false
+        ref.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.focus()
+    }, [open])
 
     useEffect(() => {
         if (!open) return
         const close = (e: Event) => {
-            if (e instanceof KeyboardEvent ? e.key === 'Escape' : !ref.current?.contains(e.target as Node)) setOpen(false)
+            if (e instanceof KeyboardEvent) {
+                if (e.key !== 'Escape') return
+                refocus.current = true
+                setOpen(false)
+            } else if (!ref.current?.contains(e.target as Node)) {
+                setOpen(false)
+            }
         }
         document.addEventListener('mousedown', close)
         document.addEventListener('keydown', close)
@@ -49,6 +63,7 @@ export function Menu({ trigger, items, align = 'end' }: MenuProps) {
                             disabled={item.disabled}
                             className={`menu__item ${item.danger ? 'menu__item--danger' : ''}`}
                             onClick={() => {
+                                refocus.current = true
                                 setOpen(false)
                                 item.onSelect()
                             }}

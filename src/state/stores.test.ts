@@ -4,9 +4,10 @@ import { selectActiveGroup, useProjectStore } from './projectStore'
 import { useCatalogStore } from './catalogStore'
 import { useSampleStore, DEFAULT_SAMPLES } from './sampleStore'
 import { PICK_MIME, useBrowserStore, isFiltering } from './browserStore'
-import { addPicks, addSpecs, describeAddResult, dropOnAxisGroup, openProjectFile, resolvePicks, saveProjectFile } from './actions'
+import { addPicks, addSpecs, applyDrop, describeAddResult, openProjectFile, resolvePicks, saveProjectFile } from './actions'
 import { toast, useToasts } from './toastStore'
 import type { BrowserPick } from './browserStore'
+import { readProjectDrag } from './projectDrag'
 
 const group = () => useProjectStore.getState().project.scopeFiles[0].axisGroups[0]
 
@@ -172,15 +173,40 @@ describe('actions', () => {
         expect(addSpecs('missing', [])).toEqual({ added: 0, duplicates: 0 })
     })
 
-    it('handles drops of browser picks, Target Browser XML and garbage', () => {
+    it('applies drops of browser picks, Target Browser XML and garbage', () => {
         useCatalogStore.getState().importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
+        const fileId = useProjectStore.getState().project.scopeFiles[0].id
         const data = (type: string, value: string) => ({ types: [type], getData: (t: string) => (t === type ? value : '') })
-        expect(dropOnAxisGroup(group().id, data(PICK_MIME, JSON.stringify([pick('MAIN.nCycle')]))).added).toBe(1)
-        expect(dropOnAxisGroup(group().id, data(PICK_MIME, '{broken')).added).toBe(0)
+        const drop = (type: string, value: string, slot?: number) =>
+            applyDrop(readProjectDrag(data(type, value))!, { fileId, axisGroupId: group().id, slot }, false)
+        expect(drop(PICK_MIME, JSON.stringify([pick('MAIN.nCycle')]))).toEqual({ tone: 'success', message: '1 channel added to Axis Group 1' })
+        expect(drop(PICK_MIME, '{broken')?.tone).toBe('warning')
         const xml = '<TargetBrowserExportInfo><Symbols><Symbol><Name>MAIN.q</Name><BaseType>BOOL</BaseType></Symbol></Symbols></TargetBrowserExportInfo>'
-        expect(dropOnAxisGroup(group().id, data('text/plain', xml), 0)).toMatchObject({ added: 1 })
+        expect(drop('text/plain', xml, 0)?.tone).toBe('success')
         expect(group().channels.map((c) => c.symbol)).toEqual(['MAIN.q', 'MAIN.nCycle'])
-        expect(describeAddResult(dropOnAxisGroup(group().id, data('text/plain', 'hello')), 'G')).toMatch(/Nothing to add/)
+        expect(drop('text/plain', 'hello')?.message).toMatch(/Nothing to add/)
+    })
+
+    it('moves and copies dropped channels and axis groups, null when nothing changed', () => {
+        const s = useProjectStore.getState()
+        const fileId = s.project.scopeFiles[0].id
+        s.addChannels(group().id, [{ symbol: 'a' }, { symbol: 'b' }])
+        s.addScopeFile('f2')
+        const [a, b] = group().channels
+        expect(applyDrop({ kind: 'channel', id: b.id }, { fileId, axisGroupId: group().id, slot: 0 }, false)).toEqual({
+            tone: 'success',
+            message: 'Moved channel to Scope_1 › Axis Group 1',
+        })
+        expect(group().channels.map((c) => c.symbol)).toEqual(['b', 'a'])
+        expect(applyDrop({ kind: 'channel', id: a.id }, { fileId, axisGroupId: group().id }, false)).toBeNull()
+        expect(applyDrop({ kind: 'channel', id: 'ghost' }, { fileId }, false)).toBeNull()
+        expect(applyDrop({ kind: 'channel', id: a.id }, { fileId: 'ghost' }, false)).toBeNull()
+        expect(applyDrop({ kind: 'channel', id: a.id }, { fileId: 'f2' }, true)?.message).toBe('Copied channel to Scope_2 › Axis Group 1')
+
+        expect(applyDrop({ kind: 'axis-group', id: group().id }, { fileId }, false)).toBeNull()
+        useProjectStore.getState().updateScopeFile('f2', { name: '' })
+        expect(applyDrop({ kind: 'axis-group', id: group().id }, { fileId: 'f2' }, false)?.message).toBe('Moved axis group to Untitled')
+        expect(applyDrop({ kind: 'channel', id: a.id }, { fileId }, false)).toBeNull()
     })
 
     it('describes partial results', () => {

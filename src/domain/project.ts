@@ -13,7 +13,6 @@
  */
 import { v4 as uuid } from 'uuid'
 import type { ScopeDataType } from './dataTypes'
-import { isScopeDataType } from './dataTypes'
 import { expansionCount, validateTemplate } from './pattern'
 
 export interface Target {
@@ -140,12 +139,36 @@ export function uniqueName(base: string, taken: Iterable<string>): string {
 // Lookups
 // ---------------------------------------------------------------------------
 
-export function findAxisGroup(project: Project, axisGroupId: string): AxisGroup | undefined {
-    for (const f of project.scopeFiles) {
-        const ag = f.axisGroups.find((a) => a.id === axisGroupId)
-        if (ag) return ag
+/** Where an entity sits: its parent and its index in the parent's list. */
+export interface Located<P> {
+    parent: P
+    index: number
+}
+
+function locateIn<P, I extends { id: string }>(parents: P[], items: (parent: P) => I[], id: string): Located<P> | undefined {
+    for (const parent of parents) {
+        const index = items(parent).findIndex((x) => x.id === id)
+        if (index !== -1) return { parent, index }
     }
     return undefined
+}
+
+const allAxisGroups = (p: Project): AxisGroup[] => p.scopeFiles.flatMap((f) => f.axisGroups)
+
+/** The axis group holding a channel, and the channel's index there. */
+export const locateChannel = (p: Project, id: string): Located<AxisGroup> | undefined =>
+    locateIn(allAxisGroups(p), (a) => a.channels, id)
+
+/** The scope file holding an axis group, and the group's index there. */
+export const locateAxisGroup = (p: Project, id: string): Located<ScopeFile> | undefined =>
+    locateIn(p.scopeFiles, (f) => f.axisGroups, id)
+
+/** A scope file's name as shown in tabs and menus. */
+export const scopeFileLabel = (file: ScopeFile): string => file.name || 'Untitled'
+
+export function findAxisGroup(project: Project, axisGroupId: string): AxisGroup | undefined {
+    const at = locateAxisGroup(project, axisGroupId)
+    return at && at.parent.axisGroups[at.index]
 }
 
 /** Acquisitions a template produces: its expansion count, 0 when it is invalid or empty. */
@@ -205,30 +228,75 @@ function moveSlot(fromIndex: number, length: number, index?: number): number | n
     return slot === fromIndex ? null : slot
 }
 
-function locateChannel(p: Project, id: string): { group: AxisGroup; index: number } | undefined {
-    for (const f of p.scopeFiles) {
-        for (const group of f.axisGroups) {
-            const index = group.channels.findIndex((c) => c.id === id)
-            if (index !== -1) return { group, index }
-        }
-    }
-    return undefined
-}
-
-function locateAxisGroup(p: Project, id: string): { file: ScopeFile; index: number } | undefined {
-    for (const file of p.scopeFiles) {
-        const index = file.axisGroups.findIndex((a) => a.id === id)
-        if (index !== -1) return { file, index }
-    }
-    return undefined
-}
-
 const cloneChannel = (c: Channel): Channel => ({ ...c, id: uuid() })
 const cloneAxisGroup = (a: AxisGroup, name = a.name): AxisGroup => ({
     id: uuid(),
     name,
     channels: a.channels.map(cloneChannel),
 })
+
+/** One parent → children level of the tree, as `relocate` needs it. */
+interface Level<P extends { id: string }, I extends { id: string }> {
+    parents: (p: Project) => P[]
+    mapParents: (p: Project, fn: (parent: P) => P) => Project
+    items: (parent: P) => I[]
+    withItems: (parent: P, items: I[]) => P
+    /** A copy with new ids; `sameParent` when it lands next to the original. */
+    clone: (item: I, sameParent: boolean) => I
+}
+
+const channelLevel: Level<AxisGroup, Channel> = {
+    parents: allAxisGroups,
+    mapParents: (p, fn) => mapAxisGroups(p, fn),
+    items: (a) => a.channels,
+    withItems: (a, channels) => ({ ...a, channels }),
+    clone: (c) => cloneChannel(c),
+}
+
+const axisGroupLevel: Level<ScopeFile, AxisGroup> = {
+    parents: (p) => p.scopeFiles,
+    mapParents: (p, fn) => mapFiles(p, fn),
+    items: (f) => f.axisGroups,
+    withItems: (f, axisGroups) => ({ ...f, axisGroups }),
+    clone: (a, sameParent) => cloneAxisGroup(a, sameParent ? `${a.name} (copy)` : a.name),
+}
+
+/**
+ * Moves an item, or inserts a copy of it, at `index` of another (or its own) parent; appended
+ * when `index` is omitted. `index` is a slot `0..length` in the destination as it is shown now,
+ * i.e. still including the item when it stays in its parent. Returns `p` itself when unknown ids
+ * are given or the move changes nothing.
+ */
+function relocate<P extends { id: string }, I extends { id: string }>(
+    level: Level<P, I>,
+    p: Project,
+    id: string,
+    toParentId: string,
+    index: number | undefined,
+    mode: 'move' | 'copy',
+): Project {
+    const from = locateIn(level.parents(p), level.items, id)
+    const to = level.parents(p).find((x) => x.id === toParentId)
+    if (!from || !to) return p
+    const original = level.items(from.parent)[from.index]
+    const sameParent = from.parent.id === to.id
+    const length = level.items(to).length
+    const slot = mode === 'move' ? moveSlot(sameParent ? from.index : -1, length, index) : clampSlot(index, length)
+    if (slot === null) return p
+    const item = mode === 'move' ? original : level.clone(original, sameParent)
+    return level.mapParents(p, (parent) => {
+        let items = level.items(parent)
+        if (mode === 'move' && parent.id === from.parent.id) items = items.filter((x) => x.id !== id)
+        if (parent.id === to.id) items = insertAt(items, [item], slot)
+        return items === level.items(parent) ? parent : level.withItems(parent, items)
+    })
+}
+
+/** A copy right after the original. */
+function duplicate<P extends { id: string }, I extends { id: string }>(level: Level<P, I>, p: Project, id: string): Project {
+    const at = locateIn(level.parents(p), level.items, id)
+    return at ? relocate(level, p, id, at.parent.id, at.index + 1, 'copy') : p
+}
 
 export const ops = {
     updateSettings: (p: Project, patch: Partial<ProjectSettings>): Project => ({
@@ -293,11 +361,13 @@ export const ops = {
         mapAxisGroups(p, (a) => (a.id === id ? { ...a, ...patch } : a)),
     removeAxisGroup: (p: Project, id: string): Project =>
         mapFiles(p, (f) => ({ ...f, axisGroups: f.axisGroups.filter((a) => a.id !== id) })),
-    duplicateAxisGroup: (p: Project, id: string): Project =>
-        mapFiles(p, (f) => {
-            const a = f.axisGroups.find((x) => x.id === id)
-            return a ? { ...f, axisGroups: insertAfter(f.axisGroups, id, cloneAxisGroup(a, `${a.name} (copy)`)) } : f
-        }),
+    duplicateAxisGroup: (p: Project, id: string): Project => duplicate(axisGroupLevel, p, id),
+    /** Moves an axis group to `index` of a scope file (see `relocate`). */
+    moveAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project =>
+        relocate(axisGroupLevel, p, id, toFileId, index, 'move'),
+    /** Inserts a copy (new ids) of an axis group at `index` of a scope file; named "… (copy)" in its own file. */
+    copyAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project =>
+        relocate(axisGroupLevel, p, id, toFileId, index, 'copy'),
 
     // Channels --------------------------------------------------------------
     addChannels: (p: Project, axisGroupId: string, channels: ChannelInit[]): Project =>
@@ -310,59 +380,13 @@ export const ops = {
         mapChannels(p, (c) => (c.id === id ? { ...c, ...patch } : c)),
     removeChannel: (p: Project, id: string): Project =>
         mapAxisGroups(p, (a) => ({ ...a, channels: a.channels.filter((c) => c.id !== id) })),
-    duplicateChannel: (p: Project, id: string): Project =>
-        mapAxisGroups(p, (a) => {
-            const c = a.channels.find((x) => x.id === id)
-            return c ? { ...a, channels: insertAfter(a.channels, id, cloneChannel(c)) } : a
-        }),
-    /**
-     * Moves a channel to `index` of an axis group, possibly in another scope file (appended
-     * when `index` is omitted). `index` is a slot in the destination as it is shown now, i.e.
-     * still including the channel when it stays in its group.
-     */
-    moveChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project => {
-        const from = locateChannel(p, id)
-        const to = findAxisGroup(p, toAxisGroupId)
-        if (!from || !to) return p
-        const channel = from.group.channels[from.index]
-        const slot = moveSlot(from.group === to ? from.index : -1, to.channels.length, index)
-        if (slot === null) return p
-        return mapAxisGroups(p, (a) => {
-            const channels = a.id === from.group.id ? a.channels.filter((c) => c.id !== id) : a.channels
-            return a.id === to.id ? { ...a, channels: insertAt(channels, [channel], slot) } : { ...a, channels }
-        })
-    },
-    /** Inserts a copy (new id) of a channel at `index` of an axis group (appended when omitted). */
-    copyChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project => {
-        const from = locateChannel(p, id)
-        if (!from || !findAxisGroup(p, toAxisGroupId)) return p
-        const copy = cloneChannel(from.group.channels[from.index])
-        return mapAxisGroups(p, (a) => (a.id === toAxisGroupId ? { ...a, channels: insertAt(a.channels, [copy], index) } : a))
-    },
-    /** Moves an axis group to `index` of a scope file (appended when omitted); `index` as in `moveChannel`. */
-    moveAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project => {
-        const from = locateAxisGroup(p, id)
-        const to = p.scopeFiles.find((f) => f.id === toFileId)
-        if (!from || !to) return p
-        const group = from.file.axisGroups[from.index]
-        const slot = moveSlot(from.file === to ? from.index : -1, to.axisGroups.length, index)
-        if (slot === null) return p
-        return mapFiles(p, (f) => {
-            const axisGroups = f.id === from.file.id ? f.axisGroups.filter((a) => a.id !== id) : f.axisGroups
-            return f.id === to.id ? { ...f, axisGroups: insertAt(axisGroups, [group], slot) } : { ...f, axisGroups }
-        })
-    },
-    /**
-     * Inserts a copy (new ids) of an axis group at `index` of a scope file (appended when omitted).
-     * A copy into its own file is named like a duplicate.
-     */
-    copyAxisGroup: (p: Project, id: string, toFileId: string, index?: number): Project => {
-        const from = locateAxisGroup(p, id)
-        if (!from || !p.scopeFiles.some((f) => f.id === toFileId)) return p
-        const group = from.file.axisGroups[from.index]
-        const copy = cloneAxisGroup(group, from.file.id === toFileId ? `${group.name} (copy)` : group.name)
-        return mapFiles(p, (f) => (f.id === toFileId ? { ...f, axisGroups: insertAt(f.axisGroups, [copy], index) } : f))
-    },
+    duplicateChannel: (p: Project, id: string): Project => duplicate(channelLevel, p, id),
+    /** Moves a channel to `index` of an axis group, possibly in another scope file (see `relocate`). */
+    moveChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project =>
+        relocate(channelLevel, p, id, toAxisGroupId, index, 'move'),
+    /** Inserts a copy (new id) of a channel at `index` of an axis group. */
+    copyChannel: (p: Project, id: string, toAxisGroupId: string, index?: number): Project =>
+        relocate(channelLevel, p, id, toAxisGroupId, index, 'copy'),
 }
 
 export interface MergeResult {
@@ -412,20 +436,6 @@ export function fileAcquisitionCount(file: ScopeFile): number {
     return file.axisGroups.reduce((n, a) => n + acquisitionCount(a), 0)
 }
 
-// ---------------------------------------------------------------------------
-// Validation & (de)serialisation
-// ---------------------------------------------------------------------------
-
-const AMS_NET_ID = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
-
-/** Error message for an invalid AMS Net ID (six bytes, dot separated), or null. */
-export function amsNetIdError(value: string): string | null {
-    const m = AMS_NET_ID.exec(value.trim())
-    if (!m) return 'Six numbers separated by dots, e.g. 192.168.0.10.1.1'
-    if (m.slice(1).some((b) => Number(b) > 255)) return 'Each part must be between 0 and 255'
-    return null
-}
-
 /** Characters Windows does not allow in file names, plus control characters. */
 // eslint-disable-next-line no-control-regex
 const ILLEGAL_FILE_CHARS = /[<>:"/\\|?*\u0000-\u001f]/g
@@ -435,98 +445,6 @@ export function sanitizeFileName(name: string): string {
     return cleaned || 'Scope'
 }
 
-export function fileNameError(name: string, siblings: string[]): string | null {
-    if (!name.trim()) return 'Name is required'
-    if (sanitizeFileName(name) !== name.trim()) return 'Contains characters not allowed in file names'
-    const lower = name.trim().toLowerCase()
-    if (siblings.some((s) => s.trim().toLowerCase() === lower)) return 'Another scope file has this name'
-    return null
-}
-
-/**
- * Parse a project from JSON (an exported project file or persisted state).
- * Unknown or malformed parts are dropped rather than trusted, so a hand-edited
- * file can never put the store into an invalid shape.
- */
-export function parseProject(json: unknown): Project {
-    const base = createProject()
-    if (!json || typeof json !== 'object') throw new Error('Not a project file')
-    const raw = json as Record<string, unknown>
-    if (raw.version !== 2) throw new Error('Unsupported project file version')
-
-    const str = (v: unknown, fallback: string) => (typeof v === 'string' ? v : fallback)
-    const num = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback)
-    const arr = (v: unknown): Record<string, unknown>[] =>
-        Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object') : []
-
-    const s = (raw.settings ?? {}) as Record<string, unknown>
-    const settings: ProjectSettings = {
-        name: str(s.name, base.settings.name),
-        mainServer: str(s.mainServer, base.settings.mainServer),
-        recordTime: num(s.recordTime, base.settings.recordTime),
-        baseSampleTime: num(s.baseSampleTime, base.settings.baseSampleTime),
-        defaultPort: num(s.defaultPort, base.settings.defaultPort),
-    }
-
-    const targets = arr(raw.targets).map((t) => ({
-        id: str(t.id, uuid()),
-        name: str(t.name, 'Target'),
-        amsNetId: str(t.amsNetId, '127.0.0.1.1.1'),
-    }))
-    if (targets.length === 0) targets.push(...base.targets)
-    const targetIds = new Set(targets.map((t) => t.id))
-
-    const scopeFiles = arr(raw.scopeFiles).map((f) => ({
-        id: str(f.id, uuid()),
-        name: str(f.name, 'Scope'),
-        axisGroups: arr(f.axisGroups).map((a) => ({
-            id: str(a.id, uuid()),
-            name: str(a.name, 'Axis Group'),
-            channels: arr(a.channels).map((c) => ({
-                id: str(c.id, uuid()),
-                symbol: str(c.symbol, ''),
-                dataType: isScopeDataType(c.dataType) ? c.dataType : 'REAL64',
-                port: num(c.port, settings.defaultPort),
-                targetId: typeof c.targetId === 'string' && targetIds.has(c.targetId) ? c.targetId : targets[0].id,
-            })),
-        })),
-    }))
-
-    return { version: 2, settings, targets, scopeFiles }
-}
-
-/** Above this many acquisitions the export is refused: the XML would run into hundreds of MB. */
-export const MAX_PROJECT_ACQUISITIONS = 20_000
-
 export function projectAcquisitionCount(project: Project): number {
     return project.scopeFiles.reduce((n, f) => n + fileAcquisitionCount(f), 0)
-}
-
-/** Why the project cannot be exported right now, or null. */
-export function exportBlocker(project: Project): string | null {
-    const count = projectAcquisitionCount(project)
-    if (count === 0) return 'Add at least one valid channel'
-    if (count > MAX_PROJECT_ACQUISITIONS) {
-        return `${count.toLocaleString('en-US')} acquisitions exceed the limit of ${MAX_PROJECT_ACQUISITIONS.toLocaleString('en-US')}`
-    }
-    return null
-}
-
-/** Problems worth telling the user about before exporting. None of them blocks the export. */
-export function projectIssues(project: Project): string[] {
-    const issues: string[] = []
-    const invalid = allChannels(project).filter((c) => c.symbol.trim() && !validateTemplate(c.symbol).valid).length
-    if (invalid > 0) issues.push(`${invalid} channel${invalid === 1 ? ' has an' : 's have'} invalid symbol paths and will be skipped`)
-    const empty = allChannels(project).filter((c) => !c.symbol.trim()).length
-    if (empty > 0) issues.push(`${empty} empty channel${empty === 1 ? '' : 's'} will be skipped`)
-    const names = project.scopeFiles.map((f) => f.name)
-    project.scopeFiles.forEach((f, i) => {
-        const error = fileNameError(f.name, names.filter((_, j) => j !== i))
-        if (error) issues.push(`Scope file "${f.name}": ${error.toLowerCase()} — it will be renamed on export`)
-    })
-    for (const t of project.targets) {
-        if (amsNetIdError(t.amsNetId)) issues.push(`Target "${t.name}" has an invalid AMS Net ID`)
-    }
-    if (amsNetIdError(project.settings.mainServer)) issues.push('The scope server AMS Net ID is invalid')
-    return issues
 }

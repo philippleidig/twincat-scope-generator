@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { v4 as uuid } from 'uuid'
 import { Copy, Library, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
-import { fileNameError } from '@/domain/project'
+import { fileNameError } from '@/domain/projectValidation'
 import { PORT_PRESETS } from '@/domain/ports'
 import { useProjectStore } from '@/state/projectStore'
 import { Button } from '@/ui/components/Button'

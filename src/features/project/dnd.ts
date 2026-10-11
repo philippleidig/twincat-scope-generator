@@ -1,48 +1,10 @@
 /**
- * Drag & drop inside the scope project. Payloads are plain JSON under their own MIME types, so
- * everything a drop needs travels with the drag; there is no module-level drag state.
- * During `dragover` only the types are readable, the payload itself only on `drop`.
+ * Pointer-side helpers for drag & drop in the scope project: where a drop lands and how the
+ * pending drop is shown. Payloads and the drop itself live in `state/projectDrag` and `state/actions`.
  */
-import { PICK_MIME } from '@/state/browserStore'
-
-export const CHANNEL_MIME = 'application/x-scope-channel'
-export const AXIS_GROUP_MIME = 'application/x-scope-axis-group'
-
-/** What is being dragged: a channel, an axis group, browser picks or text (TwinCAT Target Browser XML). */
-export type DragKind = 'channel' | 'axis-group' | 'picks' | 'text'
+import { useCallback, useEffect, useState } from 'react'
 
 export type DropEdge = 'before' | 'after'
-
-export function dragKind(types: readonly string[]): DragKind | null {
-    if (types.includes(CHANNEL_MIME)) return 'channel'
-    if (types.includes(AXIS_GROUP_MIME)) return 'axis-group'
-    if (types.includes(PICK_MIME)) return 'picks'
-    if (types.includes('text/plain')) return 'text'
-    return null
-}
-
-export function setChannelDragData(dataTransfer: DataTransfer, channelId: string): void {
-    dataTransfer.setData(CHANNEL_MIME, JSON.stringify({ channelId }))
-    dataTransfer.effectAllowed = 'copyMove'
-}
-
-export function setAxisGroupDragData(dataTransfer: DataTransfer, axisGroupId: string): void {
-    dataTransfer.setData(AXIS_GROUP_MIME, JSON.stringify({ axisGroupId }))
-    dataTransfer.effectAllowed = 'copyMove'
-}
-
-function readId(data: Pick<DataTransfer, 'getData'>, mime: string, key: string): string | null {
-    try {
-        const parsed: unknown = JSON.parse(data.getData(mime))
-        const id = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>)[key] : undefined
-        return typeof id === 'string' ? id : null
-    } catch {
-        return null
-    }
-}
-
-export const readChannelDrag = (data: Pick<DataTransfer, 'getData'>) => readId(data, CHANNEL_MIME, 'channelId')
-export const readAxisGroupDrag = (data: Pick<DataTransfer, 'getData'>) => readId(data, AXIS_GROUP_MIME, 'axisGroupId')
 
 const isMac = () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
 
@@ -57,8 +19,52 @@ export function dropEdge(clientY: number, el: Element): DropEdge {
     return clientY < rect.top + rect.height / 2 ? 'before' : 'after'
 }
 
+/**
+ * The channel row a drop over `list` refers to, by the pointer's height: before the first row
+ * whose middle is below the pointer, else after the last row. Works in the gaps between rows too.
+ */
+export function rowAt(list: Element, clientY: number): { row: number; edge: DropEdge } | null {
+    const rows = [...list.children].filter((el): el is HTMLElement => el instanceof HTMLElement && el.dataset.channelIndex !== undefined)
+    if (rows.length === 0) return null
+    const before = rows.find((row) => dropEdge(clientY, row) === 'before')
+    const row = before ?? rows[rows.length - 1]
+    return { row: Number(row.dataset.channelIndex), edge: before ? 'before' : 'after' }
+}
+
+/** Attributes that draw the drop indicator line (and the "+" while copying) on a row or card. */
+export function dropAttrs(edge: DropEdge | undefined, copy: boolean) {
+    return { 'data-drop': edge, 'data-drop-copy': edge && copy ? '' : undefined }
+}
+
 /** Use the whole row or card as drag image when dragging by its handle. */
 export function setDragImage(dataTransfer: DataTransfer, handle: Element, selector: string): void {
     const el = handle.closest(selector)
     if (el && typeof dataTransfer.setDragImage === 'function') dataTransfer.setDragImage(el, 16, 16)
+}
+
+/**
+ * State of a drag hovering a drop target. `update` keeps the previous object while `key` is
+ * unchanged (dragover fires continuously); the state clears when any drag ends or drops anywhere,
+ * so a cancelled drag (Escape) leaves no indicator behind.
+ */
+export function usePendingDrop<T>(key: (t: T) => string) {
+    const [drop, setDrop] = useState<T | null>(null)
+    const pending = drop !== null
+
+    useEffect(() => {
+        if (!pending) return
+        const clear = () => setDrop(null)
+        document.addEventListener('dragend', clear)
+        document.addEventListener('drop', clear)
+        return () => {
+            document.removeEventListener('dragend', clear)
+            document.removeEventListener('drop', clear)
+        }
+    }, [pending])
+
+    const update = useCallback(
+        (next: T | null) => setDrop((d) => (d !== null && next !== null && key(d) === key(next) ? d : next)),
+        [key],
+    )
+    return [drop, update] as const
 }
