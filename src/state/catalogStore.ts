@@ -5,6 +5,7 @@ import { buildIndex } from '@/catalog/search'
 import { importTwinCatFile, mergeSources } from '@/catalog/importFile'
 import { useBrowserStore } from './browserStore'
 import { idbGet, idbSet } from './idb'
+import { toast } from './toastStore'
 
 export interface ImportReport {
     fileName: string
@@ -27,7 +28,12 @@ interface CatalogState {
     hydrate: () => Promise<void>
 }
 
-const STORAGE_KEY = 'sources'
+/**
+ * Versioned: V2.1 reads pointers, references and access flags into the stored sources, so sources
+ * stored by V2.0 (under `sources`) would produce wrong paths. They are dropped with a hint.
+ */
+const STORAGE_KEY = 'sources@2.1'
+const OUTDATED_KEYS = ['sources']
 
 /** New sources: rebuild the index, persist, and drop picks that may point at changed paths. */
 function commit(sources: SymbolSource[]): Pick<CatalogState, 'sources' | 'index'> {
@@ -72,6 +78,12 @@ export const useCatalogStore = create<CatalogState>()((set, get) => ({
             set({ sources: stored, index: buildIndex(stored), hydrated: true })
         } else {
             set({ hydrated: true })
+        }
+        for (const key of OUTDATED_KEYS) {
+            const outdated = await idbGet<unknown[]>(key)
+            if (!Array.isArray(outdated)) continue
+            void idbSet(key, undefined)
+            if (outdated.length > 0) toast.info('Imported TwinCAT files from an older version were removed — import them again to browse them.')
         }
     },
 }))

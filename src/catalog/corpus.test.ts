@@ -1,14 +1,16 @@
 /**
  * Invariants over a corpus of real TwinCAT files (`scripts/corpus/manifest.json`).
  *
- * Runs only when the corpus has been downloaded (`npm run test:corpus` fetches it into
- * `.corpus/`), with its own config (`vitest.corpus.config.ts`) so `npm test` stays fast and
- * offline. Checks invariants, not snapshots, and prints a summary table at the end.
+ * Run with `npm run test:corpus`, which fetches the corpus into `.corpus/` first; it has its own
+ * config (`vitest.corpus.config.ts`) and is excluded from `npm test`, which stays fast and offline.
+ * A missing or incomplete corpus fails the run. Checks invariants, not snapshots, and prints a
+ * summary table at the end.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { afterAll, describe, expect, it } from 'vitest'
 import { resolve } from 'node:path'
 import { MAX_EXPANSION, expansionCount, validateTemplate } from '@/domain/pattern'
+import { NOTE } from './access'
 import { importTwinCatFile } from './importFile'
 import type { SymbolSource } from './model'
 import { buildIndex, templateOf } from './search'
@@ -63,7 +65,9 @@ function hiddenSymbols(content: string): Set<string> {
 /**
  * Members the raw XML marks as having no ADS symbol, per declaring type (upper-case):
  * `hide`, `tc_no_symbol` (without value) and implicit VAR_INST members. Read independently
- * of the importer so the check does not just repeat its logic.
+ * of the importer so the check does not just repeat its logic — and deliberately narrower: it
+ * does not cover locals under `hide_all_locals` (never present in the corpus) or empty arrays
+ * (covered by the template check), and it matches members by declaring type name only.
  */
 function hiddenMembers(content: string): Map<string, Set<string>> {
     const out = new Map<string, Set<string>>()
@@ -107,7 +111,7 @@ function check(file: string, sources: SymbolSource[], content: string) {
     const step = Math.max(1, Math.ceil(index.entries.length / SAMPLE))
     index.entries.forEach((entry, i) => {
         if (entry.path.includes('^')) summary.pointerPaths++
-        if (entry.viaReference) summary.viaReference++
+        if (entry.warning?.includes(NOTE.viaReference)) summary.viaReference++
         if (entry.reason) {
             // One bucket for all "Static variable — record <FB>.<var>".
             const reason = entry.reason.replace(/^(Static variable — record ).+$/, '$1<FB type>.<var>')
@@ -141,7 +145,11 @@ function check(file: string, sources: SymbolSource[], content: string) {
     })
 }
 
-describe.skipIf(!available)('real-file corpus', () => {
+describe('real-file corpus', () => {
+    it('is downloaded', () => {
+        expect(available, 'run `npm run test:corpus` (or `node scripts/corpus/fetch.mjs`) to download .corpus/').toBe(true)
+    })
+
     afterAll(() => {
         const rows: Array<[string, string | number]> = [
             ['files', summary.files],
@@ -171,7 +179,7 @@ describe.skipIf(!available)('real-file corpus', () => {
         )
     })
 
-    it.each(manifest.map((m) => [m.file, m] as const))('%s', (file) => {
+    it.skipIf(!available).each(manifest.map((m) => [m.file, m] as const))('%s', (file) => {
         const t0 = performance.now()
         summary.files++
         const content = readFileSync(resolve(dir, file), 'utf8')

@@ -4,7 +4,7 @@
  * data types they use.
  */
 import type { ChannelSpec } from '@/domain/project'
-import { readTypeTable, resolveType } from './typeTable'
+import { readTypeTable, resolveDecl } from './typeTable'
 import { parseXml, text } from './xml'
 
 export interface DropResult {
@@ -29,7 +29,7 @@ export function parseTargetBrowserDrop(xml: string): DropResult {
     for (const el of doc.querySelectorAll('Symbols > Symbol')) {
         const name = text(el, 'Name')
         if (!name) continue
-        const resolved = resolveType(types, text(el, 'BaseType') || text(el, 'Type'))
+        const resolved = resolveDecl(types, { type: text(el, 'BaseType') || text(el, 'Type') })
         if (resolved.kind === 'scalar') {
             result.symbols.push({ symbol: name, dataType: resolved.scopeType, port: Number.isFinite(port) ? port : 851, amsNetId })
         } else {

@@ -34,6 +34,25 @@ describe('buildIndex', () => {
         const r = buildIndex([big])
         expect(r.entries).toHaveLength(MAX_ENTRIES)
         expect(r.truncated).toBe(true)
+        // A huge source does not starve the next one: each gets its share of what is left.
+        const small: SymbolSource = { ...demo, id: 'small' }
+        const both = buildIndex([big, small])
+        expect(both.entries.filter((e) => e.sourceId === 'small')).toHaveLength(index.entries.length)
+        expect(both.truncated).toBe(true)
+    })
+    it('expands each pointer target type once per root, so mutually pointing FBs stay linear', () => {
+        const names = Array.from({ length: 8 }, (_, i) => `FB_${i}`)
+        const types = Object.fromEntries(
+            names.map((n) => [
+                n.toUpperCase(),
+                { kind: 'struct' as const, name: n, members: [{ name: 'v', type: 'INT' }, ...names.filter((o) => o !== n).map((o) => ({ name: `p${o}`, type: `POINTER TO ${o}` }))] },
+            ]),
+        )
+        const web: SymbolSource = { ...demo, types, roots: [{ name: 'MAIN.fb', type: 'FB_0', area: 'internal', areaName: 'I' }] }
+        const r = buildIndex([web])
+        expect(r.truncated).toBe(false)
+        expect(r.entries.length).toBeLessThan(200)
+        expect(r.entries.map((e) => e.path)).toContain('MAIN.fb.pFB_1^.v')
     })
 })
 

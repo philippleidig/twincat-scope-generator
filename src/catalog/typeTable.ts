@@ -1,34 +1,15 @@
 /**
- * Type table built from `<DataTypes>` and resolution of type names into scalars, structs
+ * Type table built from `<DataTypes>` and resolution of declarations into scalars, structs
  * (with inherited members), arrays and pointers.
  *
- * This is also where the ADS accessibility rules are decided (ADR 0005): what has no ADS
- * symbol is dropped or resolves to `hidden`, what cannot be sampled resolves to `unsupported`
- * with a reason. The walker applies the result, so tree, search and "Add" agree.
+ * Together with `access.ts` this decides what the browser offers (ADR 0005): declarations
+ * without an ADS symbol are dropped while reading or in `finalizeSource`, disabled ones resolve
+ * to `unsupported`. The walker only calls `resolveDecl`, so tree, search and "Add" agree.
  */
 import { scopeTypeForIec } from '@/domain/dataTypes'
+import { REASON, applyAccess, readAccess } from './access'
 import type { Access, ArrayDim, MemberDef, ResolvedType, SymbolRoot, TypeDef, TypeTable } from './model'
 import { child, children, properties, text } from './xml'
-
-/** Why something is shown but cannot be recorded. */
-export const REASON = {
-    property: 'Property (called on access) — Scope cannot sample it',
-    staticVar: (owner: string, name: string) => `Static variable — record ${owner}.${name}`,
-    conditionalShow: 'Hidden in compiled libraries',
-    pointer: 'Pointer — expand ^ to record the target',
-    pointerToHidden: 'Pointer to a type without ADS symbols',
-    string: 'Strings can only be shown in table charts',
-    interface: 'Interface references cannot be recorded',
-    platform: 'Platform-dependent size',
-    recursive: 'Type definition is recursive',
-    undefined: 'Type is not defined in the imported file',
-} as const
-
-/** Caveats shown next to something that stays recordable. */
-export const NOTE = {
-    unusedNoSymbol: "TcNoSymbol 'unused': there is no ADS symbol if the code does not use it",
-    viaReference: 'Valid only while the reference is bound',
-} as const
 
 /** `<ArrayInfo><LBound>1</LBound><Elements>10</Elements></ArrayInfo>` (one per dimension). */
 export function readArrayDims(el: Element): ArrayDim[] | undefined {
@@ -64,6 +45,7 @@ export function typeNameOf(typeEl: Element | null): string {
     return typeEl && name ? `${indirection(typeEl)}${name}` : name
 }
 
+/** The type of a declaration: name (with pointers/references folded in), namespace, array dims. */
 export interface TypeRef {
     type: string
     ns?: string
@@ -84,19 +66,8 @@ export function readTypeRef(el: Element, typeEl: Element | null): TypeRef {
     return prefix && type ? { type: `${prefix}${arrayLabel(dims!, type)}`, ns } : { type, ns, dims }
 }
 
-/** Access flags from an element's `<Properties>`. `hidden` means there is no ADS symbol. */
-export function readAccess(props: Map<string, string>): Access & { hidden?: boolean } {
-    const noSymbol = props.get('tc_no_symbol') ?? props.get('TcNoSymbol')
-    const unused = noSymbol !== undefined && /^unused\b/i.test(noSymbol)
-    if (props.has('hide') || props.has('implicit_inst_var') || (noSymbol !== undefined && !unused)) return { hidden: true }
-    const access: Access = {}
-    if (props.has('conditionalshow')) access.disabled = REASON.conditionalShow
-    if (unused) access.note = NOTE.unusedNoSymbol
-    return access
-}
-
-/** The declaring type of a member, for `*_all_locals` and static variables. */
-interface Owner {
+/** The type declaring a member: names static variables and applies `*_all_locals`. */
+export interface Owner {
     name: string
     props: Map<string, string>
 }
@@ -106,7 +77,7 @@ interface Owner {
  * `monitoring := 'call'`). Members without an ADS symbol (`hide`, `TcNoSymbol`, VAR_INST,
  * locals under `hide_all_locals`) are skipped; VAR_IN_OUT becomes a reference.
  */
-export function readMember(el: Element, owner?: Owner): MemberDef | null {
+export function readMember(el: Element, owner: Owner): MemberDef | null {
     const nameEl = child(el, 'Name')
     const name = (nameEl?.textContent ?? '').trim()
     const { ns, dims, ...ref } = readTypeRef(el, child(el, 'Type') ?? child(el, 'BaseType'))
@@ -114,14 +85,14 @@ export function readMember(el: Element, owner?: Owner): MemberDef | null {
     if (!name || !type) return null
     const props = properties(el)
     const local = !props.has('ItemType')
-    const { hidden, ...access } = readAccess(props)
-    if (hidden || (local && owner?.props.has('hide_all_locals'))) return null
+    const access = readAccess(props)
+    if (!access || (local && owner.props.has('hide_all_locals'))) return null
 
     if (props.get('ItemType') === 'InOut' && !/^REFERENCE\s+TO\b/i.test(type)) type = `REFERENCE TO ${type}`
     if (el.tagName === 'PropertyItem') access.disabled = REASON.property
     // VAR_STAT has no place in the instance (no BitOffs); its symbol is `<FB type>.<name>`.
-    else if (nameEl?.getAttribute('Static') === 'true' && !child(el, 'BitOffs')) access.disabled = REASON.staticVar(owner?.name ?? 'FB', name)
-    else if (local && owner?.props.has('conditionalshow_all_locals')) access.disabled ??= REASON.conditionalShow
+    else if (nameEl?.getAttribute('Static') === 'true' && !child(el, 'BitOffs')) access.disabled = REASON.staticVar(owner.name, name)
+    else if (local && owner.props.has('conditionalshow_all_locals')) access.disabled ??= REASON.conditionalShow
 
     const member: MemberDef = { name, type, ...access }
     if (ns) member.ns = ns
@@ -136,7 +107,8 @@ function readTypeDef(el: Element): TypeDef | null {
     const name = (nameEl?.textContent ?? '').trim()
     if (!name) return null
     const props = properties(el)
-    const flags = { comment: text(el, 'Comment') || undefined, ...readAccess(props) }
+    // Only `conditionalshow` acts on the type; `hide`/`TcNoSymbol` on a type do not remove its symbols.
+    const flags = { comment: text(el, 'Comment') || undefined, disabled: props.has('conditionalshow') ? REASON.conditionalShow : undefined }
     const items = Array.from(el.children).filter((c) => c.tagName === 'SubItem' || c.tagName === 'PropertyItem')
     const extendsEl = child(el, 'ExtendsType')
     const baseEl = child(el, 'BaseType')
@@ -183,6 +155,13 @@ function lookup(table: TypeTable, name: string, ns?: string): TypeDef | undefine
     return (ns ? table[`${ns.toUpperCase()}.${key}`] : undefined) ?? table[key]
 }
 
+// ---------------------------------------------------------------------------
+// Resolution
+// ---------------------------------------------------------------------------
+
+/** Internal only: a type with no symbols at all (an empty array, or an array of them). */
+type Resolved = ResolvedType | { kind: 'hidden'; typeName: string }
+
 const POINTER_DECL = /^POINTER\s+TO\s+(.+)$/i
 const REFERENCE_DECL = /^REFERENCE\s+TO\s+(.+)$/i
 const ARRAY_DECL = /^ARRAY\s*\[(.+?)\]\s*OF\s+(.+)$/i
@@ -212,39 +191,54 @@ const BUILTIN_ALIASES: Record<string, string> = {
     PLCTONC_AXIS_REF_CTRL: 'DWORD',
 }
 
-/**
- * Resolve a type name (plus array dims declared on the symbol itself) into what the
- * browser needs to show and expand it.
- */
-export function resolveType(table: TypeTable, typeName: string, ns?: string, dims?: ArrayDim[]): ResolvedType {
-    if (dims && dims.length > 0) return arrayOf(table, dims, typeName, ns, typeName, 0)
-    return resolveNamed(table, typeName.trim(), ns, 0)
+function resolveRef(table: TypeTable, ref: TypeRef): Resolved {
+    if (ref.dims && ref.dims.length > 0) return arrayOf(table, ref.dims, ref.type, ref.ns, ref.type, 0)
+    return resolveNamed(table, ref.type.trim(), ref.ns, 0)
 }
 
 /**
- * Roots that have an ADS symbol (their type is not `hide`/`TcNoSymbol`, no empty array), once per
- * name: a file can declare the same name twice (two versions of a library GVL); ADS names are
- * unique and case-insensitive, so the first declaration wins everywhere.
+ * What a declaration (symbol, member, array element, pointer target) is for the browser: its
+ * type resolved and its access applied. Declarations without symbols never get here once the
+ * source is finalised; should one slip through, it shows as disabled.
  */
-export function visibleRoots(table: TypeTable, roots: SymbolRoot[]): SymbolRoot[] {
+export function resolveDecl(table: TypeTable, decl: TypeRef & Access): ResolvedType {
+    const resolved = resolveRef(table, decl)
+    if (resolved.kind === 'hidden') return { kind: 'unsupported', typeName: resolved.typeName, reason: 'Empty array' }
+    return applyAccess(resolved, decl)
+}
+
+const prunedTables = new WeakSet<TypeTable>()
+
+/**
+ * Last import step for a source: drop members (once per table) and roots whose type has no
+ * symbols, and keep one root per name — a file can declare a name twice (two versions of a
+ * library GVL), ADS names are unique and case-insensitive, so the first declaration wins.
+ */
+export function finalizeSource(table: TypeTable, roots: SymbolRoot[]): SymbolRoot[] {
+    if (!prunedTables.has(table)) {
+        prunedTables.add(table)
+        for (const def of new Set(Object.values(table))) {
+            if (def.kind === 'struct') def.members = def.members.filter((m) => resolveRef(table, m).kind !== 'hidden')
+        }
+    }
     const seen = new Set<string>()
     return roots.filter((r) => {
         const key = r.name.toLowerCase()
-        if (seen.has(key) || resolveType(table, r.type, r.ns, r.dims).kind === 'hidden') return false
+        if (seen.has(key) || resolveRef(table, r).kind === 'hidden') return false
         seen.add(key)
         return true
     })
 }
 
-/** Empty arrays and arrays of hidden types have no symbol. */
-function arrayOf(table: TypeTable, dims: ArrayDim[], element: string, ns: string | undefined, typeName: string, depth: number): ResolvedType {
-    if (dims.some((d) => d.upper < d.lower)) return { kind: 'hidden', typeName, reason: 'Empty array' }
+/** Empty arrays and arrays of empty arrays have no symbol. */
+function arrayOf(table: TypeTable, dims: ArrayDim[], element: string, ns: string | undefined, typeName: string, depth: number): Resolved {
+    if (dims.some((d) => d.upper < d.lower)) return { kind: 'hidden', typeName }
     const el = resolveNamed(table, element, ns, depth + 1)
     if (el.kind === 'hidden') return el
     return { kind: 'array', dims, element, ns, typeName }
 }
 
-function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined, depth: number): ResolvedType {
+function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined, depth: number): Resolved {
     if (depth > MAX_DEPTH) return { kind: 'unsupported', typeName, reason: REASON.recursive }
 
     const scalar = scopeTypeForIec(typeName)
@@ -274,14 +268,12 @@ function resolveNamed(table: TypeTable, typeName: string, ns: string | undefined
     const builtin = BUILTIN_ALIASES[typeName.toUpperCase()]
     if (!def && builtin) return { ...resolveNamed(table, builtin, undefined, depth + 1), typeName }
     if (!def) return { kind: 'unsupported', typeName, reason: REASON.undefined }
-    if (def.hidden) return { kind: 'hidden', typeName, reason: `${def.name} has no ADS symbols` }
-    if (def.disabled) return { kind: 'unsupported', typeName, reason: def.disabled }
 
     const resolved = resolveDef(table, def, typeName, depth)
-    return def.note && resolved.kind !== 'hidden' ? { ...resolved, note: def.note } : resolved
+    return resolved.kind === 'hidden' ? resolved : applyAccess(resolved, def)
 }
 
-function resolveDef(table: TypeTable, def: TypeDef, typeName: string, depth: number): ResolvedType {
+function resolveDef(table: TypeTable, def: TypeDef, typeName: string, depth: number): Resolved {
     if (def.kind === 'alias') {
         if (def.dims) return arrayOf(table, def.dims, def.base, def.ns, typeName, depth)
         const base = resolveNamed(table, def.base, def.ns, depth + 1)

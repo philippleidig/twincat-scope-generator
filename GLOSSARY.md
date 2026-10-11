@@ -28,8 +28,9 @@ name + members + indices.
 that has an ADS symbol. Strings, interfaces, pointers themselves and **disabled symbols** are not
 recordable; values reached **via reference** or through a pointer's `^` are.
 
-**Hidden symbol** — Something the file lists that has no ADS symbol on the target (`hide`,
-`TcNoSymbol`, `VAR_INST`, methods, empty arrays, …). Not shown anywhere. See ADR 0005.
+**Hidden symbol** — Something the file lists that has no ADS symbol on the target (a symbol or
+member marked `hide` or `TcNoSymbol`, `VAR_INST`, methods, empty arrays, …). Not shown anywhere.
+A *type* marked `hide` does not hide its instances. See ADR 0005.
 
 **Disabled symbol** — Shown muted with the reason as tooltip, never selectable or added: properties
 with `monitoring := 'call'`, static variables below FB instances, `conditionalshow`, strings,

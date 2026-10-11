@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { importTwinCatFile } from '@/catalog/importFile'
 import { sourceKey } from '@/catalog/tree'
-import { NOTE, REASON } from '@/catalog/typeTable'
+import { NOTE, REASON } from '@/catalog/access'
 import { useBrowserStore } from '@/state/browserStore'
 import { SymbolTree } from './SymbolTree'
 

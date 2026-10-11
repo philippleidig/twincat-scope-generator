@@ -14,9 +14,8 @@ export interface ArrayDim {
 }
 
 /**
- * What the walker needs to know about whether a member, root or type can be recorded by its
- * ADS symbol name (see ADR 0005). Things without an ADS symbol at all are dropped (or, for
- * types, resolve to `hidden`); these are the cases that stay visible.
+ * Whether a declared member, root or type can be recorded by its ADS symbol name (ADR 0005,
+ * `catalog/access.ts`). Declarations without an ADS symbol are dropped while reading.
  */
 export interface Access {
     /** Shown muted with this reason and never recordable (property, static variable, `conditionalshow`). */
@@ -35,11 +34,8 @@ export interface MemberDef extends Access {
     comment?: string
 }
 
-/** Flags a type definition can carry, from its `<Properties>`. */
-interface TypeFlags extends Access {
-    /** `hide` or `TcNoSymbol`: no symbol of this type has an ADS symbol. */
-    hidden?: boolean
-}
+/** A type marked `conditionalshow` disables every symbol of that type. */
+type TypeFlags = Pick<Access, 'disabled'>
 
 export type TypeDef =
     /** Alias or enum: behaves like `base` (with optional array dims). */
@@ -95,10 +91,9 @@ export interface SymbolSource {
  *
  * - `pointer`: not recordable itself; its one child `^` is the pointed-to `target`.
  * - `unsupported`: shown disabled with `reason` (strings, interfaces, properties, …).
- * - `hidden`: has no ADS symbol; the walker drops it (never shown).
  *
  * `viaReference` marks a type reached through `REFERENCE TO`/`VAR_IN_OUT` (expanded like the
- * referenced type, valid only while bound); `note` is a caveat from the type definition.
+ * referenced type, valid only while bound).
  */
 export type ResolvedType = (
     | { kind: 'scalar'; scopeType: ScopeDataType; typeName: string }
@@ -106,5 +101,4 @@ export type ResolvedType = (
     | { kind: 'array'; dims: ArrayDim[]; element: string; ns?: string; typeName: string }
     | { kind: 'pointer'; typeName: string; target: string; ns?: string; reason: string }
     | { kind: 'unsupported'; typeName: string; reason: string }
-    | { kind: 'hidden'; typeName: string; reason: string }
-) & { viaReference?: boolean; note?: string }
+) & { viaReference?: boolean }

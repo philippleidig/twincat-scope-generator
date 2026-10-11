@@ -14,7 +14,7 @@
  */
 import type { AreaKind, SymbolRoot, SymbolSource, TypeTable } from './model'
 import { DEFAULT_PLC_PORT, DEFAULT_TCCOM_PORT, TCCOM_PREFIX_HINT, parameterNote, readModuleRoots } from './tmc'
-import { readTypeRef, readTypeTable, visibleRoots } from './typeTable'
+import { finalizeSource, readTypeRef, readTypeTable } from './typeTable'
 import { child, children, text } from './xml'
 
 export const DEFAULT_NC_PORT = 501
@@ -84,7 +84,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
         const instance = child(project, 'Instance')
         if (!instance) continue
         const title = project.getAttribute('Name') || stem
-        const roots = visibleRoots(types, readVars(instance, () => ''))
+        const roots = finalizeSource(types, readVars(instance, () => ''))
         sources.push({
             ...base(sources.length),
             kind: 'PLC',
@@ -139,7 +139,7 @@ export function importSystemManager(fileName: string, doc: Document): SymbolSour
             title: 'NC axes',
             pathPrefix: '',
             port: ncPort,
-            roots: visibleRoots(types, axisRoots),
+            roots: finalizeSource(types, axisRoots),
             complete: true,
             warnings: [
                 'NC symbols exist only for axes with "Create symbols" enabled. Encoder/drive paths (Axes.<axis>.<Enc>.<variable>) are not verified yet.',

@@ -1,16 +1,15 @@
 /**
  * Walking the symbols of a source: the one place that knows how a resolved type
- * expands into members and array elements. The tree, the search index and the
- * "what does adding this produce" logic are all built on it.
+ * expands into members, array elements and pointer targets. The tree, the search index and
+ * the "what does adding this produce" logic are all built on it.
  */
 import type { ScopeDataType } from '@/domain/dataTypes'
-import type { Access, ArrayDim, AreaKind, ResolvedType, SymbolRoot, SymbolSource } from './model'
-import { NOTE, arrayLabel, resolveType } from './typeTable'
+import { NOTE } from './access'
+import type { ArrayDim, AreaKind, ResolvedType, SymbolRoot, SymbolSource } from './model'
+import type { TypeRef } from './typeTable'
+import { arrayLabel, resolveDecl } from './typeTable'
 
-export { arrayLabel }
-
-/** Kinds the walker emits (`hidden` types are dropped before that). */
-export type SymbolKind = Exclude<ResolvedType['kind'], 'hidden'>
+export type SymbolKind = ResolvedType['kind']
 
 /** What the UI shows about a symbol. */
 export interface SymbolInfo {
@@ -19,30 +18,15 @@ export interface SymbolInfo {
     scopeType?: ScopeDataType
     /** Why a disabled symbol (unsupported or pointer) cannot be recorded. */
     reason?: string
-    /** Reached through a reference (VAR_IN_OUT, REFERENCE TO): recordable while bound. */
-    viaReference?: boolean
     /** Caveat for a recordable symbol (via reference, TcNoSymbol 'unused'). */
     warning?: string
 }
 
-function describeType(r: ResolvedType): SymbolInfo {
-    switch (r.kind) {
-        case 'scalar':
-            return { kind: r.kind, typeName: r.typeName, scopeType: r.scopeType }
-        case 'array':
-            return { kind: r.kind, typeName: arrayLabel(r.dims, r.element) }
-        case 'pointer':
-        case 'unsupported':
-        case 'hidden':
-            return { kind: r.kind === 'hidden' ? 'unsupported' : r.kind, typeName: r.typeName, reason: r.reason }
-        default:
-            return { kind: r.kind, typeName: r.typeName }
-    }
-}
-
 export function describe(node: PathNode): SymbolInfo {
-    const info = describeType(node.resolved)
-    if (node.viaReference) info.viaReference = true
+    const r = node.resolved
+    const info: SymbolInfo = { kind: r.kind, typeName: r.kind === 'array' ? arrayLabel(r.dims, r.element) : r.typeName }
+    if (r.kind === 'scalar') info.scopeType = r.scopeType
+    if (r.kind === 'pointer' || r.kind === 'unsupported') info.reason = r.reason
     const warnings = [node.viaReference && NOTE.viaReference, node.note].filter(Boolean)
     if (warnings.length > 0) info.warning = warnings.join(' · ')
     return info
@@ -70,46 +54,41 @@ export interface PathNode {
     note?: string
 }
 
-/** Apply what the declaration says (property, static, `conditionalshow`, note) to its type. */
-function withAccess(resolved: ResolvedType, access: Access): ResolvedType {
-    if (resolved.kind === 'hidden') return resolved
-    if (access.disabled) return { kind: 'unsupported', typeName: resolved.typeName, reason: access.disabled }
-    return access.note ? { ...resolved, note: access.note } : resolved
-}
-
 export function rootNode(source: SymbolSource, root: SymbolRoot): PathNode {
     const path = fullPath(source, root.name)
-    const resolved = withAccess(resolveType(source.types, root.type, root.ns, root.dims), root)
+    const resolved = resolveDecl(source.types, root)
     const node: PathNode = { path, name: lastSegment(path), resolved, area: root.area, port: root.port ?? source.port, comment: root.comment, ranges: [] }
     if (resolved.viaReference) node.viaReference = true
-    if (resolved.note) node.note = resolved.note
+    if (root.note) node.note = root.note
     return node
 }
 
-/** A node below `parent`, inheriting area, port, ranges and the reference flag. */
-function childNode(parent: PathNode, path: string, name: string, resolved: ResolvedType, ranges = parent.ranges, comment?: string): PathNode {
-    const node: PathNode = { path, name, resolved, area: parent.area, port: parent.port, comment, ranges }
+interface ChildDecl extends TypeRef {
+    note?: string
+    comment?: string
+    disabled?: string
+}
+
+/** A node below `parent`, inheriting area, port, ranges, the reference flag and the note. */
+function childNode(source: SymbolSource, parent: PathNode, path: string, name: string, decl: ChildDecl, ranges = parent.ranges): PathNode {
+    const resolved = resolveDecl(source.types, decl)
+    const node: PathNode = { path, name, resolved, area: parent.area, port: parent.port, comment: decl.comment, ranges }
     if (parent.viaReference || resolved.viaReference) node.viaReference = true
-    const note = resolved.note ?? parent.note
+    const note = decl.note ?? parent.note
     if (note) node.note = note
     return node
 }
 
-/** Struct members of a node (none for other kinds); members without an ADS symbol are dropped. */
+/** Struct members of a node (none for other kinds). */
 export function memberNodes(source: SymbolSource, node: PathNode): PathNode[] {
     if (node.resolved.kind !== 'struct') return []
-    const out: PathNode[] = []
-    for (const m of node.resolved.members) {
-        const resolved = withAccess(resolveType(source.types, m.type, m.ns, m.dims), m)
-        if (resolved.kind !== 'hidden') out.push(childNode(node, `${node.path}.${m.name}`, m.name, resolved, node.ranges, m.comment))
-    }
-    return out
+    return node.resolved.members.map((m) => childNode(source, node, `${node.path}.${m.name}`, m.name, m))
 }
 
 /** The pointed-to value of a pointer node: `p` → `p^` (null for other kinds). */
 export function derefNode(source: SymbolSource, node: PathNode): PathNode | null {
     if (node.resolved.kind !== 'pointer') return null
-    return childNode(node, `${node.path}^`, `${node.name}^`, resolveType(source.types, node.resolved.target, node.resolved.ns))
+    return childNode(source, node, `${node.path}^`, `${node.name}^`, { type: node.resolved.target, ns: node.resolved.ns })
 }
 
 /** Element of an array node at `index` (one value per dimension), or all elements as `*`. */
@@ -118,77 +97,66 @@ export function elementNode(source: SymbolSource, node: PathNode, index: number[
     const { dims, element, ns } = node.resolved
     const wildcard = index === '*'
     const label = wildcard ? `[${dims.map(() => '*').join(',')}]` : `[${index.join(',')}]`
-    return childNode(node, `${node.path}${label}`, `${node.name}${label}`, resolveType(source.types, element, ns), wildcard ? [...node.ranges, ...dims] : node.ranges)
+    return childNode(source, node, `${node.path}${label}`, `${node.name}${label}`, { type: element, ns }, wildcard ? [...node.ranges, ...dims] : node.ranges)
 }
 
 export const MAX_DEPTH = 16
 
-export interface WalkOptions {
-    /**
-     * Continue through pointers (`p^`) and references found *below* the start node (default true).
-     * Off for "Add": adding an FB should not pull in everything its pointers and VAR_IN_OUTs
-     * reach; the user adds `p^` or the reference itself for that.
-     */
-    indirection?: boolean
-    /**
-     * Expand what a reference / VAR_IN_OUT points to (default true). Off for the search index: the
-     * reference member is listed, its target is found under its real symbol (an MC function
-     * block's `Axis` would otherwise repeat the whole AXIS_REF); the tree and "Add" expand it.
-     */
-    references?: boolean
-}
+/**
+ * What the walk does with a node reached through an indirection *below* its start: a pointer's
+ * target `p^`, or a member that is a reference / VAR_IN_OUT.
+ * - `expand`: emit it and everything below it (default);
+ * - `list`: emit it, not what is below it;
+ * - `skip`: neither.
+ */
+export type Indirection = 'expand' | 'list' | 'skip'
 
-/** A node entered through a pointer or a reference, keyed by the type it leads to. */
-function indirectionKey(node: PathNode): string | null {
-    if (node.path.endsWith('^') || node.resolved.viaReference) return node.resolved.typeName.toUpperCase()
-    return null
+export interface WalkOptions {
+    pointers?: Indirection
+    references?: Indirection
 }
 
 /**
  * Depth-first walk over a node and everything below it. Arrays are not enumerated:
  * they continue as one wildcard element (`a[*]`), so the walk stays proportional to the
  * number of distinct member paths. Struct elements are skipped in favour of their
- * members (they add nothing searchable). Pointers continue as their `^` child. A pointer or
- * reference leading to a type already entered that way further up is listed but not expanded
- * again (linked lists, back references). `stats.depthLimited` reports pruning.
+ * members (they add nothing searchable). Pointers continue as their `^` child.
+ *
+ * Indirections follow `options`; in addition each type is expanded through an indirection at
+ * most once per walk — later pointers/references to it are listed, not expanded — so linked
+ * lists and FBs pointing at each other stay linear instead of combinatorial.
+ * `stats.depthLimited` reports pruning.
  */
 export function* walk(source: SymbolSource, start: PathNode, stats = { depthLimited: false }, options: WalkOptions = {}): Generator<PathNode> {
-    const indirection = options.indirection ?? true
-    const references = options.references ?? true
-    const visit = function* (node: PathNode, depth: number, emitSelf: boolean, entered: string[]): Generator<PathNode> {
+    // The start's own type counts as expanded: a pointer back to it is listed, not walked again.
+    const expanded = new Set<string>([start.resolved.typeName.toUpperCase()])
+    const visit = function* (node: PathNode, depth: number, emitSelf: boolean, via?: 'pointers' | 'references'): Generator<PathNode> {
         if (depth > MAX_DEPTH) {
             stats.depthLimited = true
             return
         }
-        if (node.resolved.kind === 'hidden') return
-        if (!references && node.resolved.viaReference) {
-            yield node
-            return
-        }
-        let path = entered
-        if (depth > 0) {
-            const key = indirectionKey(node)
-            if (key !== null) {
-                if (!indirection) return
-                if (entered.includes(key)) {
-                    yield node
-                    return
-                }
-                path = [...entered, key]
+        if (via) {
+            const policy = options[via] ?? 'expand'
+            if (policy === 'skip') return
+            const key = node.resolved.typeName.toUpperCase()
+            if (policy === 'list' || expanded.has(key)) {
+                yield node
+                return
             }
+            expanded.add(key)
         }
         if (emitSelf) yield node
         const r = node.resolved
         if (r.kind === 'struct') {
-            for (const m of memberNodes(source, node)) yield* visit(m, depth + 1, true, path)
+            for (const m of memberNodes(source, node)) yield* visit(m, depth + 1, true, m.resolved.viaReference ? 'references' : undefined)
         } else if (r.kind === 'array') {
             const element = elementNode(source, node, '*')!
-            yield* visit(element, depth + 1, element.resolved.kind !== 'struct', path)
+            yield* visit(element, depth + 1, element.resolved.kind !== 'struct', element.resolved.viaReference ? 'references' : undefined)
         } else if (r.kind === 'pointer') {
-            yield* visit(derefNode(source, node)!, depth + 1, true, path)
+            yield* visit(derefNode(source, node)!, depth + 1, true, 'pointers')
         }
     }
-    yield* visit(start, 0, true, [])
+    yield* visit(start, 0, true)
 }
 
 // ---------------------------------------------------------------------------
@@ -229,14 +197,13 @@ function findRoot(source: SymbolSource, lower: string): [SymbolRoot, number] | n
  * Find the node for a full symbol path (`GVL.aAxis[3].fActPos`, with wildcards
  * `GVL.aAxis[*].fActPos` whose ranges are taken from the type, or through a pointer
  * `MAIN.pData^.fValue`). Matching is case-insensitive, like ADS symbol names. Returns null
- * when the path does not exist or has no ADS symbol.
+ * when the path does not exist.
  */
 export function resolvePath(source: SymbolSource, path: string): PathNode | null {
     // Roots can be prefixes of each other (`MAIN.fb` and `MAIN.fb.x`): take the longest match.
     const found = findRoot(source, path.toLowerCase())
     if (!found) return null
     let node: PathNode | null = rootNode(source, found[0])
-    if (node.resolved.kind === 'hidden') return null
     const rest = path.slice(found[1])
     SEGMENT.lastIndex = 0
     let consumed = 0
@@ -260,7 +227,6 @@ export function resolvePath(source: SymbolSource, path: string): PathNode | null
                 node = elementNode(source, node, index)
             }
         }
-        if (node?.resolved.kind === 'hidden') return null
     }
     return consumed === rest.length ? node : null
 }

@@ -43,7 +43,8 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 - **Only what has an ADS symbol is offered.** A `.tmc` also lists things TwinCAT creates no ADS
   symbol for, so the browser filters them like the target would
   ([ADR 0005](docs/adr/0005-ads-accessibility-rules.md)):
-  - **hidden**: `{attribute 'hide'}` (on a symbol, member or type), `TcNoSymbol`, methods with their
+  - **hidden**: `{attribute 'hide'}` and `TcNoSymbol` on a symbol or member (on a *type* they do not
+    hide its instances), methods with their
     parameters and locals, properties without a monitoring pragma, `VAR_INST`, empty arrays;
   - **shown but disabled, with the reason as tooltip**: properties with `monitoring := 'call'` (the
     getter runs on access, there is nothing to sample), `VAR_STAT` below FB instances (record the
@@ -92,7 +93,8 @@ npm test               # unit + component tests (Vitest)
 npm run test:coverage  # with coverage thresholds
 npm run test:e2e       # Playwright; set PW_CHROMIUM_PATH to use a preinstalled Chromium
 npm run test:corpus    # downloads 352 real TwinCAT files (scripts/corpus/manifest.json) into .corpus/
-                       # and checks import/search/path invariants over all of them (~2 min)
+                       # and checks import/search/path invariants over all of them (~2 min);
+                       # behind an HTTPS proxy the download needs Node ≥ 22.21 (NODE_USE_ENV_PROXY)
 ```
 
 ### Architecture

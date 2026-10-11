@@ -10,7 +10,7 @@
 import type { ScopeDataType } from '@/domain/dataTypes'
 import { wildcardsToTemplate } from '@/domain/pattern'
 import type { ArrayDim, AreaKind, SymbolSource } from './model'
-import type { SymbolKind } from './walk'
+import type { SymbolKind, WalkOptions } from './walk'
 import { describe, rootNode, walk } from './walk'
 
 export interface SearchEntry {
@@ -26,8 +26,6 @@ export interface SearchEntry {
     scopeType?: ScopeDataType
     /** Why a disabled entry (unsupported, pointer) cannot be recorded. */
     reason?: string
-    /** Reached through a reference: recordable while the reference is bound. */
-    viaReference?: boolean
     /** Caveat for a recordable entry. */
     warning?: string
     area: AreaKind
@@ -42,7 +40,7 @@ export interface SearchEntry {
 export interface SearchIndex {
     /** Sorted by path: case-insensitively, then exactly, then by source. */
     entries: SearchEntry[]
-    /** True when the index stopped at MAX_ENTRIES or the walk's depth limit and is incomplete. */
+    /** True when the index stopped at MAX_ENTRIES (or a source's share of it) or the walk's depth limit. */
     truncated: boolean
 }
 
@@ -61,11 +59,16 @@ function collectEntries(sources: SymbolSource[]): SearchIndex {
     const entries: SearchEntry[] = []
     const seen = new Set<string>()
     const stats = { depthLimited: false }
-    for (const source of sources) {
+    let truncated = false
+    sources.forEach((source, i) => {
+        // Every source gets its share of what is left, so one huge source cannot starve the others.
+        const limit = entries.length + Math.floor((MAX_ENTRIES - entries.length) / (sources.length - i))
         for (const root of source.roots) {
-            // References are listed, not expanded (WalkOptions.references).
-            for (const node of walk(source, rootNode(source, root), stats, { references: false })) {
-                if (entries.length >= MAX_ENTRIES) return { entries, truncated: true }
+            for (const node of walk(source, rootNode(source, root), stats, SEARCH_WALK)) {
+                if (entries.length >= limit) {
+                    truncated = true
+                    return
+                }
                 // The same path can be reachable twice (a struct root and its separately declared member).
                 const key = `${source.id}|${node.path}`
                 if (seen.has(key)) continue
@@ -84,9 +87,16 @@ function collectEntries(sources: SymbolSource[]): SearchIndex {
                 })
             }
         }
-    }
-    return { entries, truncated: stats.depthLimited }
+    })
+    return { entries, truncated: truncated || stats.depthLimited }
 }
+
+/**
+ * Pointer targets are indexed (that is how `p^` paths are found); a reference member is listed but
+ * not expanded — its target is found under its real symbol, and an MC function block's `Axis`
+ * would otherwise repeat the whole AXIS_REF.
+ */
+const SEARCH_WALK: WalkOptions = { pointers: 'expand', references: 'list' }
 
 /** The channel template for a wildcard path: `*` become counters. */
 export function templateOf(entry: Pick<SearchEntry, 'path' | 'ranges'>): string {

@@ -11,13 +11,12 @@ import type { SymbolSource } from './model'
 import { buildIndex } from './search'
 import type { BrowserNode, SymbolNode } from './tree'
 import { childrenOf, isExpandable, sourceChildren } from './tree'
-import { NOTE, REASON } from './typeTable'
+import { NOTE, REASON } from './access'
 import { resolvePath, rootNode, walk } from './walk'
 
 const prop = (name: string, value?: string) => `<Property><Name>${name}</Name>${value === undefined ? '' : `<Value>${value}</Value>`}</Property>`
 const props = (...p: string[]) => `<Properties>${p.join('')}</Properties>`
-let offset = 0
-const sub = (name: string, type: string, extra = '') => `<SubItem><Name>${name}</Name><Type>${type}</Type>${extra}<BitOffs>${(offset += 8)}</BitOffs></SubItem>`
+const sub = (name: string, type: string, extra = '') => `<SubItem><Name>${name}</Name><Type>${type}</Type>${extra}<BitOffs>0</BitOffs></SubItem>`
 const dataType = (name: string, body: string) => `<DataType><Name>${name}</Name>${body}</DataType>`
 const symbol = (name: string, type: string, extra = '') => `<Symbol><Name>${name}</Name><BaseType>${type}</BaseType>${extra}</Symbol>`
 
@@ -106,8 +105,8 @@ describe('VAR_STAT in a function block', () => {
 describe('hide / hide_all_locals', () => {
     const types =
         ST_POINT +
-        dataType('ST_Internal', sub('a', 'INT') + props(prop('hide'))) +
-        dataType('ST_Mixed', sub('visible', 'INT') + sub('_secret', 'INT', props(prop('hide'))) + sub('internal', 'ST_Internal')) +
+        dataType('_ST_Internal', sub('a', 'INT') + props(prop('hide'))) +
+        dataType('ST_Mixed', sub('visible', 'INT') + sub('_secret', 'INT', props(prop('hide'))) + sub('internal', '_ST_Internal')) +
         dataType(
             'FB_Quiet',
             sub('bIn', 'BOOL', props(prop('ItemType', 'Input'))) + sub('nLocal', 'INT') + props(prop('hide_all_locals'), prop('PouType', 'FunctionBlock')),
@@ -115,20 +114,19 @@ describe('hide / hide_all_locals', () => {
     const s = plc(
         types,
         symbol('GVL.hidden', 'INT', props(prop('hide'))) +
-            symbol('GVL.internal', 'ST_Internal') +
+            symbol('GVL.internal', '_ST_Internal') +
             symbol('GVL.mixed', 'ST_Mixed') +
-            symbol('GVL.quiet', 'FB_Quiet') +
-            symbol('GVL.point', 'ST_Point'),
+            symbol('GVL.quiet', 'FB_Quiet'),
     )
 
     it('hides symbols and members marked hide', () => {
-        expect(rootNames(s)).toEqual(['GVL.mixed', 'GVL.quiet', 'GVL.point'])
-        expect(treeLabels(s, 'GVL', 'mixed')).toEqual(['visible'])
+        expect(rootNames(s)).toEqual(['GVL.internal', 'GVL.mixed', 'GVL.quiet'])
+        expect(treeLabels(s, 'GVL', 'mixed')).toEqual(['visible', 'internal'])
+        expect(resolvePath(s, 'GVL.mixed._secret')).toBeNull()
     })
-    it('hides every symbol and member of a type marked hide', () => {
-        expect(paths(s).filter((p) => p.includes('internal'))).toEqual([])
-        expect(resolvePath(s, 'GVL.mixed.internal.a')).toBeNull()
-        expect(adds(s, 'GVL.mixed')).toEqual(['GVL.mixed.visible'])
+    it('keeps symbols and members of a type marked hide (TwinCAT_SystemInfoVarList.__PlcTask is a real symbol)', () => {
+        expect(entry(s, 'GVL.internal.a')).toMatchObject({ kind: 'scalar' })
+        expect(adds(s, 'GVL.mixed')).toEqual(['GVL.mixed.visible', 'GVL.mixed.internal.a'])
     })
     it('hides the locals of a POU marked hide_all_locals, not its inputs', () => {
         expect(treeLabels(s, 'GVL', 'quiet')).toEqual(['bIn'])
@@ -158,7 +156,7 @@ describe('conditionalshow', () => {
 })
 
 describe('TcNoSymbol', () => {
-    const types = dataType('FB_Buffer', sub('n', 'INT') + props(prop('tc_no_symbol'))) + dataType('ST_Host', sub('buf', 'FB_Buffer') + sub('k', 'INT'))
+    const types = dataType('FB_Buffer', sub('n', 'INT') + props(prop('tc_no_symbol'))) + dataType('ST_Host', sub('buf', 'INT', props(prop('tc_no_symbol'))) + sub('k', 'INT'))
     const s = plc(
         types,
         symbol('GVL.noSymbol', 'INT', props(prop('tc_no_symbol'))) +
@@ -167,9 +165,10 @@ describe('TcNoSymbol', () => {
             symbol('GVL.host', 'ST_Host'),
     )
 
-    it('hides symbols and types without value', () => {
-        expect(rootNames(s)).toEqual(['GVL.maybe', 'GVL.host'])
+    it('hides symbols and members without value, not symbols of a type marked with it', () => {
+        expect(rootNames(s)).toEqual(['GVL.maybe', 'GVL.buffer', 'GVL.host'])
         expect(treeLabels(s, 'GVL', 'host')).toEqual(['k'])
+        expect(entry(s, 'GVL.buffer.n')).toMatchObject({ kind: 'scalar' })
     })
     it("shows a symbol marked 'unused' with a note, still recordable", () => {
         expect(entry(s, 'GVL.maybe')).toMatchObject({ kind: 'scalar', warning: NOTE.unusedNoSymbol })
@@ -203,7 +202,9 @@ describe('POINTER TO', () => {
     })
     it('dereferences pointers to pointers twice', () => {
         expect(treeNode(s, 'MAIN', 'fbPath', 'ppPoint', '^')).toMatchObject({ kind: 'pointer', typeName: 'POINTER TO ST_Point' })
-        expect(entry(s, 'MAIN.fbPath.ppPoint^^.x')).toMatchObject({ kind: 'scalar', scopeType: 'REAL32' })
+        expect(resolvePath(s, 'MAIN.fbPath.ppPoint^^.x')?.resolved).toMatchObject({ kind: 'scalar', scopeType: 'REAL32' })
+        // ST_Point was already expanded through pPoint^ in this walk: listed, not expanded again.
+        expect(entry(s, 'MAIN.fbPath.ppPoint^^')).toMatchObject({ kind: 'struct' })
     })
     it('reads pointers to arrays (<ArrayInfo PointerTo>) and POINTER TO type names as pointers, not arrays', () => {
         expect(treeNode(s, 'MAIN', 'fbPath', 'pBuffer')).toMatchObject({ kind: 'pointer', typeName: 'POINTER TO ARRAY[0..65535] OF ST_Point' })
@@ -214,8 +215,10 @@ describe('POINTER TO', () => {
     })
     it('lists ^ paths in search, without running around pointer cycles', () => {
         const all = paths(s)
-        expect(all).toEqual(expect.arrayContaining(['MAIN.fbPath.pPoint', 'MAIN.fbPath.pPoint^', 'MAIN.fbPath.pPoint^.x', 'MAIN.fbPath.pNext^.n', 'MAIN.fbPath.pNext^.pNext^']))
-        expect(all).not.toContain('MAIN.fbPath.pNext^.pNext^.n')
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbPath.pPoint', 'MAIN.fbPath.pPoint^', 'MAIN.fbPath.pPoint^.x', 'MAIN.fbPath.pNext^']))
+        // pNext points back to the root's own type: listed, not walked again (the tree still expands it).
+        expect(all).not.toContain('MAIN.fbPath.pNext^.n')
+        expect(resolvePath(s, 'MAIN.fbPath.pNext^.pNext^.n')).not.toBeNull()
     })
     it('resolves ^ segments and records the target, but "Add" on the owner does not follow pointers', () => {
         expect(resolvePath(s, 'main.fbpath.ppoint^.Y')).toMatchObject({ path: 'MAIN.fbPath.pPoint^.y', resolved: { kind: 'scalar' } })
@@ -242,18 +245,18 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
     it('expands like the referenced type in the tree, without ^, flagged as via reference', () => {
         expect(treeLabels(s, 'MAIN', 'fbUse', 'refPoint')).toEqual(['x', 'y'])
         const x = treeNode(s, 'MAIN', 'fbUse', 'refPoint', 'x')
-        expect(x).toMatchObject({ kind: 'scalar', viaReference: true, warning: NOTE.viaReference })
+        expect(x).toMatchObject({ kind: 'scalar', warning: NOTE.viaReference })
         expect(resolvePath(s, 'MAIN.fbUse.refPoint.x')).toMatchObject({ viaReference: true, resolved: { kind: 'scalar' } })
     })
     it('lists the reference member in search but not what it points to', () => {
-        expect(entry(s, 'MAIN.fbUse.refPoint')).toMatchObject({ kind: 'struct', viaReference: true, warning: 'Valid only while the reference is bound' })
+        expect(entry(s, 'MAIN.fbUse.refPoint')).toMatchObject({ kind: 'struct', warning: 'Valid only while the reference is bound' })
         expect(entry(s, 'MAIN.fbUse.refPoint.x')).toBeUndefined()
-        expect(entry(s, 'MAIN.fbUse.n')?.viaReference).toBeUndefined()
+        expect(entry(s, 'MAIN.fbUse.n')?.warning).toBeUndefined()
         // A member search finds the real symbol, not a copy through every reference.
         expect(paths(s).filter((p) => p.endsWith('.x'))).toEqual(['GVL.point.x'])
     })
     it('treats VAR_IN_OUT (ItemType InOut) as a reference', () => {
-        expect(entry(s, 'MAIN.fbUse.Target')).toMatchObject({ kind: 'struct', viaReference: true })
+        expect(entry(s, 'MAIN.fbUse.Target')).toMatchObject({ kind: 'struct', warning: NOTE.viaReference })
         expect(resolvePath(s, 'MAIN.fbUse.Target.y')).toMatchObject({ viaReference: true })
     })
     it('stays recordable when added directly; "Add" on the owner does not follow references', () => {
@@ -262,10 +265,10 @@ describe('REFERENCE TO / VAR_IN_OUT', () => {
         expect(paths(s)).toContain('MAIN.fbUse.refSelf')
         expect(paths(s)).not.toContain('MAIN.fbUse.refSelf.n')
     })
-    it('walks through references once when asked to, without running around cycles', () => {
+    it('walks through references when asked to, without running around cycles', () => {
         const all = [...walk(s, rootNode(s, s.roots[0]))].map((n) => n.path)
-        expect(all).toEqual(expect.arrayContaining(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refSelf.n', 'MAIN.fbUse.refSelf.refSelf']))
-        expect(all).not.toContain('MAIN.fbUse.refSelf.refSelf.n')
+        expect(all).toEqual(expect.arrayContaining(['MAIN.fbUse.refPoint.x', 'MAIN.fbUse.refSelf']))
+        expect(all).not.toContain('MAIN.fbUse.refSelf.n')
     })
 })
 

@@ -14,8 +14,8 @@
 
 - The browser now offers exactly what can be recorded by ADS symbol name
   ([ADR 0005](docs/adr/0005-ads-accessibility-rules.md)):
-  - **hidden**: symbols, members and whole types marked `hide` or `TcNoSymbol`, implicit `VAR_INST`
-    members, locals of `hide_all_locals` POUs and empty arrays (which produced invalid templates);
+  - **hidden**: symbols and members marked `hide` or `TcNoSymbol`, implicit `VAR_INST` members,
+    locals of `hide_all_locals` POUs and empty arrays (which produced invalid templates);
   - **disabled with a reason**: properties with `monitoring := 'call'` (new: they were not listed),
     static variables below FB instances ("record `<FB type>.<var>`"), `conditionalshow` members and
     types ("Hidden in compiled libraries"); strings now say "Strings can only be shown in table charts".
@@ -27,11 +27,14 @@
   not its target (an MC function block's `Axis` would repeat the whole `AXIS_REF`); adding the member
   adds its target. `TcNoSymbol 'unused'` symbols carry a note.
 - Adding a struct or FB does not follow the pointers and references inside it (add `p^` or the
-  reference itself); pointer/reference cycles are listed once, not expanded endlessly.
+  reference itself). Search expands each pointer target type once per symbol, so pointer cycles and
+  FBs pointing at each other stay small, and one huge source no longer starves the others of
+  search entries.
 - A root name declared twice in one file (two versions of a library GVL) is listed once; the tree
   used the last declaration, path lookup the first.
 - Path lookup finds the root by path instead of scanning all roots (faster "Add" on large PLCs).
-- Re-import files saved with V2.0 to apply the new rules to them.
+- Imported files stored by V2.0 are dropped on load, with a hint to import them again (their paths
+  would be wrong under the new rules).
 
 ### Project editing
 

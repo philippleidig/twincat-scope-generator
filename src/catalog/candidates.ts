@@ -3,6 +3,7 @@ import type { ChannelSpec } from '@/domain/project'
 import { MAX_EXPANSION, expansionCount } from '@/domain/pattern'
 import type { SymbolSource } from './model'
 import { templateOf } from './search'
+import type { WalkOptions } from './walk'
 import { derefNode, resolvePath, walk } from './walk'
 
 /** Upper bound of channels a single "add" may create, so adding a huge FB stays deliberate. */
@@ -17,21 +18,27 @@ export interface Candidates {
 }
 
 /**
+ * "Add" policy for indirections: the user adds what they picked, not everything it points to.
+ * Pointer targets and reference members *below* the added symbol are skipped (an MC function
+ * block would otherwise pull in its whole AXIS_REF); to record through them, add `p^` or the
+ * reference member itself — the start is always expanded, whatever it is reached through.
+ */
+const ADD_WALK: WalkOptions = { pointers: 'skip', references: 'skip' }
+
+/**
  * The channels for the symbol at `path` (concrete like `GVL.aAxis[3]` or with wildcards like
  * `GVL.aAxis[*]`): the symbol itself if it is recordable, otherwise every recordable leaf
- * below it, with array indices turned into counters. Pointers and references below `path` are
- * not followed (add `p^` or the reference itself for that). Unknown paths yield nothing.
+ * below it, with array indices turned into counters (see ADD_WALK for pointers and references).
+ * A pointer itself cannot be recorded, so adding it adds its target `p^`. Unknown paths yield nothing.
  */
 export function candidatesAt(source: SymbolSource, path: string): Candidates {
     const found = resolvePath(source, path)
-    // A pointer itself cannot be recorded; adding it means its target.
     const start = found && (derefNode(source, found) ?? found)
     if (!start) return { specs: [], truncated: false, tooLarge: 0 }
     const stats = { depthLimited: false }
     const specs: ChannelSpec[] = []
     let tooLarge = 0
-    // Pointers and references below the start are not followed (WalkOptions.indirection).
-    for (const node of walk(source, start, stats, { indirection: false })) {
+    for (const node of walk(source, start, stats, ADD_WALK)) {
         if (node.resolved.kind !== 'scalar') continue
         const symbol = templateOf(node)
         if (expansionCount(symbol) > MAX_EXPANSION) {
