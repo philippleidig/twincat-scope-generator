@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { FIXTURES, fixture } from './__fixtures__/load'
 import demoTmc from './demo/DemoMachine.tmc?raw'
+import demoTsproj from './demo/DemoMachine.tsproj?raw'
 import { importTwinCatFile } from './importFile'
 import { buildIndex } from './search'
+import { IO_HINT } from './io'
 import { areaKind } from './tmc'
 
 const entry = (sourceText: string, name: string, path: string) =>
@@ -67,6 +69,24 @@ describe('bundled demo', () => {
         expect(paths).toContain('MAIN.fbConveyor.bBusy')
         expect(paths).not.toContain('MAIN.fbConveyor._nInternal')
         expect(source.roots.filter((r) => r.area === 'input').map((r) => r.name)).toEqual(['GVL_IO.bEmergencyStop', 'GVL_IO.nPressureRaw'])
+    })
+
+    it('adds NC axes and an EtherCAT process image from the .tsproj', () => {
+        const sources = importTwinCatFile('DemoMachine.tsproj', demoTsproj)
+        expect(sources.map((s) => [s.kind, s.title, s.port])).toEqual([
+            ['NC', 'NC axes', 501],
+            ['IO', 'Device 1 (EtherCAT)', 27905],
+        ])
+        const [nc, io] = sources.map((s) => buildIndex([s]).entries.map((e) => e.path))
+        expect(nc).toContain('Axes.Gantry X.ActPos')
+        expect(nc).toContain('Axes.Gantry Y.SetVelo')
+        expect(io).toContain('Inputs.Frm0State')
+        expect(io).toContain('Term 2 (EL1008).Channel 1.Input')
+        expect(io).toContain('Term 4 (EL3102).AI Standard Channel 1.Value')
+        expect(io).toContain('Term 5 (EL7041).STM Status.Status.Ready')
+        expect(io).not.toContain('Term 5 (EL7041).ENC Status')
+        // The image's ADS server is on, so only the general hint remains.
+        expect(sources[1].warnings).toEqual([IO_HINT])
     })
 })
 

@@ -94,6 +94,8 @@ test('adds symbols picked in the flat list view', async ({ page }) => {
     await page.getByRole('button', { name: 'Try the demo machine' }).click()
     await page.getByRole('group', { name: 'Browser view' }).getByRole('button', { name: 'List' }).click()
     const list = page.getByRole('listbox', { name: 'Symbol list' })
+    // The demo also has NC axes and EtherCAT I/O; narrow the list to the PLC globals.
+    await page.getByLabel('Search symbols').fill('GVL')
     await list.getByRole('checkbox', { name: 'Select GVL.aAxis[{i:1:4}].fActPos', exact: true }).check()
     await list.getByRole('checkbox', { name: 'Select GVL.fCycleLoad', exact: true }).check()
     await page.getByRole('button', { name: /Add to scope/ }).click()

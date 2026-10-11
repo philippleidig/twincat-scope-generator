@@ -20,6 +20,8 @@
   (`<box>.<group>.<var>`), marked as not verified yet.
 - Path lookup accepts member names with dots (`CC Inputs.Current actual value Ch.1`).
 - Port presets *I/O image 1* (27905) and *I/O image 2* (27906).
+- The **demo machine** now also has an NC task with two axes (`Axes.Gantry X.ActPos`, …) and an EtherCAT
+  master (EK1100, EL1008, EL2008, EL3102, two EL7041) whose image serves its symbols on port 27905.
 
 ## V2.1 (unreleased)
 

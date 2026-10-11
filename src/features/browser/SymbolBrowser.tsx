@@ -5,6 +5,7 @@ import { browserBody, useBrowserStore } from '@/state/browserStore'
 import { Button } from '@/ui/components/Button'
 import { useFilePicker } from '@/ui/components/useFilePicker'
 import demoTmc from '@/catalog/demo/DemoMachine.tmc?raw'
+import demoTsproj from '@/catalog/demo/DemoMachine.tsproj?raw'
 import { useFileImport } from './useFileImport'
 import { SourceCard } from './SourceCard'
 import { BrowserToolbar } from './BrowserToolbar'
@@ -33,8 +34,12 @@ export function SymbolBrowser() {
     const [dragOver, setDragOver] = useState(false)
 
     const loadDemo = () => {
-        const [report] = importFiles([{ name: 'DemoMachine.tmc', text: demoTmc }])
-        useBrowserStore.getState().expandSources(report.sourceIds)
+        // PLC symbols from the .tmc; NC axes and the EtherCAT process image from the .tsproj.
+        const reports = importFiles([
+            { name: 'DemoMachine.tmc', text: demoTmc },
+            { name: 'DemoMachine.tsproj', text: demoTsproj },
+        ])
+        useBrowserStore.getState().expandSources(reports.flatMap((r) => r.sourceIds))
     }
 
     return (
