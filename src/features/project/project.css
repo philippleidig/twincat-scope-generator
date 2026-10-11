@@ -296,3 +296,96 @@
         flex-basis: calc(100% - 40px);
     }
 }
+
+/* ---------- Drag & drop ---------- */
+.drag-handle {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 18px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+    cursor: grab;
+}
+.drag-handle:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+/*
+ * Indicator line where a drop inserts, centred in the gap before/after a channel row or axis group
+ * (each sets --drop-gap to the gap of its list), with a "+" badge while the drop copies.
+ */
+.channel {
+    --drop-gap: 6px;
+    position: relative;
+}
+.axis-group {
+    --drop-gap: var(--space-3);
+}
+[data-drop]::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 2;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    pointer-events: none;
+}
+[data-drop='before']::before {
+    top: calc(var(--drop-gap) / -2 - 1px);
+}
+[data-drop='after']::before {
+    bottom: calc(var(--drop-gap) / -2 - 1px);
+}
+[data-drop-copy]::after {
+    content: '+';
+    position: absolute;
+    left: -6px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+[data-drop='before'][data-drop-copy]::after {
+    top: calc(var(--drop-gap) / -2 - 8px);
+}
+[data-drop='after'][data-drop-copy]::after {
+    bottom: calc(var(--drop-gap) / -2 - 8px);
+}
+.drop-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+    line-height: 1;
+}
+.file-tab--drop {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+.file-tab .drop-badge {
+    width: 16px;
+    height: 16px;
+    margin-right: 0;
+    font-size: 12px;
+}

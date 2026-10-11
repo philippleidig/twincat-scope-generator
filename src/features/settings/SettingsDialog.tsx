@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react'
-import { TICKS_PER_MS, amsNetIdError } from '@/domain/project'
+import { TICKS_PER_MS } from '@/domain/project'
+import { amsNetIdError } from '@/domain/projectValidation'
 import { useProjectStore } from '@/state/projectStore'
 import { Dialog } from '@/ui/components/Dialog'
 import { Button, IconButton } from '@/ui/components/Button'

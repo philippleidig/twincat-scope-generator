@@ -10,6 +10,18 @@
 - Selection, inspector focus, drag to axis groups and *Add to scope* work the same in both views.
 - The chosen view is remembered in the browser (falls back to the tree when storage is blocked).
 
+### Project editing
+
+- **Drag & drop in the scope project**: drag a channel by its handle to reorder it (an indicator line
+  shows where it lands), into another axis group, or onto a scope file tab (appended to that file's
+  first axis group). Axis groups are dragged by their header handle to reorder them or onto a file tab.
+- Hold **Ctrl** (Windows/Linux) or **Option** (macOS) while dropping to **copy** instead of move; the
+  indicator shows a "+".
+- Symbols from the browser or the TwinCAT Target Browser can be dropped at a precise position between
+  channels.
+- **"Move to…" menu** on every channel and axis group (move up/down, to another axis group or file) as
+  a keyboard-friendly alternative to dragging.
+
 ## V2.0 (2026-10-10)
 
 Scope projects can now be built completely offline from TwinCAT project files.

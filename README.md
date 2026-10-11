@@ -54,6 +54,9 @@ listing of the same PLC, and the Net ID from the `.tsproj` is applied to the oth
 - **Targets** (AMS Net IDs) are managed in *Project settings*, together with project name, scope server,
   base sample time and record time.
 - **Drag & drop** from the TwinCAT Target Browser onto an axis group still works.
+- **Reorganise by dragging**: channels (by their handle) to another position, axis group or file tab;
+  axis groups to another position or file tab. Hold Ctrl (Option on macOS) to copy instead of move.
+  Every channel and axis group also has a **Move to…** menu for keyboard use.
 - **Pattern library** with reusable templates (import/export as JSON).
 - Problems (invalid paths, duplicate file names, bad Net IDs) are flagged before export; invalid channels are skipped.
 
