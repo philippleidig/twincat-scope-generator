@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_EXPANSION, expandTemplate, expansionCount, parseCounters, validateTemplate, wildcardsToTemplate } from './pattern'
+import {
+    MAX_EXPANSION,
+    expandTemplate,
+    expandTemplateValues,
+    expansionAt,
+    expansionCount,
+    hasCounterDefinition,
+    parseCounters,
+    validateTemplate,
+    wildcardsToTemplate,
+} from './pattern'
 
 describe('parseCounters', () => {
     it('returns unique counters in order; the first occurrence defines the range', () => {
@@ -46,6 +56,23 @@ describe('validateTemplate', () => {
         expect(r.valid).toBe(false)
         expect(r.errors[0]).toMatch(/limit/)
         expect(validateTemplate(`x{i:1:${MAX_EXPANSION}}`).valid).toBe(true)
+    })
+})
+
+describe('expansionAt', () => {
+    it('matches the full expansion by index, without expanding the rest', () => {
+        const t = 'S[{s:1:3}].N[{n:0:1}].{s:1:3}'
+        const all = expandTemplateValues(t)
+        expect(all.map((_, i) => expansionAt(t, i))).toEqual(all)
+        expect(all[3].values).toEqual(new Map([['n', '1'], ['s', '2']]))
+        expect(expansionAt(t, -1)).toBeNull()
+        expect(expansionAt(t, all.length)).toBeNull()
+        expect(expansionAt('broken{', 0)).toBeNull()
+    })
+
+    it('tells counter definitions from references', () => {
+        expect(hasCounterDefinition('A {i:1:2}')).toBe(true)
+        expect(hasCounterDefinition('A {i}')).toBe(false)
     })
 })
 

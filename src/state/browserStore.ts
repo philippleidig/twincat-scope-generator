@@ -18,9 +18,6 @@ export interface BrowserPick {
     kind: SymbolKind
 }
 
-/** MIME type of a drag carrying browser picks (JSON). */
-export const PICK_MIME = 'application/x-scope-picks'
-
 /** How the browser shows symbols: the hierarchical tree or a flat list of every search entry. */
 export type BrowserView = 'tree' | 'list'
 

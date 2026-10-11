@@ -64,3 +64,56 @@ describe('projectIssues', () => {
         expect(issues[1]).toMatch(/1 empty channel/)
     })
 })
+
+describe('channel names and colours', () => {
+    const styled = () => {
+        const p = withChannels(['A[{i:1:2}]', 'B'])
+        const [a, b] = firstGroup(p).channels
+        let q = ops.updateChannel(p, a.id, { name: 'Axis {i}', color: '#ff0000', colorMode: 'same' })
+        q = ops.updateChannel(q, b.id, { name: 'B {x}' })
+        return q
+    }
+
+    it('round-trips names, colours and the colour mode', () => {
+        const p = styled()
+        expect(parseProject(JSON.parse(JSON.stringify(p)))).toEqual(p)
+    })
+
+    it('keeps old files without the fields valid', () => {
+        const [c] = firstGroup(parseProject(JSON.parse(JSON.stringify(withChannels(['A'])))))!.channels
+        expect(c).not.toHaveProperty('name')
+        expect(c).not.toHaveProperty('color')
+        expect(c).not.toHaveProperty('colorMode')
+    })
+
+    it('drops malformed fields and normalises colours', () => {
+        const json = JSON.parse(JSON.stringify(withChannels(['A'])))
+        Object.assign(json.scopeFiles[0].axisGroups[0].channels[0], { name: 3, color: 'red', colorMode: 'rainbow' })
+        const [c] = firstGroup(parseProject(json)).channels
+        expect(c).not.toHaveProperty('name')
+        expect(c).not.toHaveProperty('color')
+        expect(c).not.toHaveProperty('colorMode')
+        Object.assign(json.scopeFiles[0].axisGroups[0].channels[0], { name: ' ', color: '#AABBCC', colorMode: 'palette' })
+        expect(firstGroup(parseProject(json)).channels[0]).toEqual({ ...c, name: ' ', color: '#aabbcc' })
+    })
+
+    it('reports names the template cannot fill as one issue, with the first reason', () => {
+        expect(projectIssues(styled())).toContain(
+            'Channel name "B {x}": Unknown counter {x}: the symbol path has no counters — the symbol path is used instead',
+        )
+        const p = styled()
+        const [a, b] = firstGroup(p).channels
+        let q = ops.updateChannel(p, b.id, { name: 'B {i:1:2}' })
+        q = ops.updateChannel(q, a.id, { name: 'A {j}' })
+        const nameIssues = projectIssues(q).filter((i) => i.startsWith('Channel name'))
+        expect(nameIssues).toEqual(['Channel name "A {j}": Unknown counter {j}: the symbol path has {i} (and 1 more) — the symbol path is used instead'])
+    })
+
+    it('does not report the name of a channel skipped for its symbol path', () => {
+        const p = withChannels(['broken{', ''])
+        const [a, b] = firstGroup(p).channels
+        let q = ops.updateChannel(p, a.id, { name: 'A {x}' })
+        q = ops.updateChannel(q, b.id, { name: 'B {x}' })
+        expect(projectIssues(q).filter((i) => i.startsWith('Channel name'))).toEqual([])
+    })
+})

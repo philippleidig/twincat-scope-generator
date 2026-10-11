@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { readFileSync } from 'node:fs'
+import JSZip from 'jszip'
 
 test.beforeEach(async ({ page }) => {
     await page.goto('./')
@@ -88,4 +89,29 @@ test('adds symbols picked in the flat list view', async ({ page }) => {
     // The choice survives a reload.
     await page.reload()
     await expect(page.getByRole('listbox', { name: 'Symbol list' })).toBeVisible()
+})
+
+test('names and colours a channel and exports both', async ({ page }) => {
+    await page.getByRole('button', { name: 'Add channel' }).click()
+    await page.getByLabel('Symbol path').fill('GVL.aAxis[{i:1:2}].fActPos')
+    await page.getByRole('button', { name: /^Name and colour/ }).click()
+    const name = page.getByLabel('Display name')
+    await name.fill('Axis {j}')
+    await expect(page.getByText('Unknown counter {j}: the symbol path has {i}')).toBeVisible()
+    await name.fill('Axis {i} pos')
+    await expect(page.getByText('→ Axis 1 pos … Axis 2 pos (2)')).toBeVisible()
+    await page.getByRole('button', { name: 'Red', exact: true }).click()
+
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: /Export ZIP/ }).click()
+    const zip = await JSZip.loadAsync(readFileSync((await (await download).path())!))
+    const xml = await zip.file('Scope_1.tcscopex')!.async('string')
+    expect(xml).toContain('<Name>Axis 1 pos</Name>')
+    expect(xml).toContain('<Name>Axis 2 pos</Name>')
+    expect(xml).toContain('<UsedNameType>Custom</UsedNameType>')
+    expect(xml).toContain('<SymbolName>GVL.aAxis[1].fActPos</SymbolName>')
+    // #ff0000, then the next palette colour (#ffff00), each in DisplayColor, SeriesStyle DisplayColor and MarkColor.
+    expect(xml.match(/<MarkColor>-65536<\/MarkColor>/g)).toHaveLength(1)
+    expect(xml.match(/<MarkColor>-256<\/MarkColor>/g)).toHaveLength(1)
+    expect(xml.match(/<DisplayColor>-65536<\/DisplayColor>/g)).toHaveLength(2)
 })

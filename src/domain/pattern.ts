@@ -27,6 +27,15 @@ export const MAX_EXPANSION = 5_000
 
 const COUNTER = /\{(\w+):(-?\d+):(-?\d+)\}/g
 
+/**
+ * A reference to a counter without its range, `{i}`: how display names insert counter values.
+ * Group 1 is the counter name.
+ */
+export const COUNTER_REF = /\{(\w+)\}/g
+
+/** True when `text` contains a counter with its range (`{i:1:4}`). */
+export const hasCounterDefinition = (text: string): boolean => text.search(COUNTER) !== -1
+
 /** Unique counters in order of first appearance; the first occurrence defines the range. */
 export function parseCounters(template: string): Counter[] {
     const counters = new Map<string, Counter>()
@@ -82,29 +91,49 @@ function format(value: number, width: number): string {
     return width > 0 ? String(value).padStart(width, '0') : String(value)
 }
 
+/** One expansion of a template: the symbol path and the (formatted) value of each counter. */
+export interface Expansion {
+    symbol: string
+    values: ReadonlyMap<string, string>
+}
+
+/** The counter values of expansion `index` (mixed radix: the last counter varies fastest). */
+function valuesAt(counters: Counter[], index: number): Map<string, string> {
+    const values = new Map<string, string>()
+    let rest = index
+    for (let i = counters.length - 1; i >= 0; i--) {
+        const c = counters[i]
+        const n = c.end - c.start + 1
+        values.set(c.name, format(c.start + (rest % n), c.width))
+        rest = Math.floor(rest / n)
+    }
+    return values
+}
+
+const expansion = (template: string, values: Map<string, string>): Expansion => ({
+    symbol: template.replace(COUNTER, (_, name: string) => values.get(name)!),
+    values,
+})
+
 /**
- * All symbol paths a template expands to, in counter order (first counter varies slowest).
+ * Every expansion of a template, in counter order (first counter varies slowest).
  * Callers must validate first; an invalid template expands to nothing.
  */
-export function expandTemplate(template: string): string[] {
+export function expandTemplateValues(template: string): Expansion[] {
     if (!validateTemplate(template).valid) return []
     const counters = parseCounters(template)
-    const out: string[] = []
-    const values = new Map<string, string>()
+    return Array.from({ length: expansionCount(template) }, (_, i) => expansion(template, valuesAt(counters, i)))
+}
 
-    const walk = (i: number) => {
-        if (i === counters.length) {
-            out.push(template.replace(COUNTER, (_, name: string) => values.get(name)!))
-            return
-        }
-        const c = counters[i]
-        for (let v = c.start; v <= c.end; v++) {
-            values.set(c.name, format(v, c.width))
-            walk(i + 1)
-        }
-    }
-    walk(0)
-    return out
+/** Expansion `index` alone (without expanding the rest); null for an invalid template or index. */
+export function expansionAt(template: string, index: number): Expansion | null {
+    if (!validateTemplate(template).valid || index < 0 || index >= expansionCount(template)) return null
+    return expansion(template, valuesAt(parseCounters(template), index))
+}
+
+/** All symbol paths a template expands to (see `expandTemplateValues`). */
+export function expandTemplate(template: string): string[] {
+    return expandTemplateValues(template).map((e) => e.symbol)
 }
 
 const COUNTER_NAMES = ['i', 'j', 'k', 'l', 'm', 'n']

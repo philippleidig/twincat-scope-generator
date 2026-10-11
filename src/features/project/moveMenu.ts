@@ -3,6 +3,7 @@
  * Built from the store when a menu opens, so the rows do not re-render on every change.
  */
 import { locateAxisGroup, locateChannel, scopeFileLabel } from '@/domain/project'
+import { focusKey, requestFocus } from '@/state/focusRequest'
 import { useProjectStore } from '@/state/projectStore'
 import type { MenuItem } from '@/ui/components/Menu'
 
@@ -20,7 +21,7 @@ function stepItems(index: number, length: number, moveTo: (slot: number) => void
 
 /** Up/down within the axis group, then every other axis group of every file (appended there). */
 export function channelMoveItems(channelId: string): MenuItem[] {
-    const { project, moveChannel } = useProjectStore.getState()
+    const { project, activeFileId, moveChannel } = useProjectStore.getState()
     const at = locateChannel(project, channelId)
     if (!at) return []
     const group = at.parent
@@ -32,7 +33,12 @@ export function channelMoveItems(channelId: string): MenuItem[] {
                 .map((g) => ({
                     key: g.id,
                     label: `Move to ${scopeFileLabel(f)} › ${g.name}`,
-                    onSelect: () => moveChannel(channelId, g.id),
+                    onSelect: () => {
+                        moveChannel(channelId, g.id)
+                        // The row remounts in its new group, or is not shown when that file is not
+                        // the open one: keep focus on the row, else on the tab of its new file.
+                        requestFocus(f.id === activeFileId ? focusKey.channelMenu(channelId) : focusKey.fileTab(f.id))
+                    },
                 })),
         ),
     ]
@@ -48,6 +54,14 @@ export function axisGroupMoveItems(axisGroupId: string): MenuItem[] {
         ...stepItems(at.index, file.axisGroups.length, (slot) => moveAxisGroup(axisGroupId, file.id, slot)),
         ...project.scopeFiles
             .filter((f) => f.id !== file.id)
-            .map((f) => ({ key: f.id, label: `Move to ${scopeFileLabel(f)}`, onSelect: () => moveAxisGroup(axisGroupId, f.id) })),
+            .map((f) => ({
+                key: f.id,
+                label: `Move to ${scopeFileLabel(f)}`,
+                onSelect: () => {
+                    moveAxisGroup(axisGroupId, f.id)
+                    // The group leaves the open file: focus the tab of the file it went to.
+                    requestFocus(focusKey.fileTab(f.id))
+                },
+            })),
     ]
 }

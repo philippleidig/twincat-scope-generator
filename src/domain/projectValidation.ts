@@ -2,6 +2,7 @@
  * Validation of a scope project and loading it from untrusted JSON (project files, persisted state).
  */
 import { v4 as uuid } from 'uuid'
+import { channelNameError, normalizeChannelStyle } from './channelStyle'
 import { isScopeDataType } from './dataTypes'
 import { validateTemplate } from './pattern'
 import type { Project, ProjectSettings } from './project'
@@ -70,6 +71,9 @@ export function parseProject(json: unknown): Project {
                 dataType: isScopeDataType(c.dataType) ? c.dataType : 'REAL64',
                 port: num(c.port, settings.defaultPort),
                 targetId: typeof c.targetId === 'string' && targetIds.has(c.targetId) ? c.targetId : targets[0].id,
+                // V2.1, optional: kept only when well-formed. A name the template cannot fill is kept
+                // (the editor shows why, the export uses the symbol name).
+                ...normalizeChannelStyle(c),
             })),
         })),
     }))
@@ -97,6 +101,15 @@ export function projectIssues(project: Project): string[] {
     if (invalid > 0) issues.push(`${invalid} channel${invalid === 1 ? ' has an' : 's have'} invalid symbol paths and will be skipped`)
     const empty = allChannels(project).filter((c) => !c.symbol.trim()).length
     if (empty > 0) issues.push(`${empty} empty channel${empty === 1 ? '' : 's'} will be skipped`)
+    // Channels skipped for their symbol path are reported above, not again for their name.
+    const badNames = allChannels(project).flatMap((c) => {
+        const error = validateTemplate(c.symbol).valid ? channelNameError(c) : null
+        return error ? [`"${c.name}": ${error}`] : []
+    })
+    if (badNames.length > 0) {
+        const more = badNames.length > 1 ? ` (and ${badNames.length - 1} more)` : ''
+        issues.push(`Channel name ${badNames[0]}${more} — the symbol path is used instead`)
+    }
     const names = project.scopeFiles.map((f) => f.name)
     project.scopeFiles.forEach((f, i) => {
         const error = fileNameError(f.name, names.filter((_, j) => j !== i))
