@@ -259,6 +259,21 @@ describe('"Move to…" menus', () => {
         await waitFor(() => expect(screen.getByRole('tab', { name: /Scope_2/ })).toHaveFocus())
     })
 
+    it('does not steal focus later for a channel moved into a collapsed axis group', async () => {
+        const user = userEvent.setup()
+        render(<ProjectPanel />)
+        await user.click(within(card('Axis Group 2')).getByRole('button', { name: 'Collapse Axis Group 2' }))
+        await user.click(within(rows('Axis Group 1')[0]).getByRole('button', { name: 'Move channel to…' }))
+        await user.click(screen.getByRole('menuitem', { name: 'Move to Scope_1 › Axis Group 2' }))
+        expect(symbols(0, 1)).toEqual(['d', 'a'])
+        // Let the unconsumed request lapse, then expand the group: focus stays on the toggle.
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        const expand = within(card('Axis Group 2')).getByRole('button', { name: 'Expand Axis Group 2' })
+        await user.click(expand)
+        expect(within(rows('Axis Group 2')[1]).getByRole('button', { name: 'Move channel to…' })).not.toHaveFocus()
+        expect(within(card('Axis Group 2')).getByRole('button', { name: 'Collapse Axis Group 2' })).toHaveFocus()
+    })
+
     it('moves an axis group up, down and to another file', async () => {
         const user = userEvent.setup()
         render(<ProjectPanel />)

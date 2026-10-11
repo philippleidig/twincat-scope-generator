@@ -97,12 +97,23 @@ describe('channel names and colours', () => {
         expect(firstGroup(parseProject(json)).channels[0]).toEqual({ ...c, name: ' ', color: '#aabbcc' })
     })
 
-    it('reports names the template cannot fill, with the reason', () => {
+    it('reports names the template cannot fill as one issue, with the first reason', () => {
         expect(projectIssues(styled())).toContain(
             'Channel name "B {x}": Unknown counter {x}: the symbol path has no counters — the symbol path is used instead',
         )
         const p = styled()
-        const ranged = ops.updateChannel(p, firstGroup(p).channels[1].id, { name: 'B {i:1:2}' })
-        expect(projectIssues(ranged).join('\n')).toMatch(/"B \{i:1:2\}": Use a counter without its range/)
+        const [a, b] = firstGroup(p).channels
+        let q = ops.updateChannel(p, b.id, { name: 'B {i:1:2}' })
+        q = ops.updateChannel(q, a.id, { name: 'A {j}' })
+        const nameIssues = projectIssues(q).filter((i) => i.startsWith('Channel name'))
+        expect(nameIssues).toEqual(['Channel name "A {j}": Unknown counter {j}: the symbol path has {i} (and 1 more) — the symbol path is used instead'])
+    })
+
+    it('does not report the name of a channel skipped for its symbol path', () => {
+        const p = withChannels(['broken{', ''])
+        const [a, b] = firstGroup(p).channels
+        let q = ops.updateChannel(p, a.id, { name: 'A {x}' })
+        q = ops.updateChannel(q, b.id, { name: 'B {x}' })
+        expect(projectIssues(q).filter((i) => i.startsWith('Channel name'))).toEqual([])
     })
 })

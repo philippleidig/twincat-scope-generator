@@ -1,25 +1,22 @@
 import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
-import { forwardRef } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    ref?: Ref<HTMLButtonElement>
     variant?: Variant
     size?: 'sm' | 'md'
     icon?: ReactNode
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-    { variant = 'secondary', size = 'md', icon, className = '', children, type = 'button', ...rest },
-    ref,
-) {
+export function Button({ variant = 'secondary', size = 'md', icon, className = '', children, type = 'button', ...rest }: ButtonProps) {
     return (
-        <button ref={ref} type={type} className={`btn btn--${variant} btn--${size} ${className}`} {...rest}>
+        <button type={type} className={`btn btn--${variant} btn--${size} ${className}`} {...rest}>
             {icon}
             {children}
         </button>
     )
-})
+}
 
 export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     /** Accessible name; also shown as tooltip. */

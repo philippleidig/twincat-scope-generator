@@ -4,7 +4,7 @@
  * Keys are plain strings (`focusKey.*`); nothing is looked up in the DOM by id.
  */
 import type { RefObject } from 'react'
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { create } from 'zustand'
 
 const useFocusRequestStore = create<{ key: string | null }>(() => ({ key: null }))
@@ -14,15 +14,23 @@ export const focusKey = {
     fileTab: (fileId: string) => `file-tab:${fileId}`,
 }
 
-/** Ask the element registered under `key` to take focus once it has rendered. */
+/**
+ * Ask the element registered under `key` to take focus as the current change renders. A request
+ * nobody takes up then (the element is not shown, e.g. in a collapsed axis group) is dropped, so it
+ * cannot steal focus later.
+ */
 export function requestFocus(key: string): void {
     useFocusRequestStore.setState({ key })
+    setTimeout(() => {
+        if (useFocusRequestStore.getState().key === key) useFocusRequestStore.setState({ key: null })
+    })
 }
 
-/** Focus `ref` when focus is requested for `key` (now or later); the request is then used up. */
+/** Focus `ref` when focus is requested for `key` and it renders with that change; the request is then used up. */
 export function useFocusRequest(key: string, ref: RefObject<HTMLElement | null>): void {
     const requested = useFocusRequestStore((s) => s.key === key)
-    useEffect(() => {
+    // A layout effect: it runs within the render of the change, before the request is dropped.
+    useLayoutEffect(() => {
         if (!requested || !ref.current) return
         ref.current.focus()
         useFocusRequestStore.setState({ key: null })
