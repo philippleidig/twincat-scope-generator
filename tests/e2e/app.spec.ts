@@ -94,13 +94,13 @@ test('adds symbols picked in the flat list view', async ({ page }) => {
 test('names and colours a channel and exports both', async ({ page }) => {
     await page.getByRole('button', { name: 'Add channel' }).click()
     await page.getByLabel('Symbol path').fill('GVL.aAxis[{i:1:2}].fActPos')
-    await page.getByRole('button', { name: 'Name and colour' }).click()
+    await page.getByRole('button', { name: /^Name and colour/ }).click()
     const name = page.getByLabel('Display name')
     await name.fill('Axis {j}')
     await expect(page.getByText('Unknown counter {j}: the symbol path has {i}')).toBeVisible()
     await name.fill('Axis {i} pos')
     await expect(page.getByText('→ Axis 1 pos … Axis 2 pos (2)')).toBeVisible()
-    await page.getByRole('button', { name: 'Colour #ff0000' }).click()
+    await page.getByRole('button', { name: 'Red', exact: true }).click()
 
     const download = page.waitForEvent('download')
     await page.getByRole('button', { name: /Export ZIP/ }).click()

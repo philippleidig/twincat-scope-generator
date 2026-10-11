@@ -76,15 +76,16 @@ describe('ops', () => {
     it('sets and clears channel names and colours; copies keep them', () => {
         let p = withChannels(['MAIN.a'])
         const [a] = firstGroup(p).channels
-        p = ops.updateChannel(p, a.id, { name: 'A', color: '#ff0000', colorMode: 'same' })
+        p = ops.updateChannel(p, a.id, { name: 'A', color: '#FF0000', colorMode: 'same' })
         expect(firstGroup(p).channels[0]).toMatchObject({ name: 'A', color: '#ff0000', colorMode: 'same' })
         p = ops.duplicateChannel(p, a.id)
         expect(firstGroup(p).channels[1]).toMatchObject({ name: 'A', color: '#ff0000', colorMode: 'same' })
-        p = ops.updateChannel(p, a.id, { name: ' ', color: undefined, colorMode: 'palette' })
-        expect(Object.keys(firstGroup(p).channels[0]).sort()).toEqual(['dataType', 'id', 'port', 'symbol', 'targetId'])
-        p = ops.addChannels(p, firstGroup(p).id, [{ symbol: 'MAIN.b', name: 'B', color: '#00ff00' }])
-        expect(firstGroup(p).channels[2]).toMatchObject({ name: 'B', color: '#00ff00' })
-        expect(firstGroup(p).channels[2]).not.toHaveProperty('colorMode')
+        // Back to Auto also drops "same colour for all"; an emptied name is removed.
+        p = ops.updateChannel(p, a.id, { name: '', color: undefined })
+        expect(firstGroup(p).channels[0]).toEqual({ ...a, symbol: 'MAIN.a' })
+        p = ops.addChannels(p, firstGroup(p).id, [{ symbol: 'MAIN.b', name: ' B', color: 'red' }])
+        expect(firstGroup(p).channels[2]).toMatchObject({ name: ' B' })
+        expect(firstGroup(p).channels[2]).not.toHaveProperty('color')
     })
 
     it('manages axis groups', () => {

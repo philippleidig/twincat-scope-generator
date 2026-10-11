@@ -12,7 +12,8 @@
  * own id instead of the chain of parent ids. All functions here are pure.
  */
 import { v4 as uuid } from 'uuid'
-import type { ColorMode } from './channelStyle'
+import type { ChannelStyle } from './channelStyle'
+import { normalizeChannelStyle } from './channelStyle'
 import type { ScopeDataType } from './dataTypes'
 import { expansionCount, validateTemplate } from './pattern'
 
@@ -22,19 +23,14 @@ export interface Target {
     amsNetId: string
 }
 
-export interface Channel {
+/** A channel; its optional display name and colour are the `ChannelStyle` fields. */
+export interface Channel extends ChannelStyle {
     id: string
     /** Symbol path, optionally with counters (`MAIN.aAxis[{i:1:4}].fPos`). */
     symbol: string
     dataType: ScopeDataType
     port: number
     targetId: string
-    /** Display name in Scope; may insert the template's counters as `{i}`. Unset: the symbol name. */
-    name?: string
-    /** `#rrggbb`. Unset: the exporter assigns palette colours. */
-    color?: string
-    /** How a pattern channel colours its acquisitions; unset means `'palette'`. */
-    colorMode?: ColorMode
 }
 
 export interface AxisGroup {
@@ -99,25 +95,20 @@ export interface ChannelSpec {
 export type ChannelInit = Partial<Omit<Channel, 'id'>>
 
 export function createChannel(project: Project, init: ChannelInit = {}): Channel {
-    return withoutUnset({
+    return {
         id: uuid(),
         symbol: init.symbol ?? '',
         dataType: init.dataType ?? 'REAL64',
         port: init.port ?? project.settings.defaultPort,
         targetId: init.targetId ?? project.targets[0]?.id ?? LOCAL_TARGET_ID,
-        name: init.name,
-        color: init.color,
-        colorMode: init.colorMode,
-    })
+        ...normalizeChannelStyle(init),
+    }
 }
 
-/** The channel without its optional style fields that are unset (undefined, a blank name, the default mode). */
-function withoutUnset(c: Channel): Channel {
-    const out = { ...c }
-    if (!out.name?.trim()) delete out.name
-    if (out.color === undefined) delete out.color
-    if (out.colorMode !== 'same') delete out.colorMode
-    return out
+/** A channel with a patch applied; the style fields are re-normalised (undefined or '' removes one). */
+function patchChannel(c: Channel, patch: Patch<Channel>): Channel {
+    const { name, color, colorMode, ...rest } = { ...c, ...patch }
+    return { ...rest, ...normalizeChannelStyle({ name, color, colorMode }) }
 }
 
 export function createAxisGroup(name: string, channels: Channel[] = []): AxisGroup {
@@ -395,9 +386,9 @@ export const ops = {
                 ? { ...a, channels: [...a.channels, ...channels.map((c) => createChannel(p, c))] }
                 : a,
         ),
-    /** Patching `name`, `color` or `colorMode` with undefined (or a blank name) removes it. */
+    /** Patching `name`, `color` or `colorMode` with undefined (or `name` with '') removes it; removing the colour removes `colorMode`. */
     updateChannel: (p: Project, id: string, patch: Patch<Channel>): Project =>
-        mapChannels(p, (c) => (c.id === id ? withoutUnset({ ...c, ...patch }) : c)),
+        mapChannels(p, (c) => (c.id === id ? patchChannel(c, patch) : c)),
     removeChannel: (p: Project, id: string): Project =>
         mapAxisGroups(p, (a) => ({ ...a, channels: a.channels.filter((c) => c.id !== id) })),
     duplicateChannel: (p: Project, id: string): Project => duplicate(channelLevel, p, id),

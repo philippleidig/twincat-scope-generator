@@ -94,10 +94,15 @@ describe('channel names and colours', () => {
         expect(c).not.toHaveProperty('color')
         expect(c).not.toHaveProperty('colorMode')
         Object.assign(json.scopeFiles[0].axisGroups[0].channels[0], { name: ' ', color: '#AABBCC', colorMode: 'palette' })
-        expect(firstGroup(parseProject(json)).channels[0]).toEqual({ ...c, color: '#aabbcc' })
+        expect(firstGroup(parseProject(json)).channels[0]).toEqual({ ...c, name: ' ', color: '#aabbcc' })
     })
 
-    it('reports names with unknown counters', () => {
-        expect(projectIssues(styled())).toContain('1 channel name uses unknown counters — the symbol path is used instead')
+    it('reports names the template cannot fill, with the reason', () => {
+        expect(projectIssues(styled())).toContain(
+            'Channel name "B {x}": Unknown counter {x}: the symbol path has no counters — the symbol path is used instead',
+        )
+        const p = styled()
+        const ranged = ops.updateChannel(p, firstGroup(p).channels[1].id, { name: 'B {i:1:2}' })
+        expect(projectIssues(ranged).join('\n')).toMatch(/"B \{i:1:2\}": Use a counter without its range/)
     })
 })

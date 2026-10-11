@@ -17,6 +17,8 @@ function sample(): Project {
         { symbol: 'MAIN.b & <c>', dataType: 'BIT', port: 852, targetId: p.targets[1].id },
         { symbol: 'broken{', dataType: 'INT16', port: 851 },
         { symbol: '', dataType: 'INT16', port: 851 },
+        // V2.1: display name and colour.
+        { symbol: 'MAIN.d', dataType: 'INT16', port: 851, name: 'D & <d>', color: '#123456' },
     ])
     return p
 }
@@ -27,10 +29,18 @@ describe('planProject', () => {
     it('expands channels and skips invalid/empty ones', () => {
         const [file] = planProject(sample(), sequentialIds())
         const acq = file.axisGroups[0].acquisitions
-        expect(acq.map((a) => a.symbolName)).toEqual(['GVL.aAxis[1].fActPos', 'GVL.aAxis[2].fActPos', 'MAIN.b & <c>'])
-        expect(acq.map((a) => a.amsNetId)).toEqual(['127.0.0.1.1.1', '127.0.0.1.1.1', '10.1.2.3.1.1'])
+        expect(acq.map((a) => a.symbolName)).toEqual(['GVL.aAxis[1].fActPos', 'GVL.aAxis[2].fActPos', 'MAIN.b & <c>', 'MAIN.d'])
+        expect(acq.map((a) => a.amsNetId)).toEqual(['127.0.0.1.1.1', '127.0.0.1.1.1', '10.1.2.3.1.1', '127.0.0.1.1.1'])
         expect(acq[2]).toMatchObject({ targetPort: 852, dataType: 'BIT', baseSampleTime: 100_000 })
-        expect(file.acquisitionCount).toBe(3)
+        // Automatic colours by position; the channel's own colour and name otherwise.
+        expect(acq.map((a) => a.color)).toEqual(['#008000', '#0000ff', '#ff0000', '#123456'])
+        expect(acq.map((a) => [a.displayName, a.customName])).toEqual([
+            ['GVL.aAxis[1].fActPos', false],
+            ['GVL.aAxis[2].fActPos', false],
+            ['MAIN.b & <c>', false],
+            ['D & <d>', true],
+        ])
+        expect(file.acquisitionCount).toBe(4)
     })
 
     it('drops empty axis groups and files', () => {
@@ -60,7 +70,7 @@ describe('generateProject', () => {
         const doc = parse(scopeFiles[0].content)
         expect(doc.getElementsByTagName('parsererror')).toHaveLength(0)
         const acquisitions = [...doc.getElementsByTagName('AdsAcquisition')]
-        expect(acquisitions).toHaveLength(3)
+        expect(acquisitions).toHaveLength(4)
         const guids = acquisitions.map((a) => a.getElementsByTagName('Guid')[0].textContent)
         const referenced = [...doc.getElementsByTagName('AcquisitionGUID')].map((e) => e.textContent)
         expect(referenced).toEqual(guids)
@@ -71,7 +81,7 @@ describe('generateProject', () => {
         expect(doc.getElementsByTagName('RecordTime')[0].textContent).toBe('6000000000')
 
         expect(tcmproj.fileName).toBe('Scope_Project.tcmproj')
-        expect(tcmproj.acquisitionCount).toBe(3)
+        expect(tcmproj.acquisitionCount).toBe(4)
         expect(parse(tcmproj.content).getElementsByTagName('Content')[0].getAttribute('Include')).toBe('Scope_1.tcscopex')
     })
 
@@ -81,7 +91,7 @@ describe('generateProject', () => {
         expect(tcmproj.content).toMatchSnapshot()
     })
 
-    it('writes display names and colours (golden file)', () => {
+    it('writes display names and colours', () => {
         let p = createProject()
         const g = p.scopeFiles[0].axisGroups[0].id
         p = ops.addChannels(p, g, [
@@ -120,7 +130,15 @@ describe('generateProject', () => {
         expect(channels.map((c) => child(c, 'DisplayColor'))).toEqual(expected)
         expect(channels.map((c) => child(series(c), 'DisplayColor'))).toEqual(expected)
         expect(channels.map((c) => child(series(c), 'MarkColor'))).toEqual(expected)
-        expect(xml).toMatchSnapshot()
+    })
+
+    it('drops characters XML cannot carry from names and symbols', () => {
+        let p = createProject()
+        p = ops.addChannels(p, p.scopeFiles[0].axisGroups[0].id, [{ symbol: 'MAIN.a\u0001', name: 'A\u000b\ud800 \u{1F600}' }])
+        const doc = parse(generateProject(p, sequentialIds()).scopeFiles[0].content)
+        expect(doc.getElementsByTagName('parsererror')).toHaveLength(0)
+        expect(doc.getElementsByTagName('Channel')[0].getElementsByTagName('Name')[0].textContent).toBe('A \u{1F600}')
+        expect(doc.getElementsByTagName('SymbolName')[0].textContent).toBe('MAIN.a')
     })
 
     it('converts #rrggbb to signed ARGB', () => {

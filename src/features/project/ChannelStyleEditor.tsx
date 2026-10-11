@@ -1,27 +1,27 @@
 import { useId } from 'react'
 import type { Channel } from '@/domain/project'
-import { displayNameError, expandChannel, hasDisplayName, nameCounterHints } from '@/domain/channelStyle'
-import { expandTemplate } from '@/domain/pattern'
+import { templateAcquisitions } from '@/domain/project'
+import { channelNameError, expandChannelAt, hasDisplayName, nameCounterHints } from '@/domain/channelStyle'
 import { useProjectStore } from '@/state/projectStore'
 import { ColorPicker } from './ColorPicker'
 
-/** Name preview: the first and last display names of a pattern channel. */
-function namePreview(channel: Channel): string | null {
-    const names = expandChannel(channel).map((a) => a.displayName)
-    if (names.length === 0) return null
-    return names.length === 1 ? names[0] : `${names[0]} … ${names[names.length - 1]} (${names.length})`
+/** Name preview: the first and last display names of a pattern channel (without expanding the rest). */
+function namePreview(channel: Channel, count: number): string | null {
+    const first = expandChannelAt(channel, 0)?.displayName
+    if (first === undefined) return null
+    return count === 1 ? first : `${first} … ${expandChannelAt(channel, count - 1)!.displayName} (${count})`
 }
 
 /** The second line of a channel row: display name (with counters) and colour. */
 export function ChannelStyleEditor({ channel }: { channel: Channel }) {
     const updateChannel = useProjectStore((s) => s.updateChannel)
-    const id = useId()
+    const hintId = useId()
     const counters = nameCounterHints(channel.symbol)
+    const count = templateAcquisitions(channel.symbol)
     const named = hasDisplayName(channel)
-    const error = named ? displayNameError(channel.name!, channel.symbol) : null
-    const preview = named && !error ? namePreview(channel) : null
+    const error = channelNameError(channel)
+    const preview = named && !error ? namePreview(channel, count) : null
     const isPattern = counters.length > 0
-    const hintId = `${id}-hint`
 
     return (
         <div className="channel-style">
@@ -29,7 +29,8 @@ export function ChannelStyleEditor({ channel }: { channel: Channel }) {
                 <input
                     className="input channel-style__name-input"
                     value={channel.name ?? ''}
-                    placeholder={expandTemplate(channel.symbol)[0] ?? 'Display name'}
+                    // Without a name the channel shows its symbol path: the effective name.
+                    placeholder={expandChannelAt(channel, 0)?.symbolName ?? 'Display name'}
                     aria-label="Display name"
                     aria-invalid={!!error}
                     aria-describedby={hintId}
@@ -53,7 +54,7 @@ export function ChannelStyleEditor({ channel }: { channel: Channel }) {
                     <input
                         type="checkbox"
                         checked={channel.colorMode === 'same'}
-                        onChange={(e) => updateChannel(channel.id, { colorMode: e.target.checked ? 'same' : 'palette' })}
+                        onChange={(e) => updateChannel(channel.id, { colorMode: e.target.checked ? 'same' : undefined })}
                     />
                     Same colour for all
                 </label>

@@ -1,44 +1,44 @@
-import { CHANNEL_PALETTE, normalizeColor } from '@/domain/channelStyle'
+import { CHANNEL_PALETTE } from '@/domain/channelStyle'
 
 interface ColorPickerProps {
-    /** `#rrggbb`, or undefined for the automatic colour. */
+    /** Lower-case `#rrggbb`, or undefined for the automatic colour. */
     value: string | undefined
     onChange: (color: string | undefined) => void
 }
 
-/** Palette swatches, a native colour input for any other colour, and "Auto" (no colour). */
+/** "Auto" (no colour), the palette, and a native colour input for any other colour. */
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
-    const current = value && normalizeColor(value)
     return (
         <div className="color-picker" role="group" aria-label="Colour">
             <button
                 type="button"
                 className="color-picker__auto"
-                aria-pressed={!current}
+                aria-pressed={!value}
                 title="Automatic: a palette colour by position"
                 onClick={() => onChange(undefined)}
             >
                 Auto
             </button>
-            {CHANNEL_PALETTE.map((color) => (
+            {CHANNEL_PALETTE.map(({ color, label }) => (
                 <button
                     key={color}
                     type="button"
                     className="color-swatch"
                     style={{ background: color }}
-                    aria-label={`Colour ${color}`}
-                    title={color}
-                    aria-pressed={current === color}
+                    aria-label={label}
+                    title={`${label} ${color}`}
+                    aria-pressed={value === color}
                     onClick={() => onChange(color)}
                 />
             ))}
+            {/* While on Auto the input shows black; black is in the palette, so it stays reachable. */}
             <input
                 type="color"
                 className="color-picker__custom"
                 aria-label="Custom colour"
                 title="Custom colour"
-                value={current ?? '#000000'}
-                onChange={(e) => onChange(normalizeColor(e.target.value))}
+                value={value ?? '#000000'}
+                onChange={(e) => onChange(e.target.value)}
             />
         </div>
     )

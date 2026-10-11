@@ -59,12 +59,12 @@ name reuses the same value; a start with leading zeros pads (`{i:01:12}`).
 
 **Display name** — The name a channel shows in TwinCAT Scope (`<Channel><Name>`, name relation
 `Custom`). Optional; may insert the template's counters as `{i}` (no range), filled per acquisition
-with the template's padding. Without one (or with unknown counters) the symbol path is shown.
+with the template's padding. Without one (or when the template cannot fill it) the symbol path is shown.
 _Avoid_: alias, label, title.
 
 **Channel colour** — `#rrggbb` of a channel's line, exported as signed ARGB. Unset: the exporter picks
 a palette colour by position in the axis group. A pattern channel's acquisitions get consecutive
-palette colours starting at it (**colour mode** `palette`), or all the same colour (`same`).
+palette colours starting at it, or all the same colour (**colour mode** `same`).
 
 **Acquisition** — One recorded value in the exported file (`<AdsAcquisition>` + `<Channel>`):
 a fully expanded template.

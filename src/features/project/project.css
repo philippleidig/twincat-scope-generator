@@ -248,7 +248,7 @@
     cursor: pointer;
 }
 .channel__swatch--auto {
-    background: conic-gradient(#008000 0 25%, #0000ff 0 50%, #ff0000 0 75%, #ffa500 0);
+    /* Background: the automatic colours (set inline from the palette). */
     opacity: 0.55;
 }
 .channel__swatch[aria-expanded='true'],

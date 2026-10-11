@@ -1,14 +1,16 @@
-import { memo, useState } from 'react'
+import { memo, useRef, useState } from 'react'
 import { ArrowRightLeft, Copy, GripVertical, Trash2 } from 'lucide-react'
 import type { Channel, Target } from '@/domain/project'
 import { validateTemplate } from '@/domain/pattern'
-import { displayNameError, hasDisplayName } from '@/domain/channelStyle'
+import { channelNameError, hasDisplayName } from '@/domain/channelStyle'
+import { focusKey, useFocusRequest } from '@/state/focusRequest'
 import { setChannelDragData } from '@/state/projectDrag'
 import { useProjectStore } from '@/state/projectStore'
 import { IconButton } from '@/ui/components/Button'
 import { Menu } from '@/ui/components/Menu'
 import { ChannelFields } from './ChannelFields'
 import { ChannelStyleEditor } from './ChannelStyleEditor'
+import { AUTO_SWATCH, describeColor } from './colors'
 import type { DropEdge } from './dnd'
 import { dropAttrs, setDragImage } from './dnd'
 import { channelMoveItems } from './moveMenu'
@@ -33,13 +35,14 @@ export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dr
     const error = validation && !validation.valid ? validation.errors[0] : null
     const [styleOpen, setStyleOpen] = useState(false)
     const named = hasDisplayName(channel)
-    const nameInvalid = named && !!displayNameError(channel.name!, channel.symbol)
+    const nameInvalid = !!channelNameError(channel)
+    const menuRef = useRef<HTMLButtonElement>(null)
+    useFocusRequest(focusKey.channelMenu(channel.id), menuRef)
 
     return (
         <li
             className={`channel ${error ? 'channel--error' : ''}`}
             data-channel-index={index}
-            data-channel-id={channel.id}
             {...dropAttrs(dropEdge, dropCopy)}
         >
             <div className="channel__main">
@@ -58,10 +61,10 @@ export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dr
                 <button
                     type="button"
                     className={`channel__swatch ${channel.color ? '' : 'channel__swatch--auto'} ${nameInvalid ? 'channel__swatch--invalid' : ''}`}
-                    style={channel.color ? { background: channel.color } : undefined}
-                    aria-label="Name and colour"
+                    style={{ background: channel.color ?? AUTO_SWATCH }}
+                    aria-label={`Name and colour (${named ? channel.name : 'no name'}, ${describeColor(channel.color)})`}
                     aria-expanded={styleOpen}
-                    title={`${named ? `Name: ${channel.name}` : 'No name'} · colour: ${channel.color ?? 'automatic'}`}
+                    title={`${named ? `Name: ${channel.name}` : 'No name'} · ${describeColor(channel.color)}`}
                     onClick={() => setStyleOpen((o) => !o)}
                 />
                 <ChannelFields channel={channel} targets={targets} error={error} />
@@ -73,7 +76,7 @@ export const ChannelRow = memo(function ChannelRow({ channel, index, targets, dr
                 <div className="channel__actions">
                     <Menu
                         trigger={(props) => (
-                            <IconButton label="Move channel to…" {...props}>
+                            <IconButton label="Move channel to…" ref={menuRef} {...props}>
                                 <ArrowRightLeft size={14} />
                             </IconButton>
                         )}

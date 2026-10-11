@@ -16,7 +16,7 @@ beforeEach(() => {
 async function openEditor(i = 0) {
     const user = userEvent.setup()
     render(<ProjectPanel />)
-    const toggle = within(row(i)).getByRole('button', { name: 'Name and colour' })
+    const toggle = within(row(i)).getByRole('button', { name: /^Name and colour/ })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
     await user.click(toggle)
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
@@ -43,7 +43,7 @@ describe('channel name and colour', () => {
         expect(within(row(1)).getByRole('alert')).toHaveTextContent('Unknown counter {i}: the symbol path has no counters')
         expect(name).toHaveAttribute('aria-invalid', 'true')
         // Collapsed, the row shows the (invalid) name.
-        await user.click(within(row(1)).getByRole('button', { name: 'Name and colour' }))
+        await user.click(within(row(1)).getByRole('button', { name: /^Name and colour/ }))
         expect(within(row(1)).getByTitle('Display name')).toHaveClass('channel__name--invalid')
     })
 
@@ -60,29 +60,48 @@ describe('channel name and colour', () => {
         const user = await openEditor()
         const picker = within(row()).getByRole('group', { name: 'Colour' })
         expect(within(picker).getByRole('button', { name: 'Auto' })).toHaveAttribute('aria-pressed', 'true')
-        await user.click(within(picker).getByRole('button', { name: 'Colour #ff0000' }))
+        await user.click(within(picker).getByRole('button', { name: 'Red' }))
         expect(channel().color).toBe('#ff0000')
-        expect(within(picker).getByRole('button', { name: 'Colour #ff0000' })).toHaveAttribute('aria-pressed', 'true')
-        expect(within(row()).getByRole('button', { name: 'Name and colour' })).toHaveStyle({ background: '#ff0000' })
+        expect(within(picker).getByRole('button', { name: 'Red' })).toHaveAttribute('aria-pressed', 'true')
+        expect(within(row()).getByRole('button', { name: /^Name and colour/ })).toHaveStyle({ background: '#ff0000' })
 
         fireEvent.change(within(picker).getByLabelText('Custom colour'), { target: { value: '#ABCDEF' } })
         expect(channel().color).toBe('#abcdef')
 
         await user.click(within(picker).getByRole('button', { name: 'Auto' }))
         expect(channel()).not.toHaveProperty('color')
+
+        // Black stays reachable while the native input shows black for Auto.
+        await user.click(within(picker).getByRole('button', { name: 'Black' }))
+        expect(channel().color).toBe('#000000')
+    })
+
+    it('names the name and colour in the toggle', async () => {
+        const user = await openEditor()
+        const toggle = within(row()).getByRole('button', { name: /^Name and colour/ })
+        expect(toggle).toHaveAccessibleName('Name and colour (no name, automatic colour)')
+        await user.type(within(row()).getByLabelText('Display name'), ' Axis {{i}')
+        await user.click(within(row()).getByRole('button', { name: 'Red' }))
+        // The name is kept as typed, leading space included.
+        expect(channel().name).toBe(' Axis {i}')
+        expect(toggle).toHaveAccessibleName('Name and colour ( Axis {i}, Red)')
     })
 
     it('offers "same colour for all" only for coloured patterns', async () => {
         const user = await openEditor()
         expect(within(row()).queryByLabelText('Same colour for all')).not.toBeInTheDocument()
-        await user.click(within(row()).getByRole('button', { name: 'Colour #0000ff' }))
+        await user.click(within(row()).getByRole('button', { name: 'Blue' }))
         await user.click(within(row()).getByLabelText('Same colour for all'))
         expect(channel().colorMode).toBe('same')
         await user.click(within(row()).getByLabelText('Same colour for all'))
         expect(channel()).not.toHaveProperty('colorMode')
+        // Back to Auto drops "same colour for all" with the colour.
+        await user.click(within(row()).getByLabelText('Same colour for all'))
+        await user.click(within(row()).getByRole('button', { name: 'Auto' }))
+        expect(channel()).not.toHaveProperty('colorMode')
 
-        await user.click(within(row(1)).getByRole('button', { name: 'Name and colour' }))
-        await user.click(within(row(1)).getByRole('button', { name: 'Colour #0000ff' }))
+        await user.click(within(row(1)).getByRole('button', { name: /^Name and colour/ }))
+        await user.click(within(row(1)).getByRole('button', { name: 'Blue' }))
         expect(within(row(1)).queryByLabelText('Same colour for all')).not.toBeInTheDocument()
     })
 })

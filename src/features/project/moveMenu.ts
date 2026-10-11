@@ -3,24 +3,9 @@
  * Built from the store when a menu opens, so the rows do not re-render on every change.
  */
 import { locateAxisGroup, locateChannel, scopeFileLabel } from '@/domain/project'
+import { focusKey, requestFocus } from '@/state/focusRequest'
 import { useProjectStore } from '@/state/projectStore'
 import type { MenuItem } from '@/ui/components/Menu'
-
-/**
- * A move to another parent remounts the moved item there (or hides it, when its new file is not
- * shown), so focus would fall to <body>. Once React has rendered the move, focus the first of
- * `selectors` that exists: the moved item's menu trigger, else the destination's file tab.
- */
-function focusAfterMove(...selectors: string[]): void {
-    setTimeout(() => {
-        for (const selector of selectors) {
-            const el = document.querySelector<HTMLElement>(selector)
-            if (el) return el.focus()
-        }
-    })
-}
-
-const fileTab = (fileId: string) => `[role="tab"][data-file-id="${fileId}"]`
 
 /**
  * "Move up" / "Move down" for the item at `index` of a list of `length`. `moveTo` takes a slot
@@ -36,7 +21,7 @@ function stepItems(index: number, length: number, moveTo: (slot: number) => void
 
 /** Up/down within the axis group, then every other axis group of every file (appended there). */
 export function channelMoveItems(channelId: string): MenuItem[] {
-    const { project, moveChannel } = useProjectStore.getState()
+    const { project, activeFileId, moveChannel } = useProjectStore.getState()
     const at = locateChannel(project, channelId)
     if (!at) return []
     const group = at.parent
@@ -50,7 +35,9 @@ export function channelMoveItems(channelId: string): MenuItem[] {
                     label: `Move to ${scopeFileLabel(f)} › ${g.name}`,
                     onSelect: () => {
                         moveChannel(channelId, g.id)
-                        focusAfterMove(`[data-channel-id="${channelId}"] [aria-haspopup="menu"]`, fileTab(f.id))
+                        // The row remounts in its new group, or is not shown when that file is not
+                        // the open one: keep focus on the row, else on the tab of its new file.
+                        requestFocus(f.id === activeFileId ? focusKey.channelMenu(channelId) : focusKey.fileTab(f.id))
                     },
                 })),
         ),
@@ -72,7 +59,8 @@ export function axisGroupMoveItems(axisGroupId: string): MenuItem[] {
                 label: `Move to ${scopeFileLabel(f)}`,
                 onSelect: () => {
                     moveAxisGroup(axisGroupId, f.id)
-                    focusAfterMove(`[data-axis-group-id="${axisGroupId}"] [aria-haspopup="menu"]`, fileTab(f.id))
+                    // The group leaves the open file: focus the tab of the file it went to.
+                    requestFocus(focusKey.fileTab(f.id))
                 },
             })),
     ]
