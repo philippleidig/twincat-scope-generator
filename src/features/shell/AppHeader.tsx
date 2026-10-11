@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Activity, FilePlus2, FolderOpen, MessageSquarePlus, Monitor, Moon, MoreHorizontal, Save, Settings, Sun } from 'lucide-react'
+import { FilePlus2, FolderOpen, MessageSquarePlus, Monitor, Moon, MoreHorizontal, Save, Settings, Sun } from 'lucide-react'
 import { useProjectStore } from '@/state/projectStore'
 import { toast } from '@/state/toastStore'
 import { openProjectFile, saveProjectFile } from '@/state/actions'
@@ -43,9 +43,7 @@ export function AppHeader() {
     return (
         <header className="app-header">
             <div className="brand">
-                <span className="brand__mark" aria-hidden>
-                    <Activity size={18} />
-                </span>
+                <img className="brand__mark" src={`${import.meta.env.BASE_URL}TwinCAT.Scope.Server.png`} alt="" width={32} height={32} />
                 <div className="brand__text">
                     <span className="brand__name">Scope Generator</span>
                     <span className="brand__sub">for TwinCAT Scope · offline</span>

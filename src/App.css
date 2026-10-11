@@ -22,13 +22,9 @@
     margin-right: var(--space-3);
 }
 .brand__mark {
-    display: grid;
-    place-items: center;
+    flex: none;
     width: 32px;
     height: 32px;
-    border-radius: 9px;
-    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #06b6d4));
-    color: #fff;
 }
 .brand__text {
     display: flex;
