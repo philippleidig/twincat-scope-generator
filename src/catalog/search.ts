@@ -89,6 +89,8 @@ export interface SearchQuery {
     sourceIds?: ReadonlySet<string>
     /** Only entries that can become channels directly (scalars). */
     recordableOnly?: boolean
+    /** `relevance` (default) ranks name matches of the first word first; `path` sorts by path. */
+    order?: 'relevance' | 'path'
 }
 
 export interface SearchResult {
@@ -145,10 +147,24 @@ function rank(e: SearchEntry, firstWord: string): number {
     return 3
 }
 
+const byPathCache = new WeakMap<SearchIndex, SearchEntry[]>()
+
+/** The index entries sorted by path (case-insensitive, then exact path and source), computed once per index. */
+function entriesByPath(index: SearchIndex): SearchEntry[] {
+    let sorted = byPathCache.get(index)
+    if (!sorted) {
+        const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+        sorted = [...index.entries].sort((a, b) => cmp(a.haystack, b.haystack) || cmp(a.path, b.path) || cmp(a.sourceId, b.sourceId))
+        byPathCache.set(index, sorted)
+    }
+    return sorted
+}
+
 export function search(index: SearchIndex, query: SearchQuery, limit = 500): SearchResult {
     const terms = parseTerms(query.text)
-    const firstWord = query.text.trim().split(/\s+/).find((w) => !w.includes(':'))?.toLowerCase() ?? ''
-    const matches = index.entries.filter(
+    const byPath = query.order === 'path'
+    const firstWord = byPath ? '' : (query.text.trim().split(/\s+/).find((w) => !w.includes(':'))?.toLowerCase() ?? '')
+    const matches = (byPath ? entriesByPath(index) : index.entries).filter(
         (e) =>
             (!query.recordableOnly || e.kind === 'scalar') &&
             (!query.scopeTypes?.size || (e.scopeType !== undefined && query.scopeTypes.has(e.scopeType))) &&

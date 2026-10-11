@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { List, ListTree, Search, X } from 'lucide-react'
 import type { ScopeDataType } from '@/domain/dataTypes'
 import type { AreaKind } from '@/catalog/model'
 import { isFiltering, useBrowserStore } from '@/state/browserStore'
@@ -37,21 +37,36 @@ export function BrowserToolbar() {
 
     return (
         <div className="browser-toolbar">
-            <div className="search-box">
-                <Search size={16} className="search-box__icon" aria-hidden />
-                <input
-                    ref={inputRef}
-                    type="search"
-                    className="search-box__input"
-                    placeholder="Search… e.g. ActPos, *.fActPos, type:LREAL"
-                    aria-label="Search symbols"
-                    value={state.query}
-                    onChange={(e) => state.setQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Escape' && state.setQuery('')}
-                />
-                <kbd className="search-box__kbd" aria-hidden>
-                    /
-                </kbd>
+            <div className="browser-toolbar__row">
+                <div className="search-box">
+                    <Search size={16} className="search-box__icon" aria-hidden />
+                    <input
+                        ref={inputRef}
+                        type="search"
+                        className="search-box__input"
+                        placeholder="Search… e.g. ActPos, *.fActPos, type:LREAL"
+                        aria-label="Search symbols"
+                        value={state.query}
+                        onChange={(e) => state.setQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Escape' && state.setQuery('')}
+                    />
+                    <kbd className="search-box__kbd" aria-hidden>
+                        /
+                    </kbd>
+                </div>
+                <div className="segmented" role="group" aria-label="Browser view">
+                    <button type="button" aria-pressed={state.view === 'tree'} onClick={() => state.setView('tree')} title="Hierarchical tree">
+                        <ListTree size={14} aria-hidden /> Tree
+                    </button>
+                    <button
+                        type="button"
+                        aria-pressed={state.view === 'list'}
+                        onClick={() => state.setView('list')}
+                        title="Flat list of every symbol, sorted by path"
+                    >
+                        <List size={14} aria-hidden /> List
+                    </button>
+                </div>
             </div>
             <div className="filter-row" role="group" aria-label="Filters">
                 {TYPE_FILTERS.map((f) => (

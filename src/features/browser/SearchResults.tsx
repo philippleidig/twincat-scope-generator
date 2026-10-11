@@ -10,8 +10,14 @@ import { SymbolRow } from './SymbolRow'
 import { Highlight } from './Highlight'
 import { highlightWords } from './highlightWords'
 
-export function SearchResults({ index }: { index: SearchIndex }) {
-    const result = useSearch(index)
+/**
+ * Search entries as a flat, virtualised list. `results` mode shows search hits ranked by
+ * relevance; `list` mode is the browser's List view: every entry sorted by path, narrowed by
+ * the same query and filters.
+ */
+export function SearchResults({ index, mode = 'results' }: { index: SearchIndex; mode?: 'results' | 'list' }) {
+    const list = mode === 'list'
+    const result = useSearch(index, list ? 'path' : 'relevance')
     const query = useBrowserStore((s) => s.query)
     const words = useMemo(() => highlightWords(query), [query])
 
@@ -25,17 +31,13 @@ export function SearchResults({ index }: { index: SearchIndex }) {
     }
     return (
         <>
-            <div className="result-summary">
-                {result.total > result.entries.length
-                    ? `Showing ${result.entries.length.toLocaleString()} of ${result.total.toLocaleString()} matches — refine the search to see more`
-                    : `${result.total.toLocaleString()} match${result.total === 1 ? '' : 'es'}`}
-            </div>
+            <div className="result-summary">{summary(result.entries.length, result.total, list ? ['symbol', 'symbols'] : ['match', 'matches'])}</div>
             <VirtualList
                 items={result.entries}
                 rowHeight={32}
                 getKey={(e) => e.key}
                 role="listbox"
-                label="Search results"
+                label={list ? 'Symbol list' : 'Search results'}
                 className="symbol-list"
                 renderRow={(entry) => {
                     const template = templateOf(entry)
@@ -63,4 +65,9 @@ export function SearchResults({ index }: { index: SearchIndex }) {
             />
         </>
     )
+}
+
+function summary(shown: number, total: number, [one, many]: [string, string]): string {
+    if (total > shown) return `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} ${many} — refine the search to see more`
+    return `${total.toLocaleString()} ${total === 1 ? one : many}`
 }

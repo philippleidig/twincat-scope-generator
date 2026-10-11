@@ -60,6 +60,16 @@ describe('search', () => {
         expect(r.entries).toHaveLength(3)
         expect(r.total).toBe(index.entries.length)
     })
+    it('sorts by path instead of relevance on request, before the limit', () => {
+        const all = index.entries.map((e) => e.path)
+        const sorted = [...all].sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0))
+        expect(paths('', { order: 'path' })).toEqual(sorted)
+        expect(search(index, { text: '', order: 'path' }, 2).entries.map((e) => e.path)).toEqual(sorted.slice(0, 2))
+        // A query narrows but does not re-rank.
+        const state = paths('state', { order: 'path' })
+        expect(state).toEqual(sorted.filter((p) => p.toLowerCase().includes('state')))
+        expect(state).not.toEqual(paths('state'))
+    })
     it('parses an empty query to no terms', () => {
         expect(parseTerms('   ')).toEqual([])
     })

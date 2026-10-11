@@ -19,7 +19,30 @@ export interface BrowserPick {
 /** MIME type of a drag carrying browser picks (JSON). */
 export const PICK_MIME = 'application/x-scope-picks'
 
+/** How the browser shows symbols: the hierarchical tree or a flat list of every search entry. */
+export type BrowserView = 'tree' | 'list'
+
+const VIEW_KEY = 'twincat-scope-browser-view'
+
+/** The stored view preference; storage may be blocked (private mode), then the tree. */
+export function readStoredView(): BrowserView {
+    try {
+        return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'tree'
+    } catch {
+        return 'tree'
+    }
+}
+
+function storeView(view: BrowserView) {
+    try {
+        localStorage.setItem(VIEW_KEY, view)
+    } catch {
+        // Storage blocked: the choice just won't survive a reload.
+    }
+}
+
 interface BrowserState {
+    view: BrowserView
     query: string
     scopeTypes: Set<ScopeDataType>
     areas: Set<AreaKind>
@@ -29,6 +52,7 @@ interface BrowserState {
     /** Row whose details the inspector shows. */
     focused: BrowserPick | null
 
+    setView: (view: BrowserView) => void
     setQuery: (q: string) => void
     toggleScopeType: (t: ScopeDataType) => void
     toggleArea: (a: AreaKind) => void
@@ -54,6 +78,7 @@ const toggled = <T,>(set: Set<T>, value: T): Set<T> => {
 }
 
 export const useBrowserStore = create<BrowserState>()((set) => ({
+    view: readStoredView(),
     query: '',
     scopeTypes: new Set(),
     areas: new Set(),
@@ -62,6 +87,10 @@ export const useBrowserStore = create<BrowserState>()((set) => ({
     selection: new Map(),
     focused: null,
 
+    setView: (view) => {
+        storeView(view)
+        set({ view })
+    },
     setQuery: (query) => set({ query }),
     toggleScopeType: (t) => set((s) => ({ scopeTypes: toggled(s.scopeTypes, t) })),
     toggleArea: (a) => set((s) => ({ areas: toggled(s.areas, a) })),
